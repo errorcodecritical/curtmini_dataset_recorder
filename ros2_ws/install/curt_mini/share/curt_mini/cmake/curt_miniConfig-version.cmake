@@ -1,0 +1,1 @@
+/ros2_ws/build/curt_mini/ament_cmake_core/curt_miniConfig-version.cmake

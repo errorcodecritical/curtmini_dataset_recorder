@@ -1,0 +1,14 @@
+{
+  "package_name": "candle_ros2",
+  "non_idl_tuples": [
+    "/ros2_ws/src/candle_ros2:msg/ImpedanceCommand.msg",
+    "/ros2_ws/src/candle_ros2:msg/MotionCommand.msg",
+    "/ros2_ws/src/candle_ros2:msg/Pid.msg",
+    "/ros2_ws/src/candle_ros2:msg/VelocityPidCommand.msg",
+    "/ros2_ws/src/candle_ros2:msg/PositionPidCommand.msg",
+    "/ros2_ws/src/candle_ros2:srv/AddMd80s.srv",
+    "/ros2_ws/src/candle_ros2:srv/GenericMd80Msg.srv",
+    "/ros2_ws/src/candle_ros2:srv/SetModeMd80s.srv",
+    "/ros2_ws/src/candle_ros2:srv/SetLimitsMd80.srv"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "type_description_msg": {
+    "type_description": {
+      "type_name": "candle_ros2/srv/SetModeMd80s_Request",
+      "fields": [
+        {
+          "name": "drive_ids",
+          "type": {
+            "type_id": 149,
+            "capacity": 0,
+            "string_capacity": 0,
+            "nested_type_name": ""
+          },
+          "default_value": ""
+        },
+        {
+          "name": "mode",
+          "type": {
+            "type_id": 161,
+            "capacity": 0,
+            "string_capacity": 0,
+            "nested_type_name": ""
+          },
+          "default_value": ""
+        }
+      ]
+    },
+    "referenced_type_descriptions": []
+  },
+  "type_hashes": [
+    {
+      "type_name": "candle_ros2/srv/SetModeMd80s_Request",
+      "hash_string": "RIHS01_5927d4a6b51a0606a8e336941617062890f1b06a3a0055940475cd2b992828d0"
+    }
+  ]
+}

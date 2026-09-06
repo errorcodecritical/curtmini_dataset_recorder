@@ -1,0 +1,1080 @@
+[0.000000] (-) TimerEvent: {}
+[0.000357] (-) JobUnselected: {'identifier': 'curt_description'}
+[0.000461] (-) JobUnselected: {'identifier': 'curt_mini'}
+[0.000647] (-) JobUnselected: {'identifier': 'hector_recorder'}
+[0.000751] (-) JobUnselected: {'identifier': 'hector_recorder_msgs'}
+[0.000848] (-) JobUnselected: {'identifier': 'imu_mag_fusion'}
+[0.000881] (-) JobUnselected: {'identifier': 'ipa_ros2_control'}
+[0.000923] (-) JobUnselected: {'identifier': 'metavision_driver'}
+[0.000952] (-) JobUnselected: {'identifier': 'nmea_navsat_driver'}
+[0.000965] (-) JobUnselected: {'identifier': 'openzen_driver'}
+[0.000978] (-) JobUnselected: {'identifier': 'ouster_ros'}
+[0.000994] (-) JobUnselected: {'identifier': 'ouster_sensor_msgs'}
+[0.001018] (-) JobUnselected: {'identifier': 'realsense2_camera'}
+[0.001034] (-) JobUnselected: {'identifier': 'realsense2_camera_msgs'}
+[0.001046] (-) JobUnselected: {'identifier': 'realsense2_description'}
+[0.001059] (-) JobUnselected: {'identifier': 'realsense_camera_info_override'}
+[0.001070] (-) JobUnselected: {'identifier': 'rqml_recorder'}
+[0.001083] (-) JobUnselected: {'identifier': 'xsens_driver'}
+[0.001098] (candle_ros2) JobQueued: {'identifier': 'candle_ros2', 'dependencies': OrderedDict()}
+[0.001117] (candle_ros2) JobStarted: {'identifier': 'candle_ros2'}
+[0.020379] (candle_ros2) JobProgress: {'identifier': 'candle_ros2', 'progress': 'cmake'}
+[0.020766] (candle_ros2) Command: {'cmd': ['/usr/bin/cmake', '/ros2_ws/src/candle_ros2', '-DCMAKE_BUILD_TYPE=Release', '-DAMENT_CMAKE_SYMLINK_INSTALL=1', '-DCMAKE_INSTALL_PREFIX=/ros2_ws/install/candle_ros2'], 'cwd': '/ros2_ws/build/candle_ros2', 'env': OrderedDict({'GZ_CONFIG_PATH': '/opt/ros/jazzy/opt/sdformat_vendor/share/gz', 'HOSTNAME': 'toby-desktop', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/opt/ros/jazzy/opt/sdformat_vendor/lib:/opt/ros/jazzy/lib/x86_64-linux-gnu:/opt/ros/jazzy/opt/gz_math_vendor/lib:/opt/ros/jazzy/opt/gz_utils_vendor/lib:/opt/ros/jazzy/opt/gz_tools_vendor/lib:/opt/ros/jazzy/opt/gz_cmake_vendor/lib:/opt/ros/jazzy/lib', 'HOME': '/root', 'ROS_PYTHON_VERSION': '3', 'ROS_DISTRO': 'jazzy', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'TERM': 'xterm', 'PATH': '/opt/ros/jazzy/opt/gz_tools_vendor/bin:/opt/ros/jazzy/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin', 'LANG': 'C.UTF-8', 'RMW_IMPLEMENTATION': 'rmw_cyclonedds_cpp', 'AMENT_PREFIX_PATH': '/opt/ros/jazzy', 'DEBIAN_FRONTEND': 'noninteractive', 'ROS_AUTOMATIC_DISCOVERY_RANGE': 'SUBNET', 'PWD': '/ros2_ws/build/candle_ros2', 'LC_ALL': 'C.UTF-8', 'PYTHONPATH': '/opt/ros/jazzy/lib/python3.12/site-packages', 'COLCON': '1', 'CMAKE_PREFIX_PATH': '/opt/ros/jazzy/opt/sdformat_vendor:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_tools_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy'}), 'shell': False}
+[0.100079] (-) TimerEvent: {}
+[0.200841] (-) TimerEvent: {}
+[0.303006] (-) TimerEvent: {}
+[0.403613] (-) TimerEvent: {}
+[0.505004] (-) TimerEvent: {}
+[0.544954] (candle_ros2) StdoutLine: {'line': b'-- The C compiler identification is GNU 13.3.0\n'}
+[0.605250] (-) TimerEvent: {}
+[0.705965] (-) TimerEvent: {}
+[0.798847] (candle_ros2) StdoutLine: {'line': b'-- The CXX compiler identification is GNU 13.3.0\n'}
+[0.806098] (-) TimerEvent: {}
+[0.854388] (candle_ros2) StdoutLine: {'line': b'-- Detecting C compiler ABI info\n'}
+[0.906321] (-) TimerEvent: {}
+[1.006906] (-) TimerEvent: {}
+[1.107432] (-) TimerEvent: {}
+[1.207976] (-) TimerEvent: {}
+[1.229729] (candle_ros2) StdoutLine: {'line': b'-- Detecting C compiler ABI info - done\n'}
+[1.283630] (candle_ros2) StdoutLine: {'line': b'-- Check for working C compiler: /usr/bin/cc - skipped\n'}
+[1.289967] (candle_ros2) StdoutLine: {'line': b'-- Detecting C compile features\n'}
+[1.292539] (candle_ros2) StdoutLine: {'line': b'-- Detecting C compile features - done\n'}
+[1.308134] (-) TimerEvent: {}
+[1.328306] (candle_ros2) StdoutLine: {'line': b'-- Detecting CXX compiler ABI info\n'}
+[1.408326] (-) TimerEvent: {}
+[1.509019] (-) TimerEvent: {}
+[1.609617] (-) TimerEvent: {}
+[1.710307] (-) TimerEvent: {}
+[1.714225] (candle_ros2) StdoutLine: {'line': b'-- Detecting CXX compiler ABI info - done\n'}
+[1.757900] (candle_ros2) StdoutLine: {'line': b'-- Check for working CXX compiler: /usr/bin/c++ - skipped\n'}
+[1.759280] (candle_ros2) StdoutLine: {'line': b'-- Detecting CXX compile features\n'}
+[1.761315] (candle_ros2) StdoutLine: {'line': b'-- Detecting CXX compile features - done\n'}
+[1.782105] (candle_ros2) StdoutLine: {'line': b'-- Found rclcpp: 28.1.21 (/opt/ros/jazzy/share/rclcpp/cmake)\n'}
+[1.810495] (-) TimerEvent: {}
+[1.911039] (-) TimerEvent: {}
+[2.011708] (-) TimerEvent: {}
+[2.112283] (-) TimerEvent: {}
+[2.212918] (-) TimerEvent: {}
+[2.313426] (-) TimerEvent: {}
+[2.357039] (candle_ros2) StdoutLine: {'line': b'-- Found Python3: /usr/bin/python3 (found version "3.12.3") found components: Interpreter \n'}
+[2.413573] (-) TimerEvent: {}
+[2.514203] (-) TimerEvent: {}
+[2.614834] (-) TimerEvent: {}
+[2.655710] (candle_ros2) StdoutLine: {'line': b'-- Override CMake install command with custom implementation using symlinks instead of copying resources\n'}
+[2.714983] (-) TimerEvent: {}
+[2.815600] (-) TimerEvent: {}
+[2.916213] (-) TimerEvent: {}
+[3.016882] (-) TimerEvent: {}
+[3.062738] (candle_ros2) StdoutLine: {'line': b'-- Found rosidl_generator_c: 4.6.9 (/opt/ros/jazzy/share/rosidl_generator_c/cmake)\n'}
+[3.117056] (-) TimerEvent: {}
+[3.134910] (candle_ros2) StdoutLine: {'line': b'-- Found rosidl_generator_cpp: 4.6.9 (/opt/ros/jazzy/share/rosidl_generator_cpp/cmake)\n'}
+[3.217233] (-) TimerEvent: {}
+[3.222702] (candle_ros2) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c\n'}
+[3.313089] (candle_ros2) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp\n'}
+[3.317385] (-) TimerEvent: {}
+[3.417889] (-) TimerEvent: {}
+[3.518495] (-) TimerEvent: {}
+[3.618995] (-) TimerEvent: {}
+[3.696172] (candle_ros2) StdoutLine: {'line': b'-- Found rmw_implementation_cmake: 7.3.3 (/opt/ros/jazzy/share/rmw_implementation_cmake/cmake)\n'}
+[3.706940] (candle_ros2) StdoutLine: {'line': b'-- Found rmw_cyclonedds_cpp: 2.2.3 (/opt/ros/jazzy/share/rmw_cyclonedds_cpp/cmake)\n'}
+[3.719111] (-) TimerEvent: {}
+[3.804834] (candle_ros2) StdoutLine: {'line': b"-- Using RMW implementation 'rmw_cyclonedds_cpp' as default\n"}
+[3.819255] (-) TimerEvent: {}
+[3.919623] (-) TimerEvent: {}
+[4.020059] (-) TimerEvent: {}
+[4.059524] (candle_ros2) StdoutLine: {'line': b'-- Found sensor_msgs: 5.3.8 (/opt/ros/jazzy/share/sensor_msgs/cmake)\n'}
+[4.120205] (-) TimerEvent: {}
+[4.220608] (-) TimerEvent: {}
+[4.266624] (candle_ros2) StdoutLine: {'line': b'-- Found rosidl_default_generators: 1.6.1 (/opt/ros/jazzy/share/rosidl_default_generators/cmake)\n'}
+[4.320742] (-) TimerEvent: {}
+[4.331606] (candle_ros2) StdoutLine: {'line': b'-- Found rosidl_adapter: 4.6.9 (/opt/ros/jazzy/share/rosidl_adapter/cmake)\n'}
+[4.420886] (-) TimerEvent: {}
+[4.521330] (-) TimerEvent: {}
+[4.621834] (-) TimerEvent: {}
+[4.722297] (-) TimerEvent: {}
+[4.822784] (-) TimerEvent: {}
+[4.923376] (-) TimerEvent: {}
+[5.023916] (-) TimerEvent: {}
+[5.124455] (-) TimerEvent: {}
+[5.225044] (-) TimerEvent: {}
+[5.325610] (-) TimerEvent: {}
+[5.426086] (-) TimerEvent: {}
+[5.526505] (-) TimerEvent: {}
+[5.626784] (-) TimerEvent: {}
+[5.727373] (-) TimerEvent: {}
+[5.827938] (-) TimerEvent: {}
+[5.928608] (-) TimerEvent: {}
+[6.029164] (-) TimerEvent: {}
+[6.129668] (-) TimerEvent: {}
+[6.230172] (-) TimerEvent: {}
+[6.330763] (-) TimerEvent: {}
+[6.431285] (-) TimerEvent: {}
+[6.516228] (candle_ros2) StdoutLine: {'line': b'-- Found ament_cmake_ros: 0.12.1 (/opt/ros/jazzy/share/ament_cmake_ros/cmake)\n'}
+[6.531443] (-) TimerEvent: {}
+[6.631962] (-) TimerEvent: {}
+[6.732512] (-) TimerEvent: {}
+[6.833058] (-) TimerEvent: {}
+[6.933593] (-) TimerEvent: {}
+[7.034078] (-) TimerEvent: {}
+[7.134618] (-) TimerEvent: {}
+[7.235130] (-) TimerEvent: {}
+[7.335645] (-) TimerEvent: {}
+[7.436193] (-) TimerEvent: {}
+[7.536691] (-) TimerEvent: {}
+[7.637212] (-) TimerEvent: {}
+[7.737731] (-) TimerEvent: {}
+[7.838393] (-) TimerEvent: {}
+[7.939089] (-) TimerEvent: {}
+[8.039752] (-) TimerEvent: {}
+[8.140314] (-) TimerEvent: {}
+[8.240809] (-) TimerEvent: {}
+[8.341306] (-) TimerEvent: {}
+[8.441847] (-) TimerEvent: {}
+[8.542416] (-) TimerEvent: {}
+[8.642950] (-) TimerEvent: {}
+[8.743442] (-) TimerEvent: {}
+[8.844067] (-) TimerEvent: {}
+[8.944666] (-) TimerEvent: {}
+[9.045292] (-) TimerEvent: {}
+[9.145889] (-) TimerEvent: {}
+[9.246469] (-) TimerEvent: {}
+[9.346966] (-) TimerEvent: {}
+[9.447550] (-) TimerEvent: {}
+[9.526462] (candle_ros2) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c\n'}
+[9.547731] (-) TimerEvent: {}
+[9.648381] (-) TimerEvent: {}
+[9.748912] (-) TimerEvent: {}
+[9.849437] (-) TimerEvent: {}
+[9.949948] (-) TimerEvent: {}
+[10.050443] (-) TimerEvent: {}
+[10.150963] (-) TimerEvent: {}
+[10.251460] (-) TimerEvent: {}
+[10.351962] (-) TimerEvent: {}
+[10.452438] (-) TimerEvent: {}
+[10.552976] (-) TimerEvent: {}
+[10.653456] (-) TimerEvent: {}
+[10.716183] (candle_ros2) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp\n'}
+[10.734050] (candle_ros2) StdoutLine: {'line': b'-- Found python_cmake_module: 0.11.1 (/opt/ros/jazzy/share/python_cmake_module/cmake)\n'}
+[10.753651] (-) TimerEvent: {}
+[10.854201] (-) TimerEvent: {}
+[10.954798] (-) TimerEvent: {}
+[11.055313] (-) TimerEvent: {}
+[11.155940] (-) TimerEvent: {}
+[11.243689] (candle_ros2) StdoutLine: {'line': b'-- Found PythonExtra: /usr/bin/python3  \n'}
+[11.256078] (-) TimerEvent: {}
+[11.356616] (-) TimerEvent: {}
+[11.457156] (-) TimerEvent: {}
+[11.557613] (-) TimerEvent: {}
+[11.658145] (-) TimerEvent: {}
+[11.758761] (-) TimerEvent: {}
+[11.859435] (-) TimerEvent: {}
+[11.959930] (-) TimerEvent: {}
+[12.060576] (-) TimerEvent: {}
+[12.161141] (-) TimerEvent: {}
+[12.261769] (-) TimerEvent: {}
+[12.362387] (-) TimerEvent: {}
+[12.462828] (-) TimerEvent: {}
+[12.563080] (-) TimerEvent: {}
+[12.663431] (-) TimerEvent: {}
+[12.724735] (candle_ros2) StdoutLine: {'line': b'-- Found Python3: /usr/bin/python3 (found version "3.12.3") found components: Interpreter Development NumPy Development.Module Development.Embed \n'}
+[12.763627] (-) TimerEvent: {}
+[12.864211] (-) TimerEvent: {}
+[12.964744] (-) TimerEvent: {}
+[13.065390] (-) TimerEvent: {}
+[13.113427] (candle_ros2) StdoutLine: {'line': b'-- Found Python3: /usr/bin/python3 (found version "3.12.3") found components: Interpreter \n'}
+[13.152702] (candle_ros2) StdoutLine: {'line': b'-- \n'}
+[13.153270] (candle_ros2) StdoutLine: {'line': b'CANDLE_BUILD_SHARED: FALSE\n'}
+[13.153685] (candle_ros2) StdoutLine: {'line': b'CANDLE_BUILD_STATIC: TRUE\n'}
+[13.154450] (candle_ros2) StderrLine: {'line': b'\x1b[0mCMake Deprecation Warning at /opt/ros/jazzy/share/rosidl_cmake/cmake/rosidl_target_interfaces.cmake:32 (message):\n'}
+[13.154893] (candle_ros2) StderrLine: {'line': b'  Use rosidl_get_typesupport_target() and target_link_libraries() instead of\n'}
+[13.155218] (candle_ros2) StderrLine: {'line': b'  rosidl_target_interfaces().  i.e:\n'}
+[13.155513] (candle_ros2) StderrLine: {'line': b'\n'}
+[13.155802] (candle_ros2) StderrLine: {'line': b'    rosidl_get_typesupport_target(cpp_typesupport_target "${PROJECT_NAME}" "rosidl_typesupport_cpp")\n'}
+[13.156111] (candle_ros2) StderrLine: {'line': b'    target_link_libraries(${PROJECT_NAME}_node "${cpp_typesupport_target}")\n'}
+[13.156410] (candle_ros2) StderrLine: {'line': b'\n'}
+[13.156671] (candle_ros2) StderrLine: {'line': b'Call Stack (most recent call first):\n'}
+[13.156952] (candle_ros2) StderrLine: {'line': b'  CMakeLists.txt:47 (rosidl_target_interfaces)\n'}
+[13.157262] (candle_ros2) StderrLine: {'line': b'\n'}
+[13.157557] (candle_ros2) StderrLine: {'line': b'\x1b[0m\n'}
+[13.165578] (-) TimerEvent: {}
+[13.216983] (candle_ros2) StdoutLine: {'line': b'-- Configuring done (13.1s)\n'}
+[13.265778] (-) TimerEvent: {}
+[13.366369] (-) TimerEvent: {}
+[13.466985] (-) TimerEvent: {}
+[13.548000] (candle_ros2) StdoutLine: {'line': b'-- Generating done (0.3s)\n'}
+[13.567149] (-) TimerEvent: {}
+[13.611415] (candle_ros2) StdoutLine: {'line': b'-- Build files have been written to: /ros2_ws/build/candle_ros2\n'}
+[13.646288] (candle_ros2) CommandEnded: {'returncode': 0}
+[13.647948] (candle_ros2) JobProgress: {'identifier': 'candle_ros2', 'progress': 'build'}
+[13.650704] (candle_ros2) Command: {'cmd': ['/usr/bin/cmake', '--build', '/ros2_ws/build/candle_ros2', '--', '-j12', '-l12'], 'cwd': '/ros2_ws/build/candle_ros2', 'env': OrderedDict({'GZ_CONFIG_PATH': '/opt/ros/jazzy/opt/sdformat_vendor/share/gz', 'HOSTNAME': 'toby-desktop', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/opt/ros/jazzy/opt/sdformat_vendor/lib:/opt/ros/jazzy/lib/x86_64-linux-gnu:/opt/ros/jazzy/opt/gz_math_vendor/lib:/opt/ros/jazzy/opt/gz_utils_vendor/lib:/opt/ros/jazzy/opt/gz_tools_vendor/lib:/opt/ros/jazzy/opt/gz_cmake_vendor/lib:/opt/ros/jazzy/lib', 'HOME': '/root', 'ROS_PYTHON_VERSION': '3', 'ROS_DISTRO': 'jazzy', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'TERM': 'xterm', 'PATH': '/opt/ros/jazzy/opt/gz_tools_vendor/bin:/opt/ros/jazzy/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin', 'LANG': 'C.UTF-8', 'RMW_IMPLEMENTATION': 'rmw_cyclonedds_cpp', 'AMENT_PREFIX_PATH': '/opt/ros/jazzy', 'DEBIAN_FRONTEND': 'noninteractive', 'ROS_AUTOMATIC_DISCOVERY_RANGE': 'SUBNET', 'PWD': '/ros2_ws/build/candle_ros2', 'LC_ALL': 'C.UTF-8', 'PYTHONPATH': '/opt/ros/jazzy/lib/python3.12/site-packages', 'COLCON': '1', 'CMAKE_PREFIX_PATH': '/opt/ros/jazzy/opt/sdformat_vendor:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_tools_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy'}), 'shell': False}
+[13.667309] (-) TimerEvent: {}
+[13.767913] (-) TimerEvent: {}
+[13.870963] (-) TimerEvent: {}
+[13.872003] (candle_ros2) StdoutLine: {'line': b'[  1%] \x1b[34m\x1b[1mGenerating Rust code for ROS interfaces\x1b[0m\n'}
+[13.874555] (candle_ros2) StdoutLine: {'line': b'[  1%] \x1b[32mBuilding CXX object candle/CMakeFiles/candle.dir/src/bus.cpp.o\x1b[0m\n'}
+[13.876484] (candle_ros2) StdoutLine: {'line': b'[  1%] \x1b[32mBuilding CXX object candle/CMakeFiles/candle.dir/src/register.cpp.o\x1b[0m\n'}
+[13.877123] (candle_ros2) StdoutLine: {'line': b'[  2%] \x1b[32mBuilding CXX object candle/CMakeFiles/candle.dir/src/md80.cpp.o\x1b[0m\n'}
+[13.877679] (candle_ros2) StdoutLine: {'line': b'[  3%] \x1b[32mBuilding CXX object candle/CMakeFiles/candle.dir/src/crc.cpp.o\x1b[0m\n'}
+[13.880076] (candle_ros2) StdoutLine: {'line': b'[  4%] \x1b[32mBuilding CXX object candle/CMakeFiles/candle.dir/src/spiDevice.cpp.o\x1b[0m\n'}
+[13.891278] (candle_ros2) StdoutLine: {'line': b'[  5%] \x1b[34m\x1b[1mGenerating type hashes for ROS interfaces\x1b[0m\n'}
+[13.893146] (candle_ros2) StdoutLine: {'line': b'[  6%] \x1b[32mBuilding CXX object candle/CMakeFiles/candle.dir/src/candle.cpp.o\x1b[0m\n'}
+[13.914211] (candle_ros2) StdoutLine: {'line': b'[  8%] \x1b[32mBuilding CXX object candle/CMakeFiles/candle.dir/src/usbDevice.cpp.o\x1b[0m\n'}
+[13.919056] (candle_ros2) StdoutLine: {'line': b'[  8%] \x1b[32mBuilding CXX object candle/CMakeFiles/candle.dir/src/uartDevice.cpp.o\x1b[0m\n'}
+[13.940548] (candle_ros2) StdoutLine: {'line': b'[  8%] Built target ament_cmake_python_symlink_candle_ros2\n'}
+[13.971131] (-) TimerEvent: {}
+[14.071991] (-) TimerEvent: {}
+[14.172455] (-) TimerEvent: {}
+[14.272865] (-) TimerEvent: {}
+[14.373182] (-) TimerEvent: {}
+[14.416913] (candle_ros2) StdoutLine: {'line': b'running egg_info\n'}
+[14.417227] (candle_ros2) StdoutLine: {'line': b'creating candle_ros2.egg-info\n'}
+[14.457677] (candle_ros2) StdoutLine: {'line': b'writing candle_ros2.egg-info/PKG-INFO\n'}
+[14.458541] (candle_ros2) StdoutLine: {'line': b'writing dependency_links to candle_ros2.egg-info/dependency_links.txt\n'}
+[14.460444] (candle_ros2) StdoutLine: {'line': b'writing top-level names to candle_ros2.egg-info/top_level.txt\n'}
+[14.461170] (candle_ros2) StdoutLine: {'line': b"writing manifest file 'candle_ros2.egg-info/SOURCES.txt'\n"}
+[14.473283] (-) TimerEvent: {}
+[14.557492] (candle_ros2) StdoutLine: {'line': b"reading manifest file 'candle_ros2.egg-info/SOURCES.txt'\n"}
+[14.558421] (candle_ros2) StdoutLine: {'line': b"writing manifest file 'candle_ros2.egg-info/SOURCES.txt'\n"}
+[14.573413] (-) TimerEvent: {}
+[14.588627] (candle_ros2) StderrLine: {'line': b'\x1b[01m\x1b[K/ros2_ws/src/candle_ros2/candle/src/usbDevice.cpp:\x1b[m\x1b[K In function \xe2\x80\x98\x1b[01m\x1b[Kstd::string\x1b[01;32m\x1b[K exec\x1b[m\x1b[K(const char*)\x1b[m\x1b[K\xe2\x80\x99:\n'}
+[14.588947] (candle_ros2) StderrLine: {'line': b'\x1b[01m\x1b[K/ros2_ws/src/candle_ros2/candle/src/usbDevice.cpp:220:48:\x1b[m\x1b[K \x1b[01;35m\x1b[Kwarning: \x1b[m\x1b[Kignoring attributes on template argument \xe2\x80\x98\x1b[01m\x1b[Kint (*)(FILE*)\x1b[m\x1b[K\xe2\x80\x99 [\x1b[01;35m\x1b[K-Wignored-attributes\x1b[m\x1b[K]\n'}
+[14.589176] (candle_ros2) StderrLine: {'line': b'  220 |         std::unique_ptr<FILE, decltype(&pclose)\x1b[01;35m\x1b[K>\x1b[m\x1b[K pipe(popen(cmd, "r"), pclose);\n'}
+[14.589385] (candle_ros2) StderrLine: {'line': b'      |                                                \x1b[01;35m\x1b[K^\x1b[m\x1b[K\n'}
+[14.607732] (candle_ros2) StdoutLine: {'line': b'[  8%] Built target ament_cmake_python_build_candle_ros2_egg\n'}
+[14.674521] (-) TimerEvent: {}
+[14.713112] (candle_ros2) StdoutLine: {'line': b'[  8%] Built target candle_ros2__rosidl_generator_type_description\n'}
+[14.731941] (candle_ros2) StdoutLine: {'line': b'[  9%] \x1b[34m\x1b[1mGenerating C code for ROS interfaces\x1b[0m\n'}
+[14.749883] (candle_ros2) StdoutLine: {'line': b'[  9%] \x1b[34m\x1b[1mGenerating C++ code for ROS interfaces\x1b[0m\n'}
+[14.774631] (-) TimerEvent: {}
+[14.776040] (candle_ros2) StdoutLine: {'line': b'[  9%] Built target candle_ros2__rs\n'}
+[14.874727] (-) TimerEvent: {}
+[14.975037] (-) TimerEvent: {}
+[15.075297] (-) TimerEvent: {}
+[15.175589] (-) TimerEvent: {}
+[15.275866] (-) TimerEvent: {}
+[15.376144] (-) TimerEvent: {}
+[15.476439] (-) TimerEvent: {}
+[15.576691] (-) TimerEvent: {}
+[15.678866] (-) TimerEvent: {}
+[15.722862] (candle_ros2) StdoutLine: {'line': b'[  9%] Built target candle_ros2__cpp\n'}
+[15.778958] (-) TimerEvent: {}
+[15.879913] (-) TimerEvent: {}
+[15.972872] (candle_ros2) StdoutLine: {'line': b'[ 10%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/msg/detail/pid__description.c.o\x1b[0m\n'}
+[15.973246] (candle_ros2) StdoutLine: {'line': b'[ 10%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/msg/detail/impedance_command__type_support.c.o\x1b[0m\n'}
+[15.973468] (candle_ros2) StdoutLine: {'line': b'[ 11%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/msg/detail/motion_command__description.c.o\x1b[0m\n'}
+[15.973957] (candle_ros2) StdoutLine: {'line': b'[ 12%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/msg/detail/motion_command__functions.c.o\x1b[0m\n'}
+[15.974829] (candle_ros2) StdoutLine: {'line': b'[ 12%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/msg/detail/pid__functions.c.o\x1b[0m\n'}
+[15.975099] (candle_ros2) StdoutLine: {'line': b'[ 14%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/msg/detail/motion_command__type_support.c.o\x1b[0m\n'}
+[15.975559] (candle_ros2) StdoutLine: {'line': b'[ 14%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/msg/detail/pid__type_support.c.o\x1b[0m\n'}
+[15.976009] (candle_ros2) StdoutLine: {'line': b'[ 15%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/msg/detail/impedance_command__description.c.o\x1b[0m\n'}
+[15.976585] (candle_ros2) StdoutLine: {'line': b'[ 16%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/msg/detail/velocity_pid_command__description.c.o\x1b[0m\n'}
+[15.978872] (candle_ros2) StdoutLine: {'line': b'[ 17%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/msg/detail/impedance_command__functions.c.o\x1b[0m\n'}
+[15.979913] (candle_ros2) StdoutLine: {'line': b'[ 18%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/msg/detail/velocity_pid_command__functions.c.o\x1b[0m\n'}
+[15.980224] (-) TimerEvent: {}
+[16.049444] (candle_ros2) StdoutLine: {'line': b'[ 19%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/msg/detail/velocity_pid_command__type_support.c.o\x1b[0m\n'}
+[16.054848] (candle_ros2) StdoutLine: {'line': b'[ 19%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/msg/detail/position_pid_command__description.c.o\x1b[0m\n'}
+[16.056059] (candle_ros2) StdoutLine: {'line': b'[ 20%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/msg/detail/position_pid_command__functions.c.o\x1b[0m\n'}
+[16.078523] (candle_ros2) StdoutLine: {'line': b'[ 21%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/msg/detail/position_pid_command__type_support.c.o\x1b[0m\n'}
+[16.078885] (candle_ros2) StdoutLine: {'line': b'[ 22%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/srv/detail/add_md80s__description.c.o\x1b[0m\n'}
+[16.080328] (-) TimerEvent: {}
+[16.087748] (candle_ros2) StdoutLine: {'line': b'[ 23%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/srv/detail/add_md80s__functions.c.o\x1b[0m\n'}
+[16.094191] (candle_ros2) StdoutLine: {'line': b'[ 23%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/srv/detail/add_md80s__type_support.c.o\x1b[0m\n'}
+[16.126862] (candle_ros2) StdoutLine: {'line': b'[ 24%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/srv/detail/generic_md80_msg__description.c.o\x1b[0m\n'}
+[16.159646] (candle_ros2) StdoutLine: {'line': b'[ 25%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/srv/detail/generic_md80_msg__functions.c.o\x1b[0m\n'}
+[16.170986] (candle_ros2) StdoutLine: {'line': b'[ 26%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/srv/detail/generic_md80_msg__type_support.c.o\x1b[0m\n'}
+[16.182804] (-) TimerEvent: {}
+[16.183412] (candle_ros2) StdoutLine: {'line': b'[ 26%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/srv/detail/set_mode_md80s__description.c.o\x1b[0m\n'}
+[16.187777] (candle_ros2) StdoutLine: {'line': b'[ 27%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/srv/detail/set_mode_md80s__functions.c.o\x1b[0m\n'}
+[16.202745] (candle_ros2) StdoutLine: {'line': b'[ 28%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/srv/detail/set_mode_md80s__type_support.c.o\x1b[0m\n'}
+[16.217878] (candle_ros2) StdoutLine: {'line': b'[ 29%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/srv/detail/set_limits_md80__description.c.o\x1b[0m\n'}
+[16.240942] (candle_ros2) StdoutLine: {'line': b'[ 30%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/srv/detail/set_limits_md80__functions.c.o\x1b[0m\n'}
+[16.264872] (candle_ros2) StdoutLine: {'line': b'[ 30%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/srv/detail/set_limits_md80__type_support.c.o\x1b[0m\n'}
+[16.282913] (-) TimerEvent: {}
+[16.387179] (-) TimerEvent: {}
+[16.487782] (-) TimerEvent: {}
+[16.518924] (candle_ros2) StdoutLine: {'line': b'[ 31%] \x1b[32m\x1b[1mLinking C shared library libcandle_ros2__rosidl_generator_c.so\x1b[0m\n'}
+[16.565637] (candle_ros2) StdoutLine: {'line': b'[ 31%] Built target candle_ros2__rosidl_generator_c\n'}
+[16.578578] (candle_ros2) StdoutLine: {'line': b'[ 33%] \x1b[34m\x1b[1mGenerating C type support dispatch for ROS interfaces\x1b[0m\n'}
+[16.578888] (candle_ros2) StdoutLine: {'line': b'[ 33%] \x1b[34m\x1b[1mGenerating C introspection for ROS interfaces\x1b[0m\n'}
+[16.579136] (candle_ros2) StdoutLine: {'line': b'[ 33%] \x1b[34m\x1b[1mGenerating C++ introspection for ROS interfaces\x1b[0m\n'}
+[16.579610] (candle_ros2) StdoutLine: {'line': b'[ 34%] \x1b[34m\x1b[1mGenerating C++ type support dispatch for ROS interfaces\x1b[0m\n'}
+[16.580886] (candle_ros2) StdoutLine: {'line': b'[ 36%] \x1b[34m\x1b[1mGenerating C++ type support for eProsima Fast-RTPS\x1b[0m\n'}
+[16.581161] (candle_ros2) StdoutLine: {'line': b'[ 36%] \x1b[34m\x1b[1mGenerating C type support for eProsima Fast-RTPS\x1b[0m\n'}
+[16.587867] (-) TimerEvent: {}
+[16.688124] (-) TimerEvent: {}
+[16.788429] (-) TimerEvent: {}
+[16.888712] (-) TimerEvent: {}
+[16.989048] (-) TimerEvent: {}
+[17.089358] (-) TimerEvent: {}
+[17.185936] (candle_ros2) StdoutLine: {'line': b'[ 37%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_c.dir/rosidl_typesupport_c/candle_ros2/msg/position_pid_command__type_support.cpp.o\x1b[0m\n'}
+[17.186754] (candle_ros2) StdoutLine: {'line': b'[ 37%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_c.dir/rosidl_typesupport_c/candle_ros2/msg/motion_command__type_support.cpp.o\x1b[0m\n'}
+[17.188097] (candle_ros2) StdoutLine: {'line': b'[ 39%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_c.dir/rosidl_typesupport_c/candle_ros2/msg/velocity_pid_command__type_support.cpp.o\x1b[0m\n'}
+[17.188616] (candle_ros2) StdoutLine: {'line': b'[ 39%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_c.dir/rosidl_typesupport_c/candle_ros2/msg/pid__type_support.cpp.o\x1b[0m\n'}
+[17.189175] (candle_ros2) StdoutLine: {'line': b'[ 40%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_c.dir/rosidl_typesupport_c/candle_ros2/msg/impedance_command__type_support.cpp.o\x1b[0m\n'}
+[17.192166] (-) TimerEvent: {}
+[17.192465] (candle_ros2) StdoutLine: {'line': b'[ 41%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_c.dir/rosidl_typesupport_c/candle_ros2/srv/add_md80s__type_support.cpp.o\x1b[0m\n'}
+[17.241859] (candle_ros2) StdoutLine: {'line': b'[ 42%] \x1b[32m\x1b[1mLinking CXX static library libcandle.a\x1b[0m\n'}
+[17.292283] (-) TimerEvent: {}
+[17.294618] (candle_ros2) StdoutLine: {'line': b'[ 42%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_c.dir/rosidl_typesupport_c/candle_ros2/srv/generic_md80_msg__type_support.cpp.o\x1b[0m\n'}
+[17.295470] (candle_ros2) StdoutLine: {'line': b'[ 43%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_c.dir/rosidl_typesupport_c/candle_ros2/srv/set_mode_md80s__type_support.cpp.o\x1b[0m\n'}
+[17.298479] (candle_ros2) StdoutLine: {'line': b'[ 44%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_c.dir/rosidl_typesupport_c/candle_ros2/srv/set_limits_md80__type_support.cpp.o\x1b[0m\n'}
+[17.323757] (candle_ros2) StdoutLine: {'line': b'[ 44%] Built target candle\n'}
+[17.392381] (-) TimerEvent: {}
+[17.400489] (candle_ros2) StdoutLine: {'line': b'[ 45%] \x1b[32m\x1b[1mLinking CXX shared library libcandle_ros2__rosidl_typesupport_c.so\x1b[0m\n'}
+[17.482558] (candle_ros2) StdoutLine: {'line': b'[ 45%] Built target candle_ros2__rosidl_typesupport_c\n'}
+[17.492896] (-) TimerEvent: {}
+[17.498961] (candle_ros2) StdoutLine: {'line': b'[ 46%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/candle_ros2/msg/detail/motion_command__type_support.cpp.o\x1b[0m\n'}
+[17.499276] (candle_ros2) StdoutLine: {'line': b'[ 46%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/candle_ros2/msg/detail/position_pid_command__type_support.cpp.o\x1b[0m\n'}
+[17.500077] (candle_ros2) StdoutLine: {'line': b'[ 47%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/candle_ros2/msg/detail/pid__type_support.cpp.o\x1b[0m\n'}
+[17.500858] (candle_ros2) StdoutLine: {'line': b'[ 48%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/candle_ros2/msg/detail/impedance_command__type_support.cpp.o\x1b[0m\n'}
+[17.501147] (candle_ros2) StdoutLine: {'line': b'[ 49%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/candle_ros2/srv/detail/set_mode_md80s__type_support.cpp.o\x1b[0m\n'}
+[17.501349] (candle_ros2) StdoutLine: {'line': b'[ 50%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/candle_ros2/srv/detail/generic_md80_msg__type_support.cpp.o\x1b[0m\n'}
+[17.506780] (candle_ros2) StdoutLine: {'line': b'[ 51%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/candle_ros2/srv/detail/add_md80s__type_support.cpp.o\x1b[0m\n'}
+[17.510778] (candle_ros2) StdoutLine: {'line': b'[ 52%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/candle_ros2/msg/detail/velocity_pid_command__type_support.cpp.o\x1b[0m\n'}
+[17.544933] (candle_ros2) StdoutLine: {'line': b'[ 52%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/candle_ros2/msg/impedance_command__type_support.cpp.o\x1b[0m\n'}
+[17.592992] (-) TimerEvent: {}
+[17.693419] (-) TimerEvent: {}
+[17.793886] (-) TimerEvent: {}
+[17.896123] (-) TimerEvent: {}
+[17.996879] (-) TimerEvent: {}
+[18.100878] (-) TimerEvent: {}
+[18.186318] (candle_ros2) StdoutLine: {'line': b'[ 52%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/candle_ros2/msg/detail/impedance_command__type_support.c.o\x1b[0m\n'}
+[18.200979] (-) TimerEvent: {}
+[18.301297] (-) TimerEvent: {}
+[18.307424] (candle_ros2) StdoutLine: {'line': b'[ 53%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/candle_ros2/msg/motion_command__type_support.cpp.o\x1b[0m\n'}
+[18.401411] (-) TimerEvent: {}
+[18.421440] (candle_ros2) StdoutLine: {'line': b'[ 54%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/candle_ros2/msg/detail/motion_command__type_support.c.o\x1b[0m\n'}
+[18.429245] (candle_ros2) StdoutLine: {'line': b'[ 55%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/candle_ros2/msg/pid__type_support.cpp.o\x1b[0m\n'}
+[18.467869] (candle_ros2) StdoutLine: {'line': b'[ 56%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/candle_ros2/msg/detail/dds_fastrtps/impedance_command__type_support.cpp.o\x1b[0m\n'}
+[18.494191] (candle_ros2) StdoutLine: {'line': b'[ 57%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/candle_ros2/srv/detail/set_limits_md80__type_support.cpp.o\x1b[0m\n'}
+[18.501516] (-) TimerEvent: {}
+[18.511907] (candle_ros2) StdoutLine: {'line': b'[ 58%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/candle_ros2/msg/velocity_pid_command__type_support.cpp.o\x1b[0m\n'}
+[18.563912] (candle_ros2) StdoutLine: {'line': b'[ 59%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/candle_ros2/msg/detail/pid__type_support.c.o\x1b[0m\n'}
+[18.601630] (-) TimerEvent: {}
+[18.610194] (candle_ros2) StdoutLine: {'line': b'[ 60%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/candle_ros2/msg/detail/dds_fastrtps/motion_command__type_support.cpp.o\x1b[0m\n'}
+[18.656661] (candle_ros2) StdoutLine: {'line': b'[ 61%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/candle_ros2/msg/detail/velocity_pid_command__type_support.c.o\x1b[0m\n'}
+[18.700488] (candle_ros2) StdoutLine: {'line': b'[ 61%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/candle_ros2/msg/position_pid_command__type_support.cpp.o\x1b[0m\n'}
+[18.701728] (-) TimerEvent: {}
+[18.786025] (candle_ros2) StdoutLine: {'line': b'[ 62%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/candle_ros2/msg/detail/position_pid_command__type_support.c.o\x1b[0m\n'}
+[18.801856] (-) TimerEvent: {}
+[18.856392] (candle_ros2) StdoutLine: {'line': b'[ 63%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/candle_ros2/msg/detail/impedance_command__type_support_c.cpp.o\x1b[0m\n'}
+[18.901974] (-) TimerEvent: {}
+[18.924947] (candle_ros2) StdoutLine: {'line': b'[ 63%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/candle_ros2/srv/detail/add_md80s__type_support.c.o\x1b[0m\n'}
+[19.002085] (-) TimerEvent: {}
+[19.081737] (candle_ros2) StdoutLine: {'line': b'[ 64%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/candle_ros2/srv/add_md80s__type_support.cpp.o\x1b[0m\n'}
+[19.102201] (-) TimerEvent: {}
+[19.106993] (candle_ros2) StdoutLine: {'line': b'[ 65%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/candle_ros2/srv/detail/generic_md80_msg__type_support.c.o\x1b[0m\n'}
+[19.176864] (candle_ros2) StdoutLine: {'line': b'[ 65%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/candle_ros2/msg/detail/dds_fastrtps/pid__type_support.cpp.o\x1b[0m\n'}
+[19.202895] (-) TimerEvent: {}
+[19.289027] (candle_ros2) StdoutLine: {'line': b'[ 66%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/candle_ros2/srv/detail/set_mode_md80s__type_support.c.o\x1b[0m\n'}
+[19.303009] (-) TimerEvent: {}
+[19.370974] (candle_ros2) StdoutLine: {'line': b'[ 67%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/candle_ros2/msg/detail/motion_command__type_support_c.cpp.o\x1b[0m\n'}
+[19.403137] (-) TimerEvent: {}
+[19.487970] (candle_ros2) StdoutLine: {'line': b'[ 68%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/candle_ros2/srv/detail/set_limits_md80__type_support.c.o\x1b[0m\n'}
+[19.503251] (-) TimerEvent: {}
+[19.532347] (candle_ros2) StdoutLine: {'line': b'[ 69%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/candle_ros2/srv/generic_md80_msg__type_support.cpp.o\x1b[0m\n'}
+[19.586903] (candle_ros2) StdoutLine: {'line': b'[ 70%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/candle_ros2/srv/set_mode_md80s__type_support.cpp.o\x1b[0m\n'}
+[19.603383] (-) TimerEvent: {}
+[19.606524] (candle_ros2) StdoutLine: {'line': b'[ 71%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/candle_ros2/msg/detail/dds_fastrtps/velocity_pid_command__type_support.cpp.o\x1b[0m\n'}
+[19.703499] (-) TimerEvent: {}
+[19.709564] (candle_ros2) StdoutLine: {'line': b'[ 72%] \x1b[32m\x1b[1mLinking C shared library libcandle_ros2__rosidl_typesupport_introspection_c.so\x1b[0m\n'}
+[19.796389] (candle_ros2) StdoutLine: {'line': b'[ 72%] Built target candle_ros2__rosidl_typesupport_introspection_c\n'}
+[19.803612] (-) TimerEvent: {}
+[19.814475] (candle_ros2) StdoutLine: {'line': b'[ 73%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/candle_ros2/msg/detail/pid__type_support_c.cpp.o\x1b[0m\n'}
+[19.860884] (candle_ros2) StdoutLine: {'line': b'[ 74%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/candle_ros2/srv/set_limits_md80__type_support.cpp.o\x1b[0m\n'}
+[19.903729] (-) TimerEvent: {}
+[20.004206] (-) TimerEvent: {}
+[20.066017] (candle_ros2) StdoutLine: {'line': b'[ 75%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/candle_ros2/msg/detail/dds_fastrtps/position_pid_command__type_support.cpp.o\x1b[0m\n'}
+[20.105136] (-) TimerEvent: {}
+[20.175938] (candle_ros2) StdoutLine: {'line': b'[ 75%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/candle_ros2/msg/detail/velocity_pid_command__type_support_c.cpp.o\x1b[0m\n'}
+[20.205256] (-) TimerEvent: {}
+[20.305855] (-) TimerEvent: {}
+[20.406418] (-) TimerEvent: {}
+[20.415577] (candle_ros2) StdoutLine: {'line': b'[ 76%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/candle_ros2/srv/detail/dds_fastrtps/add_md80s__type_support.cpp.o\x1b[0m\n'}
+[20.461297] (candle_ros2) StdoutLine: {'line': b'[ 77%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/candle_ros2/msg/detail/position_pid_command__type_support_c.cpp.o\x1b[0m\n'}
+[20.506557] (-) TimerEvent: {}
+[20.533967] (candle_ros2) StdoutLine: {'line': b'[ 78%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/candle_ros2/srv/detail/add_md80s__type_support_c.cpp.o\x1b[0m\n'}
+[20.606087] (candle_ros2) StdoutLine: {'line': b'[ 79%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/candle_ros2/srv/detail/generic_md80_msg__type_support_c.cpp.o\x1b[0m\n'}
+[20.606747] (-) TimerEvent: {}
+[20.707895] (-) TimerEvent: {}
+[20.808420] (-) TimerEvent: {}
+[20.909056] (-) TimerEvent: {}
+[20.930015] (candle_ros2) StdoutLine: {'line': b'[ 79%] \x1b[32m\x1b[1mLinking CXX shared library libcandle_ros2__rosidl_typesupport_introspection_cpp.so\x1b[0m\n'}
+[20.968966] (candle_ros2) StdoutLine: {'line': b'[ 80%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/candle_ros2/srv/detail/dds_fastrtps/generic_md80_msg__type_support.cpp.o\x1b[0m\n'}
+[21.009173] (-) TimerEvent: {}
+[21.088373] (candle_ros2) StdoutLine: {'line': b'[ 81%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/candle_ros2/srv/detail/set_mode_md80s__type_support_c.cpp.o\x1b[0m\n'}
+[21.100933] (candle_ros2) StdoutLine: {'line': b'[ 81%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/candle_ros2/srv/detail/set_limits_md80__type_support_c.cpp.o\x1b[0m\n'}
+[21.109312] (-) TimerEvent: {}
+[21.137643] (candle_ros2) StdoutLine: {'line': b'[ 81%] Built target candle_ros2__rosidl_typesupport_introspection_cpp\n'}
+[21.155429] (candle_ros2) StdoutLine: {'line': b'[ 81%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/candle_ros2/srv/detail/dds_fastrtps/set_mode_md80s__type_support.cpp.o\x1b[0m\n'}
+[21.193621] (candle_ros2) StdoutLine: {'line': b'[ 82%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/candle_ros2/srv/detail/dds_fastrtps/set_limits_md80__type_support.cpp.o\x1b[0m\n'}
+[21.209433] (-) TimerEvent: {}
+[21.277589] (candle_ros2) StdoutLine: {'line': b'[ 82%] \x1b[32m\x1b[1mLinking CXX shared library libcandle_ros2__rosidl_typesupport_cpp.so\x1b[0m\n'}
+[21.309542] (-) TimerEvent: {}
+[21.409971] (-) TimerEvent: {}
+[21.510740] (-) TimerEvent: {}
+[21.515834] (candle_ros2) StdoutLine: {'line': b'[ 82%] Built target candle_ros2__rosidl_typesupport_cpp\n'}
+[21.610892] (-) TimerEvent: {}
+[21.711803] (-) TimerEvent: {}
+[21.812852] (-) TimerEvent: {}
+[21.913223] (-) TimerEvent: {}
+[22.013566] (-) TimerEvent: {}
+[22.113880] (-) TimerEvent: {}
+[22.214213] (-) TimerEvent: {}
+[22.314591] (-) TimerEvent: {}
+[22.414886] (-) TimerEvent: {}
+[22.515021] (candle_ros2) StdoutLine: {'line': b'[ 83%] \x1b[32m\x1b[1mLinking CXX shared library libcandle_ros2__rosidl_typesupport_fastrtps_c.so\x1b[0m\n'}
+[22.515300] (-) TimerEvent: {}
+[22.615550] (-) TimerEvent: {}
+[22.621503] (candle_ros2) StdoutLine: {'line': b'[ 83%] Built target candle_ros2__rosidl_typesupport_fastrtps_c\n'}
+[22.715644] (-) TimerEvent: {}
+[22.815890] (-) TimerEvent: {}
+[22.916141] (-) TimerEvent: {}
+[22.957034] (candle_ros2) StdoutLine: {'line': b'[ 84%] \x1b[32m\x1b[1mLinking CXX shared library libcandle_ros2__rosidl_typesupport_fastrtps_cpp.so\x1b[0m\n'}
+[23.016279] (-) TimerEvent: {}
+[23.092205] (candle_ros2) StdoutLine: {'line': b'[ 84%] Built target candle_ros2__rosidl_typesupport_fastrtps_cpp\n'}
+[23.116482] (-) TimerEvent: {}
+[23.163124] (candle_ros2) StdoutLine: {'line': b'[ 84%] Built target candle_ros2\n'}
+[23.216679] (-) TimerEvent: {}
+[23.239079] (candle_ros2) StdoutLine: {'line': b'[ 85%] \x1b[32mBuilding CXX object CMakeFiles/candle_ros2_node.dir/src/md80_node.cpp.o\x1b[0m\n'}
+[23.240943] (candle_ros2) StdoutLine: {'line': b'[ 86%] \x1b[34m\x1b[1mGenerating Python code for ROS interfaces\x1b[0m\n'}
+[23.316861] (-) TimerEvent: {}
+[23.417515] (-) TimerEvent: {}
+[23.518159] (-) TimerEvent: {}
+[23.618618] (-) TimerEvent: {}
+[23.718838] (-) TimerEvent: {}
+[23.819074] (-) TimerEvent: {}
+[23.919379] (-) TimerEvent: {}
+[24.019613] (-) TimerEvent: {}
+[24.119856] (-) TimerEvent: {}
+[24.220130] (-) TimerEvent: {}
+[24.320378] (-) TimerEvent: {}
+[24.420670] (-) TimerEvent: {}
+[24.520897] (-) TimerEvent: {}
+[24.621147] (-) TimerEvent: {}
+[24.721419] (-) TimerEvent: {}
+[24.821685] (-) TimerEvent: {}
+[24.921894] (-) TimerEvent: {}
+[25.022155] (-) TimerEvent: {}
+[25.120784] (candle_ros2) StdoutLine: {'line': b'[ 86%] Built target candle_ros2__py\n'}
+[25.122244] (-) TimerEvent: {}
+[25.146961] (candle_ros2) StdoutLine: {'line': b'[ 87%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_py.dir/rosidl_generator_py/candle_ros2/srv/_add_md80s_s.c.o\x1b[0m\n'}
+[25.147292] (candle_ros2) StdoutLine: {'line': b'[ 88%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_py.dir/rosidl_generator_py/candle_ros2/msg/_pid_s.c.o\x1b[0m\n'}
+[25.149111] (candle_ros2) StdoutLine: {'line': b'[ 90%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_py.dir/rosidl_generator_py/candle_ros2/msg/_impedance_command_s.c.o\x1b[0m\n'}
+[25.149429] (candle_ros2) StdoutLine: {'line': b'[ 90%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_py.dir/rosidl_generator_py/candle_ros2/msg/_motion_command_s.c.o\x1b[0m\n'}
+[25.149598] (candle_ros2) StdoutLine: {'line': b'[ 91%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_py.dir/rosidl_generator_py/candle_ros2/msg/_position_pid_command_s.c.o\x1b[0m\n'}
+[25.149767] (candle_ros2) StdoutLine: {'line': b'[ 92%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_py.dir/rosidl_generator_py/candle_ros2/srv/_generic_md80_msg_s.c.o\x1b[0m\n'}
+[25.150047] (candle_ros2) StdoutLine: {'line': b'[ 92%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_py.dir/rosidl_generator_py/candle_ros2/msg/_velocity_pid_command_s.c.o\x1b[0m\n'}
+[25.150271] (candle_ros2) StdoutLine: {'line': b'[ 93%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_py.dir/rosidl_generator_py/candle_ros2/srv/_set_mode_md80s_s.c.o\x1b[0m\n'}
+[25.150883] (candle_ros2) StdoutLine: {'line': b'[ 93%] \x1b[32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_py.dir/rosidl_generator_py/candle_ros2/srv/_set_limits_md80_s.c.o\x1b[0m\n'}
+[25.222878] (-) TimerEvent: {}
+[25.323250] (-) TimerEvent: {}
+[25.423884] (-) TimerEvent: {}
+[25.524259] (-) TimerEvent: {}
+[25.624886] (-) TimerEvent: {}
+[25.725239] (-) TimerEvent: {}
+[25.780712] (candle_ros2) StdoutLine: {'line': b'[ 94%] \x1b[32m\x1b[1mLinking C shared library libcandle_ros2__rosidl_generator_py.so\x1b[0m\n'}
+[25.825381] (-) TimerEvent: {}
+[25.839197] (candle_ros2) StdoutLine: {'line': b'[ 94%] Built target candle_ros2__rosidl_generator_py\n'}
+[25.862307] (candle_ros2) StdoutLine: {'line': b'[ 97%] \x1b[32mBuilding C object CMakeFiles/candle_ros2_s__rosidl_typesupport_fastrtps_c.dir/rosidl_generator_py/candle_ros2/_candle_ros2_s.ep.rosidl_typesupport_fastrtps_c.c.o\x1b[0m\n'}
+[25.862616] (candle_ros2) StdoutLine: {'line': b'[ 97%] \x1b[32mBuilding C object CMakeFiles/candle_ros2_s__rosidl_typesupport_introspection_c.dir/rosidl_generator_py/candle_ros2/_candle_ros2_s.ep.rosidl_typesupport_introspection_c.c.o\x1b[0m\n'}
+[25.862837] (candle_ros2) StdoutLine: {'line': b'[ 97%] \x1b[32mBuilding C object CMakeFiles/candle_ros2_s__rosidl_typesupport_c.dir/rosidl_generator_py/candle_ros2/_candle_ros2_s.ep.rosidl_typesupport_c.c.o\x1b[0m\n'}
+[25.925490] (-) TimerEvent: {}
+[26.025822] (-) TimerEvent: {}
+[26.126144] (-) TimerEvent: {}
+[26.226479] (-) TimerEvent: {}
+[26.307645] (candle_ros2) StdoutLine: {'line': b'[ 99%] \x1b[32m\x1b[1mLinking C shared module rosidl_generator_py/candle_ros2/candle_ros2_s__rosidl_typesupport_fastrtps_c.so\x1b[0m\n'}
+[26.307973] (candle_ros2) StdoutLine: {'line': b'[ 99%] \x1b[32m\x1b[1mLinking C shared module rosidl_generator_py/candle_ros2/candle_ros2_s__rosidl_typesupport_introspection_c.so\x1b[0m\n'}
+[26.326580] (-) TimerEvent: {}
+[26.328210] (candle_ros2) StdoutLine: {'line': b'[ 99%] \x1b[32m\x1b[1mLinking C shared module rosidl_generator_py/candle_ros2/candle_ros2_s__rosidl_typesupport_c.so\x1b[0m\n'}
+[26.348648] (candle_ros2) StdoutLine: {'line': b'[ 99%] Built target candle_ros2_s__rosidl_typesupport_fastrtps_c\n'}
+[26.348984] (candle_ros2) StdoutLine: {'line': b'[ 99%] Built target candle_ros2_s__rosidl_typesupport_introspection_c\n'}
+[26.366522] (candle_ros2) StdoutLine: {'line': b'[ 99%] Built target candle_ros2_s__rosidl_typesupport_c\n'}
+[26.426691] (-) TimerEvent: {}
+[26.527002] (-) TimerEvent: {}
+[26.627292] (-) TimerEvent: {}
+[26.727571] (-) TimerEvent: {}
+[26.827850] (-) TimerEvent: {}
+[26.928127] (-) TimerEvent: {}
+[27.028430] (-) TimerEvent: {}
+[27.128691] (-) TimerEvent: {}
+[27.147039] (candle_ros2) StderrLine: {'line': b'\x1b[01m\x1b[K/ros2_ws/src/candle_ros2/src/md80_node.cpp:\x1b[m\x1b[K In destructor \xe2\x80\x98\x1b[01m\x1b[Kvirtual Md80Node::\x1b[01;32m\x1b[K~Md80Node\x1b[m\x1b[K()\x1b[m\x1b[K\xe2\x80\x99:\n'}
+[27.147297] (candle_ros2) StderrLine: {'line': b'\x1b[01m\x1b[K/ros2_ws/src/candle_ros2/src/md80_node.cpp:106:17:\x1b[m\x1b[K \x1b[01;35m\x1b[Kwarning: \x1b[m\x1b[Kdeleting object of polymorphic class type \xe2\x80\x98\x1b[01m\x1b[Kmab::Candle\x1b[m\x1b[K\xe2\x80\x99 which has non-virtual destructor might cause undefined behavior [\x1b[01;35m\x1b[K-Wdelete-non-virtual-dtor\x1b[m\x1b[K]\n'}
+[27.147476] (candle_ros2) StderrLine: {'line': b'  106 |                 \x1b[01;35m\x1b[Kdelete candle\x1b[m\x1b[K;\n'}
+[27.147636] (candle_ros2) StderrLine: {'line': b'      |                 \x1b[01;35m\x1b[K^~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[27.228791] (-) TimerEvent: {}
+[27.329068] (-) TimerEvent: {}
+[27.429345] (-) TimerEvent: {}
+[27.529622] (-) TimerEvent: {}
+[27.629874] (-) TimerEvent: {}
+[27.730165] (-) TimerEvent: {}
+[27.830429] (-) TimerEvent: {}
+[27.930655] (-) TimerEvent: {}
+[28.030869] (-) TimerEvent: {}
+[28.131128] (-) TimerEvent: {}
+[28.231360] (-) TimerEvent: {}
+[28.331573] (-) TimerEvent: {}
+[28.431817] (-) TimerEvent: {}
+[28.532024] (-) TimerEvent: {}
+[28.632238] (-) TimerEvent: {}
+[28.732493] (-) TimerEvent: {}
+[28.832751] (-) TimerEvent: {}
+[28.932990] (-) TimerEvent: {}
+[29.033242] (-) TimerEvent: {}
+[29.133471] (-) TimerEvent: {}
+[29.233736] (-) TimerEvent: {}
+[29.333975] (-) TimerEvent: {}
+[29.434220] (-) TimerEvent: {}
+[29.534462] (-) TimerEvent: {}
+[29.634690] (-) TimerEvent: {}
+[29.734897] (-) TimerEvent: {}
+[29.835126] (-) TimerEvent: {}
+[29.935387] (-) TimerEvent: {}
+[30.035631] (-) TimerEvent: {}
+[30.135903] (-) TimerEvent: {}
+[30.236142] (-) TimerEvent: {}
+[30.336371] (-) TimerEvent: {}
+[30.436666] (-) TimerEvent: {}
+[30.536883] (-) TimerEvent: {}
+[30.637159] (-) TimerEvent: {}
+[30.737412] (-) TimerEvent: {}
+[30.837646] (-) TimerEvent: {}
+[30.937896] (-) TimerEvent: {}
+[31.038137] (-) TimerEvent: {}
+[31.138365] (-) TimerEvent: {}
+[31.238632] (-) TimerEvent: {}
+[31.338875] (-) TimerEvent: {}
+[31.439082] (-) TimerEvent: {}
+[31.539305] (-) TimerEvent: {}
+[31.639545] (-) TimerEvent: {}
+[31.739797] (-) TimerEvent: {}
+[31.840021] (-) TimerEvent: {}
+[31.940243] (-) TimerEvent: {}
+[32.040480] (-) TimerEvent: {}
+[32.140750] (-) TimerEvent: {}
+[32.241018] (-) TimerEvent: {}
+[32.341306] (-) TimerEvent: {}
+[32.441533] (-) TimerEvent: {}
+[32.541803] (-) TimerEvent: {}
+[32.642089] (-) TimerEvent: {}
+[32.742360] (-) TimerEvent: {}
+[32.842632] (-) TimerEvent: {}
+[32.942878] (-) TimerEvent: {}
+[33.043105] (-) TimerEvent: {}
+[33.143398] (-) TimerEvent: {}
+[33.243646] (-) TimerEvent: {}
+[33.343855] (-) TimerEvent: {}
+[33.444084] (-) TimerEvent: {}
+[33.544290] (-) TimerEvent: {}
+[33.644542] (-) TimerEvent: {}
+[33.744795] (-) TimerEvent: {}
+[33.845021] (-) TimerEvent: {}
+[33.945256] (-) TimerEvent: {}
+[34.045489] (-) TimerEvent: {}
+[34.145729] (-) TimerEvent: {}
+[34.245950] (-) TimerEvent: {}
+[34.346167] (-) TimerEvent: {}
+[34.446442] (-) TimerEvent: {}
+[34.546685] (-) TimerEvent: {}
+[34.646901] (-) TimerEvent: {}
+[34.747127] (-) TimerEvent: {}
+[34.847353] (-) TimerEvent: {}
+[34.947559] (-) TimerEvent: {}
+[35.047786] (-) TimerEvent: {}
+[35.148001] (-) TimerEvent: {}
+[35.248233] (-) TimerEvent: {}
+[35.348465] (-) TimerEvent: {}
+[35.448695] (-) TimerEvent: {}
+[35.548910] (-) TimerEvent: {}
+[35.649144] (-) TimerEvent: {}
+[35.749381] (-) TimerEvent: {}
+[35.849609] (-) TimerEvent: {}
+[35.949857] (-) TimerEvent: {}
+[36.050088] (-) TimerEvent: {}
+[36.150404] (-) TimerEvent: {}
+[36.250637] (-) TimerEvent: {}
+[36.350891] (-) TimerEvent: {}
+[36.451134] (-) TimerEvent: {}
+[36.551370] (-) TimerEvent: {}
+[36.651618] (-) TimerEvent: {}
+[36.751875] (-) TimerEvent: {}
+[36.852107] (-) TimerEvent: {}
+[36.952376] (-) TimerEvent: {}
+[37.052691] (-) TimerEvent: {}
+[37.153086] (-) TimerEvent: {}
+[37.253306] (-) TimerEvent: {}
+[37.353549] (-) TimerEvent: {}
+[37.453799] (-) TimerEvent: {}
+[37.554067] (-) TimerEvent: {}
+[37.654288] (-) TimerEvent: {}
+[37.754534] (-) TimerEvent: {}
+[37.854747] (-) TimerEvent: {}
+[37.954969] (-) TimerEvent: {}
+[38.055181] (-) TimerEvent: {}
+[38.155399] (-) TimerEvent: {}
+[38.255655] (-) TimerEvent: {}
+[38.355871] (-) TimerEvent: {}
+[38.456130] (-) TimerEvent: {}
+[38.556381] (-) TimerEvent: {}
+[38.656607] (-) TimerEvent: {}
+[38.756835] (-) TimerEvent: {}
+[38.857062] (-) TimerEvent: {}
+[38.957314] (-) TimerEvent: {}
+[39.057534] (-) TimerEvent: {}
+[39.157773] (-) TimerEvent: {}
+[39.257995] (-) TimerEvent: {}
+[39.358262] (-) TimerEvent: {}
+[39.458518] (-) TimerEvent: {}
+[39.558740] (-) TimerEvent: {}
+[39.658971] (-) TimerEvent: {}
+[39.759192] (-) TimerEvent: {}
+[39.859438] (-) TimerEvent: {}
+[39.959644] (-) TimerEvent: {}
+[40.059892] (-) TimerEvent: {}
+[40.160130] (-) TimerEvent: {}
+[40.260347] (-) TimerEvent: {}
+[40.360576] (-) TimerEvent: {}
+[40.460803] (-) TimerEvent: {}
+[40.561097] (-) TimerEvent: {}
+[40.661367] (-) TimerEvent: {}
+[40.761583] (-) TimerEvent: {}
+[40.861851] (-) TimerEvent: {}
+[40.962082] (-) TimerEvent: {}
+[41.062341] (-) TimerEvent: {}
+[41.162591] (-) TimerEvent: {}
+[41.262849] (-) TimerEvent: {}
+[41.363078] (-) TimerEvent: {}
+[41.463332] (-) TimerEvent: {}
+[41.563559] (-) TimerEvent: {}
+[41.663822] (-) TimerEvent: {}
+[41.764058] (-) TimerEvent: {}
+[41.864319] (-) TimerEvent: {}
+[41.964571] (-) TimerEvent: {}
+[42.064836] (-) TimerEvent: {}
+[42.165088] (-) TimerEvent: {}
+[42.265308] (-) TimerEvent: {}
+[42.365560] (-) TimerEvent: {}
+[42.465833] (-) TimerEvent: {}
+[42.566064] (-) TimerEvent: {}
+[42.666325] (-) TimerEvent: {}
+[42.766595] (-) TimerEvent: {}
+[42.866838] (-) TimerEvent: {}
+[42.967091] (-) TimerEvent: {}
+[43.067377] (-) TimerEvent: {}
+[43.167594] (-) TimerEvent: {}
+[43.267896] (-) TimerEvent: {}
+[43.368132] (-) TimerEvent: {}
+[43.468374] (-) TimerEvent: {}
+[43.568608] (-) TimerEvent: {}
+[43.668851] (-) TimerEvent: {}
+[43.769082] (-) TimerEvent: {}
+[43.869308] (-) TimerEvent: {}
+[43.969543] (-) TimerEvent: {}
+[44.069761] (-) TimerEvent: {}
+[44.169988] (-) TimerEvent: {}
+[44.270215] (-) TimerEvent: {}
+[44.370423] (-) TimerEvent: {}
+[44.470650] (-) TimerEvent: {}
+[44.570890] (-) TimerEvent: {}
+[44.671120] (-) TimerEvent: {}
+[44.771360] (-) TimerEvent: {}
+[44.871630] (-) TimerEvent: {}
+[44.971849] (-) TimerEvent: {}
+[45.072133] (-) TimerEvent: {}
+[45.172388] (-) TimerEvent: {}
+[45.272630] (-) TimerEvent: {}
+[45.372858] (-) TimerEvent: {}
+[45.473067] (-) TimerEvent: {}
+[45.573294] (-) TimerEvent: {}
+[45.673538] (-) TimerEvent: {}
+[45.773771] (-) TimerEvent: {}
+[45.874000] (-) TimerEvent: {}
+[45.974238] (-) TimerEvent: {}
+[46.074503] (-) TimerEvent: {}
+[46.174750] (-) TimerEvent: {}
+[46.274996] (-) TimerEvent: {}
+[46.375245] (-) TimerEvent: {}
+[46.475492] (-) TimerEvent: {}
+[46.575736] (-) TimerEvent: {}
+[46.675968] (-) TimerEvent: {}
+[46.776197] (-) TimerEvent: {}
+[46.876429] (-) TimerEvent: {}
+[46.976665] (-) TimerEvent: {}
+[47.076888] (-) TimerEvent: {}
+[47.177119] (-) TimerEvent: {}
+[47.277361] (-) TimerEvent: {}
+[47.377633] (-) TimerEvent: {}
+[47.477899] (-) TimerEvent: {}
+[47.578139] (-) TimerEvent: {}
+[47.678379] (-) TimerEvent: {}
+[47.778681] (-) TimerEvent: {}
+[47.878885] (-) TimerEvent: {}
+[47.979126] (-) TimerEvent: {}
+[48.079368] (-) TimerEvent: {}
+[48.179607] (-) TimerEvent: {}
+[48.279856] (-) TimerEvent: {}
+[48.380068] (-) TimerEvent: {}
+[48.480303] (-) TimerEvent: {}
+[48.580547] (-) TimerEvent: {}
+[48.680869] (-) TimerEvent: {}
+[48.781341] (-) TimerEvent: {}
+[48.881729] (-) TimerEvent: {}
+[48.982012] (-) TimerEvent: {}
+[49.082246] (-) TimerEvent: {}
+[49.116847] (candle_ros2) StdoutLine: {'line': b'[100%] \x1b[32m\x1b[1mLinking CXX executable candle_ros2_node\x1b[0m\n'}
+[49.182423] (-) TimerEvent: {}
+[49.282922] (-) TimerEvent: {}
+[49.383427] (-) TimerEvent: {}
+[49.483940] (-) TimerEvent: {}
+[49.584449] (-) TimerEvent: {}
+[49.684981] (-) TimerEvent: {}
+[49.785485] (-) TimerEvent: {}
+[49.885901] (-) TimerEvent: {}
+[49.969299] (candle_ros2) StdoutLine: {'line': b'[100%] Built target candle_ros2_node\n'}
+[49.983362] (candle_ros2) CommandEnded: {'returncode': 0}
+[49.983977] (candle_ros2) JobProgress: {'identifier': 'candle_ros2', 'progress': 'install'}
+[49.985970] (-) TimerEvent: {}
+[49.994369] (candle_ros2) Command: {'cmd': ['/usr/bin/cmake', '--install', '/ros2_ws/build/candle_ros2'], 'cwd': '/ros2_ws/build/candle_ros2', 'env': OrderedDict({'GZ_CONFIG_PATH': '/opt/ros/jazzy/opt/sdformat_vendor/share/gz', 'HOSTNAME': 'toby-desktop', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/opt/ros/jazzy/opt/sdformat_vendor/lib:/opt/ros/jazzy/lib/x86_64-linux-gnu:/opt/ros/jazzy/opt/gz_math_vendor/lib:/opt/ros/jazzy/opt/gz_utils_vendor/lib:/opt/ros/jazzy/opt/gz_tools_vendor/lib:/opt/ros/jazzy/opt/gz_cmake_vendor/lib:/opt/ros/jazzy/lib', 'HOME': '/root', 'ROS_PYTHON_VERSION': '3', 'ROS_DISTRO': 'jazzy', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'TERM': 'xterm', 'PATH': '/opt/ros/jazzy/opt/gz_tools_vendor/bin:/opt/ros/jazzy/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin', 'LANG': 'C.UTF-8', 'RMW_IMPLEMENTATION': 'rmw_cyclonedds_cpp', 'AMENT_PREFIX_PATH': '/opt/ros/jazzy', 'DEBIAN_FRONTEND': 'noninteractive', 'ROS_AUTOMATIC_DISCOVERY_RANGE': 'SUBNET', 'PWD': '/ros2_ws/build/candle_ros2', 'LC_ALL': 'C.UTF-8', 'PYTHONPATH': '/opt/ros/jazzy/lib/python3.12/site-packages', 'COLCON': '1', 'CMAKE_PREFIX_PATH': '/opt/ros/jazzy/opt/sdformat_vendor:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_tools_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy'}), 'shell': False}
+[50.005452] (candle_ros2) StdoutLine: {'line': b'-- Install configuration: "Release"\n'}
+[50.006396] (candle_ros2) StdoutLine: {'line': b'-- Execute custom install script\n'}
+[50.006851] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/ament_index/resource_index/rosidl_interfaces/candle_ros2\n'}
+[50.020275] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/ImpedanceCommand.json\n'}
+[50.036872] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/MotionCommand.json\n'}
+[50.063087] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/Pid.json\n'}
+[50.086139] (-) TimerEvent: {}
+[50.093925] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/VelocityPidCommand.json\n'}
+[50.122927] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/PositionPidCommand.json\n'}
+[50.153855] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/AddMd80s.json\n'}
+[50.183095] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/GenericMd80Msg.json\n'}
+[50.186301] (-) TimerEvent: {}
+[50.211074] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/SetModeMd80s.json\n'}
+[50.241161] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/SetLimitsMd80.json\n'}
+[50.275431] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__functions.h\n'}
+[50.286487] (-) TimerEvent: {}
+[50.303894] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__struct.h\n'}
+[50.332437] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__type_support.h\n'}
+[50.360930] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__functions.h\n'}
+[50.386672] (-) TimerEvent: {}
+[50.390313] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__struct.h\n'}
+[50.419839] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__type_support.h\n'}
+[50.450960] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__functions.h\n'}
+[50.482298] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__struct.h\n'}
+[50.486882] (-) TimerEvent: {}
+[50.513299] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__type_support.h\n'}
+[50.543940] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__functions.h\n'}
+[50.576494] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__struct.h\n'}
+[50.587078] (-) TimerEvent: {}
+[50.607678] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__type_support.h\n'}
+[50.640026] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__functions.h\n'}
+[50.669512] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__struct.h\n'}
+[50.687240] (-) TimerEvent: {}
+[50.700445] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__type_support.h\n'}
+[50.729614] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/impedance_command.h\n'}
+[50.760125] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/motion_command.h\n'}
+[50.787392] (-) TimerEvent: {}
+[50.789506] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/pid.h\n'}
+[50.819216] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/position_pid_command.h\n'}
+[50.849350] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/rosidl_generator_c__visibility_control.h\n'}
+[50.879359] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/velocity_pid_command.h\n'}
+[50.887592] (-) TimerEvent: {}
+[50.914086] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/add_md80s.h\n'}
+[50.945471] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__functions.h\n'}
+[50.981726] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__struct.h\n'}
+[50.987766] (-) TimerEvent: {}
+[51.016878] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__type_support.h\n'}
+[51.055135] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__functions.h\n'}
+[51.087936] (-) TimerEvent: {}
+[51.090000] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__struct.h\n'}
+[51.122326] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__type_support.h\n'}
+[51.155215] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__functions.h\n'}
+[51.186722] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__struct.h\n'}
+[51.188053] (-) TimerEvent: {}
+[51.218294] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__type_support.h\n'}
+[51.253986] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__functions.h\n'}
+[51.283433] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__struct.h\n'}
+[51.288199] (-) TimerEvent: {}
+[51.311776] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__type_support.h\n'}
+[51.340347] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/generic_md80_msg.h\n'}
+[51.369130] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/set_limits_md80.h\n'}
+[51.388414] (-) TimerEvent: {}
+[51.399311] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/set_mode_md80s.h\n'}
+[51.430524] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/environment/library_path.sh\n'}
+[51.460628] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/environment/library_path.dsv\n'}
+[51.488581] (-) TimerEvent: {}
+[51.495951] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__rosidl_typesupport_fastrtps_c.h\n'}
+[51.528150] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__rosidl_typesupport_fastrtps_c.h\n'}
+[51.559199] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__rosidl_typesupport_fastrtps_c.h\n'}
+[51.588772] (-) TimerEvent: {}
+[51.589930] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__rosidl_typesupport_fastrtps_c.h\n'}
+[51.618617] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__rosidl_typesupport_fastrtps_c.h\n'}
+[51.648376] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/rosidl_typesupport_fastrtps_c__visibility_control.h\n'}
+[51.677199] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__rosidl_typesupport_fastrtps_c.h\n'}
+[51.688952] (-) TimerEvent: {}
+[51.705866] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__rosidl_typesupport_fastrtps_c.h\n'}
+[51.733762] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__rosidl_typesupport_fastrtps_c.h\n'}
+[51.762151] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__rosidl_typesupport_fastrtps_c.h\n'}
+[51.789102] (-) TimerEvent: {}
+[51.792602] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__builder.hpp\n'}
+[51.822207] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__struct.hpp\n'}
+[51.852401] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__traits.hpp\n'}
+[51.881731] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__type_support.hpp\n'}
+[51.889253] (-) TimerEvent: {}
+[51.911910] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__builder.hpp\n'}
+[51.940158] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__struct.hpp\n'}
+[51.973851] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__traits.hpp\n'}
+[51.989400] (-) TimerEvent: {}
+[52.007759] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__type_support.hpp\n'}
+[52.038588] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__builder.hpp\n'}
+[52.067705] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__struct.hpp\n'}
+[52.089562] (-) TimerEvent: {}
+[52.097381] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__traits.hpp\n'}
+[52.126092] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__type_support.hpp\n'}
+[52.154889] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__builder.hpp\n'}
+[52.183552] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__struct.hpp\n'}
+[52.189733] (-) TimerEvent: {}
+[52.213033] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__traits.hpp\n'}
+[52.242895] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__type_support.hpp\n'}
+[52.271589] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__builder.hpp\n'}
+[52.289898] (-) TimerEvent: {}
+[52.300775] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__struct.hpp\n'}
+[52.329991] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__traits.hpp\n'}
+[52.361016] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__type_support.hpp\n'}
+[52.390133] (-) TimerEvent: {}
+[52.394882] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/impedance_command.hpp\n'}
+[52.423800] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/motion_command.hpp\n'}
+[52.453098] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/pid.hpp\n'}
+[52.486455] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/position_pid_command.hpp\n'}
+[52.490278] (-) TimerEvent: {}
+[52.519195] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/rosidl_generator_cpp__visibility_control.hpp\n'}
+[52.549421] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/velocity_pid_command.hpp\n'}
+[52.579562] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/add_md80s.hpp\n'}
+[52.590427] (-) TimerEvent: {}
+[52.608572] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__builder.hpp\n'}
+[52.637744] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__struct.hpp\n'}
+[52.668552] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__traits.hpp\n'}
+[52.690593] (-) TimerEvent: {}
+[52.697755] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__type_support.hpp\n'}
+[52.728009] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__builder.hpp\n'}
+[52.756727] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__struct.hpp\n'}
+[52.787612] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__traits.hpp\n'}
+[52.790739] (-) TimerEvent: {}
+[52.819072] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__type_support.hpp\n'}
+[52.849985] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__builder.hpp\n'}
+[52.879655] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__struct.hpp\n'}
+[52.890943] (-) TimerEvent: {}
+[52.909098] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__traits.hpp\n'}
+[52.937846] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__type_support.hpp\n'}
+[52.967478] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__builder.hpp\n'}
+[52.991122] (-) TimerEvent: {}
+[52.998355] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__struct.hpp\n'}
+[53.028045] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__traits.hpp\n'}
+[53.056772] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__type_support.hpp\n'}
+[53.089434] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/generic_md80_msg.hpp\n'}
+[53.091267] (-) TimerEvent: {}
+[53.120232] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/set_limits_md80.hpp\n'}
+[53.149698] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/set_mode_md80s.hpp\n'}
+[53.181112] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__rosidl_typesupport_fastrtps_cpp.hpp\n'}
+[53.191430] (-) TimerEvent: {}
+[53.212725] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__rosidl_typesupport_fastrtps_cpp.hpp\n'}
+[53.241533] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__rosidl_typesupport_fastrtps_cpp.hpp\n'}
+[53.271978] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__rosidl_typesupport_fastrtps_cpp.hpp\n'}
+[53.291587] (-) TimerEvent: {}
+[53.303675] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__rosidl_typesupport_fastrtps_cpp.hpp\n'}
+[53.335073] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/rosidl_typesupport_fastrtps_cpp__visibility_control.h\n'}
+[53.364003] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__rosidl_typesupport_fastrtps_cpp.hpp\n'}
+[53.391761] (-) TimerEvent: {}
+[53.393546] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__rosidl_typesupport_fastrtps_cpp.hpp\n'}
+[53.422716] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__rosidl_typesupport_fastrtps_cpp.hpp\n'}
+[53.453196] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__rosidl_typesupport_fastrtps_cpp.hpp\n'}
+[53.486122] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__rosidl_typesupport_introspection_c.h\n'}
+[53.491947] (-) TimerEvent: {}
+[53.518255] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__rosidl_typesupport_introspection_c.h\n'}
+[53.552927] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__rosidl_typesupport_introspection_c.h\n'}
+[53.583748] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__rosidl_typesupport_introspection_c.h\n'}
+[53.592106] (-) TimerEvent: {}
+[53.612931] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__rosidl_typesupport_introspection_c.h\n'}
+[53.641923] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/rosidl_typesupport_introspection_c__visibility_control.h\n'}
+[53.673941] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__rosidl_typesupport_introspection_c.h\n'}
+[53.692287] (-) TimerEvent: {}
+[53.703729] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__rosidl_typesupport_introspection_c.h\n'}
+[53.731904] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__rosidl_typesupport_introspection_c.h\n'}
+[53.762873] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__rosidl_typesupport_introspection_c.h\n'}
+[53.792262] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__rosidl_typesupport_introspection_cpp.hpp\n'}
+[53.792905] (-) TimerEvent: {}
+[53.822065] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__rosidl_typesupport_introspection_cpp.hpp\n'}
+[53.851402] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__rosidl_typesupport_introspection_cpp.hpp\n'}
+[53.880842] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__rosidl_typesupport_introspection_cpp.hpp\n'}
+[53.893077] (-) TimerEvent: {}
+[53.909939] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__rosidl_typesupport_introspection_cpp.hpp\n'}
+[53.941228] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__rosidl_typesupport_introspection_cpp.hpp\n'}
+[53.971792] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__rosidl_typesupport_introspection_cpp.hpp\n'}
+[53.993253] (-) TimerEvent: {}
+[54.004033] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__rosidl_typesupport_introspection_cpp.hpp\n'}
+[54.035106] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__rosidl_typesupport_introspection_cpp.hpp\n'}
+[54.066376] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/environment/pythonpath.sh\n'}
+[54.093427] (-) TimerEvent: {}
+[54.096077] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/environment/pythonpath.dsv\n'}
+[54.128669] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2-1.2.0-py3.12.egg-info/PKG-INFO\n'}
+[54.160864] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2-1.2.0-py3.12.egg-info/SOURCES.txt\n'}
+[54.189876] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2-1.2.0-py3.12.egg-info/dependency_links.txt\n'}
+[54.193581] (-) TimerEvent: {}
+[54.221635] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2-1.2.0-py3.12.egg-info/top_level.txt\n'}
+[54.253832] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/__init__.py\n'}
+[54.284312] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/_candle_ros2_s.ep.rosidl_typesupport_c.c\n'}
+[54.293763] (-) TimerEvent: {}
+[54.317094] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/_candle_ros2_s.ep.rosidl_typesupport_fastrtps_c.c\n'}
+[54.349567] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/_candle_ros2_s.ep.rosidl_typesupport_introspection_c.c\n'}
+[54.380144] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/candle_ros2_s__rosidl_typesupport_c.so\n'}
+[54.393963] (-) TimerEvent: {}
+[54.410398] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/candle_ros2_s__rosidl_typesupport_fastrtps_c.so\n'}
+[54.439327] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/candle_ros2_s__rosidl_typesupport_introspection_c.so\n'}
+[54.471132] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/__init__.py\n'}
+[54.494192] (-) TimerEvent: {}
+[54.503497] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_impedance_command.py\n'}
+[54.535324] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_impedance_command_s.c\n'}
+[54.566409] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_motion_command.py\n'}
+[54.594386] (-) TimerEvent: {}
+[54.598248] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_motion_command_s.c\n'}
+[54.630025] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_pid.py\n'}
+[54.660012] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_pid_s.c\n'}
+[54.688032] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_position_pid_command.py\n'}
+[54.694557] (-) TimerEvent: {}
+[54.717134] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_position_pid_command_s.c\n'}
+[54.745275] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_velocity_pid_command.py\n'}
+[54.773657] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_velocity_pid_command_s.c\n'}
+[54.794741] (-) TimerEvent: {}
+[54.804033] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/__init__.py\n'}
+[54.835698] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_add_md80s.py\n'}
+[54.867544] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_add_md80s_s.c\n'}
+[54.894933] (-) TimerEvent: {}
+[54.898734] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_generic_md80_msg.py\n'}
+[54.928955] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_generic_md80_msg_s.c\n'}
+[54.958410] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_set_limits_md80.py\n'}
+[54.987903] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_set_limits_md80_s.c\n'}
+[54.995107] (-) TimerEvent: {}
+[55.016775] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_set_mode_md80s.py\n'}
+[55.046616] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_set_mode_md80s_s.c\n'}
+[55.076055] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/candle_ros2_s__rosidl_typesupport_fastrtps_c.so\n'}
+[55.077459] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/candle_ros2_s__rosidl_typesupport_introspection_c.so\n'}
+[55.078489] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/candle_ros2_s__rosidl_typesupport_c.so\n'}
+[55.079317] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/ament_index/resource_index/rust_packages/candle_ros2\n'}
+[55.095309] (-) TimerEvent: {}
+[55.108978] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/rust/Cargo.toml\n'}
+[55.138180] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/rust/build.rs\n'}
+[55.175736] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/rust/src/lib.rs\n'}
+[55.195492] (-) TimerEvent: {}
+[55.204190] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/rust/src/msg.rs\n'}
+[55.234467] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/rust/src/msg/rmw.rs\n'}
+[55.262297] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/rust/src/srv.rs\n'}
+[55.292232] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/rust/src/srv/rmw.rs\n'}
+[55.295657] (-) TimerEvent: {}
+[55.320872] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/ImpedanceCommand.idl\n'}
+[55.350486] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/MotionCommand.idl\n'}
+[55.379530] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/Pid.idl\n'}
+[55.395893] (-) TimerEvent: {}
+[55.409070] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/VelocityPidCommand.idl\n'}
+[55.439437] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/PositionPidCommand.idl\n'}
+[55.469481] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/AddMd80s.idl\n'}
+[55.496078] (-) TimerEvent: {}
+[55.506162] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/GenericMd80Msg.idl\n'}
+[55.534967] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/SetModeMd80s.idl\n'}
+[55.565334] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/SetLimitsMd80.idl\n'}
+[55.596022] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/ImpedanceCommand.msg\n'}
+[55.596491] (-) TimerEvent: {}
+[55.625835] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/MotionCommand.msg\n'}
+[55.654189] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/Pid.msg\n'}
+[55.682932] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/VelocityPidCommand.msg\n'}
+[55.696687] (-) TimerEvent: {}
+[55.712838] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/PositionPidCommand.msg\n'}
+[55.741024] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/AddMd80s.srv\n'}
+[55.770283] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/GenericMd80Msg.srv\n'}
+[55.796887] (-) TimerEvent: {}
+[55.799979] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/SetModeMd80s.srv\n'}
+[55.835373] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/SetLimitsMd80.srv\n'}
+[55.868374] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/lib/candle_ros2/candle_ros2_node\n'}
+[55.897055] (-) TimerEvent: {}
+[55.902882] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/ament_index/resource_index/package_run_dependencies/candle_ros2\n'}
+[55.935654] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/ament_index/resource_index/parent_prefix_path/candle_ros2\n'}
+[55.971053] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/environment/ament_prefix_path.sh\n'}
+[55.997199] (-) TimerEvent: {}
+[56.004436] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/environment/ament_prefix_path.dsv\n'}
+[56.037856] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/environment/path.sh\n'}
+[56.073038] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/environment/path.dsv\n'}
+[56.097410] (-) TimerEvent: {}
+[56.107603] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/local_setup.bash\n'}
+[56.139102] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/local_setup.sh\n'}
+[56.172473] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/local_setup.zsh\n'}
+[56.197605] (-) TimerEvent: {}
+[56.206488] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/local_setup.dsv\n'}
+[56.240477] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/package.dsv\n'}
+[56.272420] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/ament_index/resource_index/packages/candle_ros2\n'}
+[56.297800] (-) TimerEvent: {}
+[56.305800] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/rosidl_cmake-extras.cmake\n'}
+[56.343034] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/ament_cmake_export_dependencies-extras.cmake\n'}
+[56.385516] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/ament_cmake_export_include_directories-extras.cmake\n'}
+[56.398017] (-) TimerEvent: {}
+[56.419872] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/ament_cmake_export_libraries-extras.cmake\n'}
+[56.452230] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/ament_cmake_export_targets-extras.cmake\n'}
+[56.484177] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/rosidl_cmake_export_typesupport_targets-extras.cmake\n'}
+[56.498207] (-) TimerEvent: {}
+[56.516664] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/rosidl_cmake_export_typesupport_libraries-extras.cmake\n'}
+[56.545703] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/rosidl_cmake_aggregate_target-extras.cmake\n'}
+[56.577224] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/candle_ros2Config.cmake\n'}
+[56.598373] (-) TimerEvent: {}
+[56.608145] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/candle_ros2Config-version.cmake\n'}
+[56.637731] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/package.xml\n'}
+[56.667215] (candle_ros2) StdoutLine: {'line': b'-- Installing: /ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_generator_c.so\n'}
+[56.669106] (candle_ros2) StdoutLine: {'line': b'-- Set non-toolchain portion of runtime path of "/ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_generator_c.so" to ""\n'}
+[56.669695] (candle_ros2) StdoutLine: {'line': b'-- Installing: /ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_typesupport_fastrtps_c.so\n'}
+[56.671139] (candle_ros2) StdoutLine: {'line': b'-- Set non-toolchain portion of runtime path of "/ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_typesupport_fastrtps_c.so" to ""\n'}
+[56.671715] (candle_ros2) StdoutLine: {'line': b'-- Installing: /ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_typesupport_fastrtps_cpp.so\n'}
+[56.673639] (candle_ros2) StdoutLine: {'line': b'-- Set non-toolchain portion of runtime path of "/ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_typesupport_fastrtps_cpp.so" to ""\n'}
+[56.674358] (candle_ros2) StdoutLine: {'line': b'-- Installing: /ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_typesupport_introspection_c.so\n'}
+[56.676177] (candle_ros2) StdoutLine: {'line': b'-- Set non-toolchain portion of runtime path of "/ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_typesupport_introspection_c.so" to ""\n'}
+[56.676887] (candle_ros2) StdoutLine: {'line': b'-- Installing: /ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_typesupport_c.so\n'}
+[56.677782] (candle_ros2) StdoutLine: {'line': b'-- Set non-toolchain portion of runtime path of "/ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_typesupport_c.so" to ""\n'}
+[56.678349] (candle_ros2) StdoutLine: {'line': b'-- Installing: /ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_typesupport_introspection_cpp.so\n'}
+[56.680125] (candle_ros2) StdoutLine: {'line': b'-- Set non-toolchain portion of runtime path of "/ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_typesupport_introspection_cpp.so" to ""\n'}
+[56.680772] (candle_ros2) StdoutLine: {'line': b'-- Installing: /ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_typesupport_cpp.so\n'}
+[56.681970] (candle_ros2) StdoutLine: {'line': b'-- Set non-toolchain portion of runtime path of "/ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_typesupport_cpp.so" to ""\n'}
+[56.698517] (-) TimerEvent: {}
+[56.799010] (-) TimerEvent: {}
+[56.899500] (-) TimerEvent: {}
+[56.928589] (candle_ros2) StdoutLine: {'line': b"Listing '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2'...\n"}
+[56.929123] (candle_ros2) StdoutLine: {'line': b"Compiling '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/__init__.py'...\n"}
+[56.929569] (candle_ros2) StdoutLine: {'line': b"Listing '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg'...\n"}
+[56.929915] (candle_ros2) StdoutLine: {'line': b"Compiling '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/__init__.py'...\n"}
+[56.930209] (candle_ros2) StdoutLine: {'line': b"Compiling '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_impedance_command.py'...\n"}
+[56.930490] (candle_ros2) StdoutLine: {'line': b"Compiling '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_motion_command.py'...\n"}
+[56.930773] (candle_ros2) StdoutLine: {'line': b"Compiling '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_pid.py'...\n"}
+[56.931081] (candle_ros2) StdoutLine: {'line': b"Compiling '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_position_pid_command.py'...\n"}
+[56.931391] (candle_ros2) StdoutLine: {'line': b"Compiling '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_velocity_pid_command.py'...\n"}
+[56.931662] (candle_ros2) StdoutLine: {'line': b"Listing '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv'...\n"}
+[56.931972] (candle_ros2) StdoutLine: {'line': b"Compiling '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/__init__.py'...\n"}
+[56.932249] (candle_ros2) StdoutLine: {'line': b"Compiling '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_add_md80s.py'...\n"}
+[56.932564] (candle_ros2) StdoutLine: {'line': b"Compiling '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_generic_md80_msg.py'...\n"}
+[56.932882] (candle_ros2) StdoutLine: {'line': b"Compiling '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_set_limits_md80.py'...\n"}
+[56.933159] (candle_ros2) StdoutLine: {'line': b"Compiling '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_set_mode_md80s.py'...\n"}
+[56.947216] (candle_ros2) StdoutLine: {'line': b'-- Installing: /ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_generator_py.so\n'}
+[56.948491] (candle_ros2) StdoutLine: {'line': b'-- Set non-toolchain portion of runtime path of "/ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_generator_py.so" to ""\n'}
+[56.948888] (candle_ros2) StdoutLine: {'line': b'-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/export_candle_ros2__rosidl_generator_cExport.cmake\n'}
+[56.949278] (candle_ros2) StdoutLine: {'line': b'-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/export_candle_ros2__rosidl_generator_cExport-release.cmake\n'}
+[56.949745] (candle_ros2) StdoutLine: {'line': b'-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/export_candle_ros2__rosidl_typesupport_fastrtps_cExport.cmake\n'}
+[56.950092] (candle_ros2) StdoutLine: {'line': b'-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/export_candle_ros2__rosidl_typesupport_fastrtps_cExport-release.cmake\n'}
+[56.950490] (candle_ros2) StdoutLine: {'line': b'-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/export_candle_ros2__rosidl_generator_cppExport.cmake\n'}
+[56.950863] (candle_ros2) StdoutLine: {'line': b'-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/export_candle_ros2__rosidl_typesupport_fastrtps_cppExport.cmake\n'}
+[56.951208] (candle_ros2) StdoutLine: {'line': b'-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/export_candle_ros2__rosidl_typesupport_fastrtps_cppExport-release.cmake\n'}
+[56.951559] (candle_ros2) StdoutLine: {'line': b'-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/candle_ros2__rosidl_typesupport_introspection_cExport.cmake\n'}
+[56.951866] (candle_ros2) StdoutLine: {'line': b'-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/candle_ros2__rosidl_typesupport_introspection_cExport-release.cmake\n'}
+[56.952232] (candle_ros2) StdoutLine: {'line': b'-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/candle_ros2__rosidl_typesupport_cExport.cmake\n'}
+[56.952573] (candle_ros2) StdoutLine: {'line': b'-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/candle_ros2__rosidl_typesupport_cExport-release.cmake\n'}
+[56.952937] (candle_ros2) StdoutLine: {'line': b'-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/candle_ros2__rosidl_typesupport_introspection_cppExport.cmake\n'}
+[56.953408] (candle_ros2) StdoutLine: {'line': b'-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/candle_ros2__rosidl_typesupport_introspection_cppExport-release.cmake\n'}
+[56.953772] (candle_ros2) StdoutLine: {'line': b'-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/candle_ros2__rosidl_typesupport_cppExport.cmake\n'}
+[56.954182] (candle_ros2) StdoutLine: {'line': b'-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/candle_ros2__rosidl_typesupport_cppExport-release.cmake\n'}
+[56.954657] (candle_ros2) StdoutLine: {'line': b'-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/export_candle_ros2__rosidl_generator_pyExport.cmake\n'}
+[56.955116] (candle_ros2) StdoutLine: {'line': b'-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/export_candle_ros2__rosidl_generator_pyExport-release.cmake\n'}
+[56.960539] (candle_ros2) CommandEnded: {'returncode': 0}
+[56.999776] (-) TimerEvent: {}
+[57.086913] (candle_ros2) JobEnded: {'identifier': 'candle_ros2', 'rc': 0}
+[57.089540] (-) EventReactorShutdown: {}

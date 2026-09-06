@@ -1,0 +1,36 @@
+[0.838s] Invoking command in '/ros2_ws/build/nmea_navsat_driver': PYTHONPATH=/ros2_ws/build/nmea_navsat_driver/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/ros2_ws/install/nmea_navsat_driver/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /ros2_ws/build/nmea_navsat_driver/build --no-deps symlink_data
+[1.075s] running develop
+[1.192s] running egg_info
+[1.192s] creating src/nmea_navsat_driver.egg-info
+[1.203s] writing src/nmea_navsat_driver.egg-info/PKG-INFO
+[1.204s] writing dependency_links to src/nmea_navsat_driver.egg-info/dependency_links.txt
+[1.204s] writing entry points to src/nmea_navsat_driver.egg-info/entry_points.txt
+[1.204s] writing requirements to src/nmea_navsat_driver.egg-info/requires.txt
+[1.204s] writing top-level names to src/nmea_navsat_driver.egg-info/top_level.txt
+[1.204s] writing manifest file 'src/nmea_navsat_driver.egg-info/SOURCES.txt'
+[1.229s] reading manifest file 'src/nmea_navsat_driver.egg-info/SOURCES.txt'
+[1.229s] writing manifest file 'src/nmea_navsat_driver.egg-info/SOURCES.txt'
+[1.242s] running build_ext
+[1.242s] Creating /ros2_ws/install/nmea_navsat_driver/lib/python3.12/site-packages/nmea-navsat-driver.egg-link (link to src)
+[1.243s] Installing nmea_serial_driver script to /ros2_ws/install/nmea_navsat_driver/lib/nmea_navsat_driver
+[1.243s] Installing nmea_socket_driver script to /ros2_ws/install/nmea_navsat_driver/lib/nmea_navsat_driver
+[1.243s] Installing nmea_tcpclient_driver script to /ros2_ws/install/nmea_navsat_driver/lib/nmea_navsat_driver
+[1.244s] Installing nmea_topic_driver script to /ros2_ws/install/nmea_navsat_driver/lib/nmea_navsat_driver
+[1.244s] Installing nmea_topic_serial_reader script to /ros2_ws/install/nmea_navsat_driver/lib/nmea_navsat_driver
+[1.244s] 
+[1.244s] Installed /ros2_ws/build/nmea_navsat_driver/src
+[1.244s] running symlink_data
+[1.244s] creating /ros2_ws/install/nmea_navsat_driver/share/ament_index
+[1.244s] creating /ros2_ws/install/nmea_navsat_driver/share/ament_index/resource_index
+[1.244s] creating /ros2_ws/install/nmea_navsat_driver/share/ament_index/resource_index/packages
+[1.244s] symbolically linking /ros2_ws/build/nmea_navsat_driver/resource/nmea_navsat_driver -> /ros2_ws/install/nmea_navsat_driver/share/ament_index/resource_index/packages
+[1.245s] symbolically linking /ros2_ws/build/nmea_navsat_driver/package.xml -> /ros2_ws/install/nmea_navsat_driver/share/nmea_navsat_driver
+[1.245s] creating /ros2_ws/install/nmea_navsat_driver/share/nmea_navsat_driver/launch
+[1.245s] symbolically linking /ros2_ws/build/nmea_navsat_driver/launch/nmea_tcpclient_driver.launch.py -> /ros2_ws/install/nmea_navsat_driver/share/nmea_navsat_driver/launch
+[1.245s] symbolically linking /ros2_ws/build/nmea_navsat_driver/launch/nmea_socket_driver.launch.py -> /ros2_ws/install/nmea_navsat_driver/share/nmea_navsat_driver/launch
+[1.245s] symbolically linking /ros2_ws/build/nmea_navsat_driver/launch/nmea_serial_driver.launch.py -> /ros2_ws/install/nmea_navsat_driver/share/nmea_navsat_driver/launch
+[1.245s] creating /ros2_ws/install/nmea_navsat_driver/share/nmea_navsat_driver/config
+[1.245s] symbolically linking /ros2_ws/build/nmea_navsat_driver/config/nmea_socket_driver.yaml -> /ros2_ws/install/nmea_navsat_driver/share/nmea_navsat_driver/config
+[1.245s] symbolically linking /ros2_ws/build/nmea_navsat_driver/config/nmea_tcpclient_driver.yaml -> /ros2_ws/install/nmea_navsat_driver/share/nmea_navsat_driver/config
+[1.245s] symbolically linking /ros2_ws/build/nmea_navsat_driver/config/nmea_serial_driver.yaml -> /ros2_ws/install/nmea_navsat_driver/share/nmea_navsat_driver/config
+[1.267s] Invoked command in '/ros2_ws/build/nmea_navsat_driver' returned '0': PYTHONPATH=/ros2_ws/build/nmea_navsat_driver/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/ros2_ws/install/nmea_navsat_driver/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /ros2_ws/build/nmea_navsat_driver/build --no-deps symlink_data

@@ -1,0 +1,1 @@
+ament_cmake_symlink_install_targets("TARGET_FILES" "/ros2_ws/build/candle_ros2/rosidl_generator_py/candle_ros2/candle_ros2_s__rosidl_typesupport_introspection_c.so" "TARGETS" "candle_ros2_s__rosidl_typesupport_introspection_c" "DESTINATION" "lib/python3.12/site-packages/candle_ros2")

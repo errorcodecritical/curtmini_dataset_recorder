@@ -1,0 +1,5 @@
+# Exclude everything in ws directories
+ros2_ws/*
+
+# Re-include only src folder
+!ros2_ws/src/

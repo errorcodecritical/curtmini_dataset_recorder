@@ -1,0 +1,793 @@
+[0.000000] (-) TimerEvent: {}
+[0.000050] (-) JobUnselected: {'identifier': 'curt_description'}
+[0.000176] (-) JobUnselected: {'identifier': 'hector_recorder'}
+[0.000284] (-) JobUnselected: {'identifier': 'hector_recorder_msgs'}
+[0.000337] (-) JobUnselected: {'identifier': 'imu_mag_fusion'}
+[0.000372] (-) JobUnselected: {'identifier': 'metavision_driver'}
+[0.000391] (-) JobUnselected: {'identifier': 'nmea_navsat_driver'}
+[0.000413] (-) JobUnselected: {'identifier': 'ouster_ros'}
+[0.000440] (-) JobUnselected: {'identifier': 'ouster_sensor_msgs'}
+[0.000457] (-) JobUnselected: {'identifier': 'realsense2_camera'}
+[0.000687] (-) JobUnselected: {'identifier': 'realsense2_camera_msgs'}
+[0.000726] (-) JobUnselected: {'identifier': 'realsense2_description'}
+[0.000746] (-) JobUnselected: {'identifier': 'realsense_camera_info_override'}
+[0.000764] (-) JobUnselected: {'identifier': 'rqml_recorder'}
+[0.000786] (-) JobUnselected: {'identifier': 'xsens_driver'}
+[0.000804] (candle_ros2) JobQueued: {'identifier': 'candle_ros2', 'dependencies': OrderedDict()}
+[0.000822] (openzen_driver) JobQueued: {'identifier': 'openzen_driver', 'dependencies': OrderedDict()}
+[0.001009] (ipa_ros2_control) JobQueued: {'identifier': 'ipa_ros2_control', 'dependencies': OrderedDict({'candle_ros2': '/ros2_ws/install/candle_ros2'})}
+[0.001031] (curt_mini) JobQueued: {'identifier': 'curt_mini', 'dependencies': OrderedDict({'candle_ros2': '/ros2_ws/install/candle_ros2', 'ipa_ros2_control': '/ros2_ws/install/ipa_ros2_control'})}
+[0.001057] (candle_ros2) JobStarted: {'identifier': 'candle_ros2'}
+[0.006361] (openzen_driver) JobStarted: {'identifier': 'openzen_driver'}
+[0.010122] (candle_ros2) JobProgress: {'identifier': 'candle_ros2', 'progress': 'cmake'}
+[0.010682] (candle_ros2) JobProgress: {'identifier': 'candle_ros2', 'progress': 'build'}
+[0.011365] (candle_ros2) Command: {'cmd': ['/usr/bin/cmake', '--build', '/ros2_ws/build/candle_ros2', '--', '-j12', '-l12'], 'cwd': '/ros2_ws/build/candle_ros2', 'env': OrderedDict({'GZ_CONFIG_PATH': '/opt/ros/jazzy/opt/sdformat_vendor/share/gz', 'HOSTNAME': 'toby-desktop', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/opt/ros/jazzy/opt/sdformat_vendor/lib:/opt/ros/jazzy/lib/x86_64-linux-gnu:/opt/ros/jazzy/opt/gz_math_vendor/lib:/opt/ros/jazzy/opt/gz_utils_vendor/lib:/opt/ros/jazzy/opt/gz_tools_vendor/lib:/opt/ros/jazzy/opt/gz_cmake_vendor/lib:/opt/ros/jazzy/lib', 'HOME': '/root', 'ROS_PYTHON_VERSION': '3', 'ROS_DISTRO': 'jazzy', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'PATH': '/opt/ros/jazzy/opt/gz_tools_vendor/bin:/opt/ros/jazzy/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin', 'LANG': 'C.UTF-8', 'RMW_IMPLEMENTATION': 'rmw_cyclonedds_cpp', 'AMENT_PREFIX_PATH': '/opt/ros/jazzy', 'DEBIAN_FRONTEND': 'noninteractive', 'ROS_AUTOMATIC_DISCOVERY_RANGE': 'SUBNET', 'PWD': '/ros2_ws/build/candle_ros2', 'LC_ALL': 'C.UTF-8', 'PYTHONPATH': '/opt/ros/jazzy/lib/python3.12/site-packages', 'COLCON': '1', 'CMAKE_PREFIX_PATH': '/opt/ros/jazzy/opt/sdformat_vendor:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_tools_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy'}), 'shell': False}
+[0.012863] (openzen_driver) JobProgress: {'identifier': 'openzen_driver', 'progress': 'cmake'}
+[0.013922] (openzen_driver) JobProgress: {'identifier': 'openzen_driver', 'progress': 'build'}
+[0.014375] (openzen_driver) Command: {'cmd': ['/usr/bin/cmake', '--build', '/ros2_ws/build/openzen_driver', '--', '-j12', '-l12'], 'cwd': '/ros2_ws/build/openzen_driver', 'env': OrderedDict({'GZ_CONFIG_PATH': '/opt/ros/jazzy/opt/sdformat_vendor/share/gz', 'HOSTNAME': 'toby-desktop', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/opt/ros/jazzy/opt/sdformat_vendor/lib:/opt/ros/jazzy/lib/x86_64-linux-gnu:/opt/ros/jazzy/opt/gz_math_vendor/lib:/opt/ros/jazzy/opt/gz_utils_vendor/lib:/opt/ros/jazzy/opt/gz_tools_vendor/lib:/opt/ros/jazzy/opt/gz_cmake_vendor/lib:/opt/ros/jazzy/lib', 'HOME': '/root', 'ROS_PYTHON_VERSION': '3', 'ROS_DISTRO': 'jazzy', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'PATH': '/opt/ros/jazzy/opt/gz_tools_vendor/bin:/opt/ros/jazzy/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin', 'LANG': 'C.UTF-8', 'RMW_IMPLEMENTATION': 'rmw_cyclonedds_cpp', 'AMENT_PREFIX_PATH': '/opt/ros/jazzy', 'DEBIAN_FRONTEND': 'noninteractive', 'ROS_AUTOMATIC_DISCOVERY_RANGE': 'SUBNET', 'PWD': '/ros2_ws/build/openzen_driver', 'LC_ALL': 'C.UTF-8', 'PYTHONPATH': '/opt/ros/jazzy/lib/python3.12/site-packages', 'COLCON': '1', 'CMAKE_PREFIX_PATH': '/opt/ros/jazzy/opt/sdformat_vendor:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_tools_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy'}), 'shell': False}
+[0.067792] (candle_ros2) StdoutLine: {'line': b'[  2%] Built target candle_ros2__rs\n'}
+[0.068131] (candle_ros2) StdoutLine: {'line': b'[  1%] Built target candle_ros2__rosidl_generator_type_description\n'}
+[0.075411] (candle_ros2) StdoutLine: {'line': b'[  9%] Built target candle\n'}
+[0.076856] (candle_ros2) StdoutLine: {'line': b'[  9%] Built target ament_cmake_python_symlink_candle_ros2\n'}
+[0.087440] (openzen_driver) StdoutLine: {'line': b'[ 19%] Built target spdlog\n'}
+[0.093152] (candle_ros2) StdoutLine: {'line': b'[  9%] Built target candle_ros2__cpp\n'}
+[0.099459] (-) TimerEvent: {}
+[0.101781] (candle_ros2) StdoutLine: {'line': b'[ 32%] Built target candle_ros2__rosidl_generator_c\n'}
+[0.144104] (candle_ros2) StdoutLine: {'line': b'[ 41%] Built target candle_ros2__rosidl_typesupport_c\n'}
+[0.144595] (candle_ros2) StdoutLine: {'line': b'[ 50%] Built target candle_ros2__rosidl_typesupport_introspection_c\n'}
+[0.145002] (candle_ros2) StdoutLine: {'line': b'[ 59%] Built target candle_ros2__rosidl_typesupport_fastrtps_c\n'}
+[0.156634] (candle_ros2) StdoutLine: {'line': b'[ 67%] Built target candle_ros2__rosidl_typesupport_introspection_cpp\n'}
+[0.159455] (candle_ros2) StdoutLine: {'line': b'[ 84%] Built target candle_ros2__rosidl_typesupport_fastrtps_cpp\n'}
+[0.159662] (candle_ros2) StdoutLine: {'line': b'[ 84%] Built target candle_ros2__rosidl_typesupport_cpp\n'}
+[0.189048] (candle_ros2) StdoutLine: {'line': b'[ 84%] Built target candle_ros2\n'}
+[0.199585] (-) TimerEvent: {}
+[0.220854] (candle_ros2) StdoutLine: {'line': b'[ 85%] Built target candle_ros2__py\n'}
+[0.221962] (openzen_driver) StdoutLine: {'line': b'[ 95%] Built target OpenZen\n'}
+[0.231900] (candle_ros2) StdoutLine: {'line': b'[ 87%] Built target candle_ros2_node\n'}
+[0.260304] (candle_ros2) StdoutLine: {'line': b'[ 95%] Built target candle_ros2__rosidl_generator_py\n'}
+[0.273087] (openzen_driver) StdoutLine: {'line': b'[100%] Built target openzen_node\n'}
+[0.290471] (openzen_driver) CommandEnded: {'returncode': 0}
+[0.291715] (openzen_driver) JobProgress: {'identifier': 'openzen_driver', 'progress': 'install'}
+[0.299698] (-) TimerEvent: {}
+[0.304612] (openzen_driver) Command: {'cmd': ['/usr/bin/cmake', '--install', '/ros2_ws/build/openzen_driver'], 'cwd': '/ros2_ws/build/openzen_driver', 'env': OrderedDict({'GZ_CONFIG_PATH': '/opt/ros/jazzy/opt/sdformat_vendor/share/gz', 'HOSTNAME': 'toby-desktop', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/opt/ros/jazzy/opt/sdformat_vendor/lib:/opt/ros/jazzy/lib/x86_64-linux-gnu:/opt/ros/jazzy/opt/gz_math_vendor/lib:/opt/ros/jazzy/opt/gz_utils_vendor/lib:/opt/ros/jazzy/opt/gz_tools_vendor/lib:/opt/ros/jazzy/opt/gz_cmake_vendor/lib:/opt/ros/jazzy/lib', 'HOME': '/root', 'ROS_PYTHON_VERSION': '3', 'ROS_DISTRO': 'jazzy', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'PATH': '/opt/ros/jazzy/opt/gz_tools_vendor/bin:/opt/ros/jazzy/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin', 'LANG': 'C.UTF-8', 'RMW_IMPLEMENTATION': 'rmw_cyclonedds_cpp', 'AMENT_PREFIX_PATH': '/opt/ros/jazzy', 'DEBIAN_FRONTEND': 'noninteractive', 'ROS_AUTOMATIC_DISCOVERY_RANGE': 'SUBNET', 'PWD': '/ros2_ws/build/openzen_driver', 'LC_ALL': 'C.UTF-8', 'PYTHONPATH': '/opt/ros/jazzy/lib/python3.12/site-packages', 'COLCON': '1', 'CMAKE_PREFIX_PATH': '/opt/ros/jazzy/opt/sdformat_vendor:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_tools_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy'}), 'shell': False}
+[0.305559] (candle_ros2) StdoutLine: {'line': b'[ 97%] Built target candle_ros2_s__rosidl_typesupport_fastrtps_c\n'}
+[0.305974] (candle_ros2) StdoutLine: {'line': b'[ 98%] Built target candle_ros2_s__rosidl_typesupport_c\n'}
+[0.306102] (candle_ros2) StdoutLine: {'line': b'[100%] Built target candle_ros2_s__rosidl_typesupport_introspection_c\n'}
+[0.314549] (openzen_driver) StdoutLine: {'line': b'-- Install configuration: "Release"\n'}
+[0.315273] (openzen_driver) StdoutLine: {'line': b'-- Execute custom install script\n'}
+[0.315529] (openzen_driver) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/openzen_driver/lib/cmake/nonstd/expected-lite-config.cmake\n'}
+[0.315791] (openzen_driver) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/openzen_driver/lib/cmake/nonstd/expected-lite-config-version.cmake\n'}
+[0.316134] (openzen_driver) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/openzen_driver/include/nonstd/expected.hpp\n'}
+[0.316548] (openzen_driver) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/openzen_driver/lib/openzen_driver/openzen_node\n'}
+[0.316888] (openzen_driver) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/openzen_driver/share/openzen_driver//launch/openzen_lpms.launch.py\n'}
+[0.317133] (openzen_driver) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/openzen_driver/share/ament_index/resource_index/package_run_dependencies/openzen_driver\n'}
+[0.317399] (openzen_driver) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/openzen_driver/share/ament_index/resource_index/parent_prefix_path/openzen_driver\n'}
+[0.317661] (openzen_driver) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/openzen_driver/share/openzen_driver/environment/ament_prefix_path.sh\n'}
+[0.317758] (openzen_driver) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/openzen_driver/share/openzen_driver/environment/ament_prefix_path.dsv\n'}
+[0.317992] (openzen_driver) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/openzen_driver/share/openzen_driver/environment/path.sh\n'}
+[0.318085] (openzen_driver) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/openzen_driver/share/openzen_driver/environment/path.dsv\n'}
+[0.318246] (openzen_driver) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/openzen_driver/share/openzen_driver/local_setup.bash\n'}
+[0.318405] (openzen_driver) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/openzen_driver/share/openzen_driver/local_setup.sh\n'}
+[0.318560] (openzen_driver) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/openzen_driver/share/openzen_driver/local_setup.zsh\n'}
+[0.318801] (openzen_driver) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/openzen_driver/share/openzen_driver/local_setup.dsv\n'}
+[0.318890] (openzen_driver) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/openzen_driver/share/openzen_driver/package.dsv\n'}
+[0.328294] (openzen_driver) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/openzen_driver/share/ament_index/resource_index/packages/openzen_driver\n'}
+[0.328622] (openzen_driver) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/openzen_driver/share/openzen_driver/cmake/openzen_driverConfig.cmake\n'}
+[0.328787] (openzen_driver) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/openzen_driver/share/openzen_driver/cmake/openzen_driverConfig-version.cmake\n'}
+[0.328867] (openzen_driver) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/openzen_driver/share/openzen_driver/package.xml\n'}
+[0.329674] (openzen_driver) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/openzen_driver/lib/libOpenZen.so\n'}
+[0.329858] (openzen_driver) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/openzen_driver/include/OpenZen.h\n'}
+[0.329934] (openzen_driver) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/openzen_driver/include/OpenZenCAPI.h\n'}
+[0.330011] (openzen_driver) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/openzen_driver/include/ZenTypes.h\n'}
+[0.330254] (openzen_driver) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/openzen_driver/lib/cmake/OpenZen/OpenZenTargets.cmake\n'}
+[0.330331] (openzen_driver) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/openzen_driver/lib/cmake/OpenZen/OpenZenTargets-release.cmake\n'}
+[0.330406] (openzen_driver) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/openzen_driver/lib/cmake/OpenZen/OpenZenConfig.cmake\n'}
+[0.330480] (openzen_driver) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/openzen_driver/lib/cmake/OpenZen/OpenZenConfigVersion.cmake\n'}
+[0.332088] (openzen_driver) CommandEnded: {'returncode': 0}
+[0.352907] (openzen_driver) JobEnded: {'identifier': 'openzen_driver', 'rc': 0}
+[0.372166] (candle_ros2) StdoutLine: {'line': b'running egg_info\n'}
+[0.390645] (candle_ros2) StdoutLine: {'line': b'writing candle_ros2.egg-info/PKG-INFO\n'}
+[0.391135] (candle_ros2) StdoutLine: {'line': b'writing dependency_links to candle_ros2.egg-info/dependency_links.txt\n'}
+[0.391276] (candle_ros2) StdoutLine: {'line': b'writing top-level names to candle_ros2.egg-info/top_level.txt\n'}
+[0.399772] (-) TimerEvent: {}
+[0.464042] (candle_ros2) StdoutLine: {'line': b"reading manifest file 'candle_ros2.egg-info/SOURCES.txt'\n"}
+[0.465024] (candle_ros2) StdoutLine: {'line': b"writing manifest file 'candle_ros2.egg-info/SOURCES.txt'\n"}
+[0.499914] (-) TimerEvent: {}
+[0.501246] (candle_ros2) StdoutLine: {'line': b'[100%] Built target ament_cmake_python_build_candle_ros2_egg\n'}
+[0.518177] (candle_ros2) CommandEnded: {'returncode': 0}
+[0.519110] (candle_ros2) JobProgress: {'identifier': 'candle_ros2', 'progress': 'install'}
+[0.519563] (candle_ros2) Command: {'cmd': ['/usr/bin/cmake', '--install', '/ros2_ws/build/candle_ros2'], 'cwd': '/ros2_ws/build/candle_ros2', 'env': OrderedDict({'GZ_CONFIG_PATH': '/opt/ros/jazzy/opt/sdformat_vendor/share/gz', 'HOSTNAME': 'toby-desktop', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/opt/ros/jazzy/opt/sdformat_vendor/lib:/opt/ros/jazzy/lib/x86_64-linux-gnu:/opt/ros/jazzy/opt/gz_math_vendor/lib:/opt/ros/jazzy/opt/gz_utils_vendor/lib:/opt/ros/jazzy/opt/gz_tools_vendor/lib:/opt/ros/jazzy/opt/gz_cmake_vendor/lib:/opt/ros/jazzy/lib', 'HOME': '/root', 'ROS_PYTHON_VERSION': '3', 'ROS_DISTRO': 'jazzy', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'PATH': '/opt/ros/jazzy/opt/gz_tools_vendor/bin:/opt/ros/jazzy/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin', 'LANG': 'C.UTF-8', 'RMW_IMPLEMENTATION': 'rmw_cyclonedds_cpp', 'AMENT_PREFIX_PATH': '/opt/ros/jazzy', 'DEBIAN_FRONTEND': 'noninteractive', 'ROS_AUTOMATIC_DISCOVERY_RANGE': 'SUBNET', 'PWD': '/ros2_ws/build/candle_ros2', 'LC_ALL': 'C.UTF-8', 'PYTHONPATH': '/opt/ros/jazzy/lib/python3.12/site-packages', 'COLCON': '1', 'CMAKE_PREFIX_PATH': '/opt/ros/jazzy/opt/sdformat_vendor:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_tools_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy'}), 'shell': False}
+[0.535488] (candle_ros2) StdoutLine: {'line': b'-- Install configuration: "Release"\n'}
+[0.537010] (candle_ros2) StdoutLine: {'line': b'-- Execute custom install script\n'}
+[0.537544] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/ament_index/resource_index/rosidl_interfaces/candle_ros2\n'}
+[0.538102] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/ImpedanceCommand.json\n'}
+[0.538554] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/MotionCommand.json\n'}
+[0.539071] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/Pid.json\n'}
+[0.539511] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/VelocityPidCommand.json\n'}
+[0.539930] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/PositionPidCommand.json\n'}
+[0.540308] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/AddMd80s.json\n'}
+[0.540655] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/GenericMd80Msg.json\n'}
+[0.541098] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/SetModeMd80s.json\n'}
+[0.541482] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/SetLimitsMd80.json\n'}
+[0.543893] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__functions.h\n'}
+[0.544430] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__struct.h\n'}
+[0.544983] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__type_support.h\n'}
+[0.545787] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__functions.h\n'}
+[0.546525] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__struct.h\n'}
+[0.546889] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__type_support.h\n'}
+[0.547480] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__functions.h\n'}
+[0.547939] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__struct.h\n'}
+[0.548310] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__type_support.h\n'}
+[0.548800] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__functions.h\n'}
+[0.549358] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__struct.h\n'}
+[0.549770] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__type_support.h\n'}
+[0.550366] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__functions.h\n'}
+[0.550852] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__struct.h\n'}
+[0.551200] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__type_support.h\n'}
+[0.551823] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/impedance_command.h\n'}
+[0.552105] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/motion_command.h\n'}
+[0.552753] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/pid.h\n'}
+[0.553255] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/position_pid_command.h\n'}
+[0.553876] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/rosidl_generator_c__visibility_control.h\n'}
+[0.554344] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/velocity_pid_command.h\n'}
+[0.554849] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/add_md80s.h\n'}
+[0.555326] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__functions.h\n'}
+[0.555857] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__struct.h\n'}
+[0.556538] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__type_support.h\n'}
+[0.556995] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__functions.h\n'}
+[0.557396] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__struct.h\n'}
+[0.557863] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__type_support.h\n'}
+[0.558151] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__functions.h\n'}
+[0.558652] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__struct.h\n'}
+[0.559133] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__type_support.h\n'}
+[0.559395] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__functions.h\n'}
+[0.559677] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__struct.h\n'}
+[0.559936] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__type_support.h\n'}
+[0.560199] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/generic_md80_msg.h\n'}
+[0.560459] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/set_limits_md80.h\n'}
+[0.560783] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/set_mode_md80s.h\n'}
+[0.561044] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/environment/library_path.sh\n'}
+[0.561734] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/environment/library_path.dsv\n'}
+[0.562246] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__rosidl_typesupport_fastrtps_c.h\n'}
+[0.562941] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__rosidl_typesupport_fastrtps_c.h\n'}
+[0.563430] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__rosidl_typesupport_fastrtps_c.h\n'}
+[0.564097] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__rosidl_typesupport_fastrtps_c.h\n'}
+[0.564361] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__rosidl_typesupport_fastrtps_c.h\n'}
+[0.565026] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/rosidl_typesupport_fastrtps_c__visibility_control.h\n'}
+[0.565343] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__rosidl_typesupport_fastrtps_c.h\n'}
+[0.565617] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__rosidl_typesupport_fastrtps_c.h\n'}
+[0.565877] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__rosidl_typesupport_fastrtps_c.h\n'}
+[0.566166] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__rosidl_typesupport_fastrtps_c.h\n'}
+[0.567268] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__builder.hpp\n'}
+[0.568102] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__struct.hpp\n'}
+[0.568725] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__traits.hpp\n'}
+[0.569256] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__type_support.hpp\n'}
+[0.569711] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__builder.hpp\n'}
+[0.570308] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__struct.hpp\n'}
+[0.570787] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__traits.hpp\n'}
+[0.571292] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__type_support.hpp\n'}
+[0.571943] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__builder.hpp\n'}
+[0.572229] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__struct.hpp\n'}
+[0.572678] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__traits.hpp\n'}
+[0.573177] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__type_support.hpp\n'}
+[0.573459] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__builder.hpp\n'}
+[0.574123] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__struct.hpp\n'}
+[0.574820] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__traits.hpp\n'}
+[0.575577] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__type_support.hpp\n'}
+[0.576156] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__builder.hpp\n'}
+[0.577144] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__struct.hpp\n'}
+[0.577820] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__traits.hpp\n'}
+[0.578105] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__type_support.hpp\n'}
+[0.578705] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/impedance_command.hpp\n'}
+[0.579169] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/motion_command.hpp\n'}
+[0.579904] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/pid.hpp\n'}
+[0.580419] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/position_pid_command.hpp\n'}
+[0.581169] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/rosidl_generator_cpp__visibility_control.hpp\n'}
+[0.581722] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/velocity_pid_command.hpp\n'}
+[0.582311] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/add_md80s.hpp\n'}
+[0.582742] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__builder.hpp\n'}
+[0.583039] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__struct.hpp\n'}
+[0.583823] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__traits.hpp\n'}
+[0.584233] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__type_support.hpp\n'}
+[0.584705] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__builder.hpp\n'}
+[0.584992] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__struct.hpp\n'}
+[0.585305] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__traits.hpp\n'}
+[0.585568] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__type_support.hpp\n'}
+[0.585860] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__builder.hpp\n'}
+[0.586117] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__struct.hpp\n'}
+[0.586371] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__traits.hpp\n'}
+[0.586660] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__type_support.hpp\n'}
+[0.586957] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__builder.hpp\n'}
+[0.587830] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__struct.hpp\n'}
+[0.588579] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__traits.hpp\n'}
+[0.589031] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__type_support.hpp\n'}
+[0.589301] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/generic_md80_msg.hpp\n'}
+[0.589976] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/set_limits_md80.hpp\n'}
+[0.590383] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/set_mode_md80s.hpp\n'}
+[0.591138] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__rosidl_typesupport_fastrtps_cpp.hpp\n'}
+[0.591418] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__rosidl_typesupport_fastrtps_cpp.hpp\n'}
+[0.591712] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__rosidl_typesupport_fastrtps_cpp.hpp\n'}
+[0.591979] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__rosidl_typesupport_fastrtps_cpp.hpp\n'}
+[0.592239] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__rosidl_typesupport_fastrtps_cpp.hpp\n'}
+[0.592518] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/rosidl_typesupport_fastrtps_cpp__visibility_control.h\n'}
+[0.593254] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__rosidl_typesupport_fastrtps_cpp.hpp\n'}
+[0.593974] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__rosidl_typesupport_fastrtps_cpp.hpp\n'}
+[0.594625] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__rosidl_typesupport_fastrtps_cpp.hpp\n'}
+[0.595102] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__rosidl_typesupport_fastrtps_cpp.hpp\n'}
+[0.595529] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__rosidl_typesupport_introspection_c.h\n'}
+[0.596235] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__rosidl_typesupport_introspection_c.h\n'}
+[0.596514] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__rosidl_typesupport_introspection_c.h\n'}
+[0.596848] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__rosidl_typesupport_introspection_c.h\n'}
+[0.597129] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__rosidl_typesupport_introspection_c.h\n'}
+[0.597395] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/rosidl_typesupport_introspection_c__visibility_control.h\n'}
+[0.598113] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__rosidl_typesupport_introspection_c.h\n'}
+[0.598703] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__rosidl_typesupport_introspection_c.h\n'}
+[0.599150] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__rosidl_typesupport_introspection_c.h\n'}
+[0.599546] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__rosidl_typesupport_introspection_c.h\n'}
+[0.599863] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__rosidl_typesupport_introspection_cpp.hpp\n'}
+[0.600549] (-) TimerEvent: {}
+[0.600635] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__rosidl_typesupport_introspection_cpp.hpp\n'}
+[0.601352] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__rosidl_typesupport_introspection_cpp.hpp\n'}
+[0.601799] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__rosidl_typesupport_introspection_cpp.hpp\n'}
+[0.602192] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__rosidl_typesupport_introspection_cpp.hpp\n'}
+[0.602469] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__rosidl_typesupport_introspection_cpp.hpp\n'}
+[0.602763] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__rosidl_typesupport_introspection_cpp.hpp\n'}
+[0.603033] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__rosidl_typesupport_introspection_cpp.hpp\n'}
+[0.603737] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__rosidl_typesupport_introspection_cpp.hpp\n'}
+[0.604443] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/environment/pythonpath.sh\n'}
+[0.604754] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/environment/pythonpath.dsv\n'}
+[0.605038] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2-1.2.0-py3.12.egg-info/PKG-INFO\n'}
+[0.605317] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2-1.2.0-py3.12.egg-info/SOURCES.txt\n'}
+[0.605575] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2-1.2.0-py3.12.egg-info/dependency_links.txt\n'}
+[0.605915] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2-1.2.0-py3.12.egg-info/top_level.txt\n'}
+[0.607143] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/__init__.py\n'}
+[0.607689] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/_candle_ros2_s.ep.rosidl_typesupport_c.c\n'}
+[0.608398] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/_candle_ros2_s.ep.rosidl_typesupport_fastrtps_c.c\n'}
+[0.609243] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/_candle_ros2_s.ep.rosidl_typesupport_introspection_c.c\n'}
+[0.609725] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/candle_ros2_s__rosidl_typesupport_c.so\n'}
+[0.610137] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/candle_ros2_s__rosidl_typesupport_fastrtps_c.so\n'}
+[0.610849] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/candle_ros2_s__rosidl_typesupport_introspection_c.so\n'}
+[0.611496] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/__init__.py\n'}
+[0.612252] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_impedance_command.py\n'}
+[0.612940] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_impedance_command_s.c\n'}
+[0.613352] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_motion_command.py\n'}
+[0.613857] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_motion_command_s.c\n'}
+[0.614576] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_pid.py\n'}
+[0.615234] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_pid_s.c\n'}
+[0.615997] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_position_pid_command.py\n'}
+[0.616646] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_position_pid_command_s.c\n'}
+[0.616928] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_velocity_pid_command.py\n'}
+[0.617257] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_velocity_pid_command_s.c\n'}
+[0.617870] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/__init__.py\n'}
+[0.618156] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_add_md80s.py\n'}
+[0.618664] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_add_md80s_s.c\n'}
+[0.619127] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_generic_md80_msg.py\n'}
+[0.619400] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_generic_md80_msg_s.c\n'}
+[0.619935] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_set_limits_md80.py\n'}
+[0.620209] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_set_limits_md80_s.c\n'}
+[0.620471] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_set_mode_md80s.py\n'}
+[0.620765] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_set_mode_md80s_s.c\n'}
+[0.621357] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/candle_ros2_s__rosidl_typesupport_fastrtps_c.so\n'}
+[0.621909] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/candle_ros2_s__rosidl_typesupport_introspection_c.so\n'}
+[0.623050] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/candle_ros2_s__rosidl_typesupport_c.so\n'}
+[0.623803] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/ament_index/resource_index/rust_packages/candle_ros2\n'}
+[0.624398] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/rust/Cargo.toml\n'}
+[0.624717] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/rust/build.rs\n'}
+[0.625339] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/rust/src/lib.rs\n'}
+[0.625655] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/rust/src/msg.rs\n'}
+[0.626338] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/rust/src/msg/rmw.rs\n'}
+[0.626842] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/rust/src/srv.rs\n'}
+[0.627463] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/rust/src/srv/rmw.rs\n'}
+[0.627916] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/ImpedanceCommand.idl\n'}
+[0.628635] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/MotionCommand.idl\n'}
+[0.629068] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/Pid.idl\n'}
+[0.629500] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/VelocityPidCommand.idl\n'}
+[0.630510] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/PositionPidCommand.idl\n'}
+[0.630953] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/AddMd80s.idl\n'}
+[0.631230] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/GenericMd80Msg.idl\n'}
+[0.631703] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/SetModeMd80s.idl\n'}
+[0.632033] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/SetLimitsMd80.idl\n'}
+[0.632637] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/ImpedanceCommand.msg\n'}
+[0.632904] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/MotionCommand.msg\n'}
+[0.633303] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/Pid.msg\n'}
+[0.633569] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/VelocityPidCommand.msg\n'}
+[0.634148] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/PositionPidCommand.msg\n'}
+[0.634652] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/AddMd80s.srv\n'}
+[0.635141] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/GenericMd80Msg.srv\n'}
+[0.635412] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/SetModeMd80s.srv\n'}
+[0.635948] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/SetLimitsMd80.srv\n'}
+[0.636410] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/candle_ros2/candle_ros2_node\n'}
+[0.636910] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/ament_index/resource_index/package_run_dependencies/candle_ros2\n'}
+[0.637391] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/ament_index/resource_index/parent_prefix_path/candle_ros2\n'}
+[0.637924] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/environment/ament_prefix_path.sh\n'}
+[0.638380] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/environment/ament_prefix_path.dsv\n'}
+[0.639064] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/environment/path.sh\n'}
+[0.639336] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/environment/path.dsv\n'}
+[0.639594] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/local_setup.bash\n'}
+[0.639947] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/local_setup.sh\n'}
+[0.640211] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/local_setup.zsh\n'}
+[0.640470] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/local_setup.dsv\n'}
+[0.640859] (candle_ros2) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/package.dsv\n'}
+[0.666259] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/ament_index/resource_index/packages/candle_ros2\n'}
+[0.667365] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/rosidl_cmake-extras.cmake\n'}
+[0.668122] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/ament_cmake_export_dependencies-extras.cmake\n'}
+[0.668720] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/ament_cmake_export_include_directories-extras.cmake\n'}
+[0.669222] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/ament_cmake_export_libraries-extras.cmake\n'}
+[0.670009] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/ament_cmake_export_targets-extras.cmake\n'}
+[0.670496] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/rosidl_cmake_export_typesupport_targets-extras.cmake\n'}
+[0.670818] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/rosidl_cmake_export_typesupport_libraries-extras.cmake\n'}
+[0.671498] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/rosidl_cmake_aggregate_target-extras.cmake\n'}
+[0.672009] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/candle_ros2Config.cmake\n'}
+[0.672279] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/candle_ros2Config-version.cmake\n'}
+[0.672777] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date symlink: /ros2_ws/install/candle_ros2/share/candle_ros2/package.xml\n'}
+[0.673056] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_generator_c.so\n'}
+[0.673915] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_typesupport_fastrtps_c.so\n'}
+[0.675128] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_typesupport_fastrtps_cpp.so\n'}
+[0.676362] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_typesupport_introspection_c.so\n'}
+[0.677397] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_typesupport_c.so\n'}
+[0.678493] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_typesupport_introspection_cpp.so\n'}
+[0.679661] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_typesupport_cpp.so\n'}
+[0.700741] (-) TimerEvent: {}
+[0.788937] (candle_ros2) StdoutLine: {'line': b"Listing '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2'...\n"}
+[0.789320] (candle_ros2) StdoutLine: {'line': b"Listing '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg'...\n"}
+[0.789569] (candle_ros2) StdoutLine: {'line': b"Listing '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv'...\n"}
+[0.800846] (-) TimerEvent: {}
+[0.803669] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_generator_py.so\n'}
+[0.804452] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/export_candle_ros2__rosidl_generator_cExport.cmake\n'}
+[0.804950] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/export_candle_ros2__rosidl_generator_cExport-release.cmake\n'}
+[0.805790] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/export_candle_ros2__rosidl_typesupport_fastrtps_cExport.cmake\n'}
+[0.806461] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/export_candle_ros2__rosidl_typesupport_fastrtps_cExport-release.cmake\n'}
+[0.806901] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/export_candle_ros2__rosidl_generator_cppExport.cmake\n'}
+[0.807374] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/export_candle_ros2__rosidl_typesupport_fastrtps_cppExport.cmake\n'}
+[0.807770] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/export_candle_ros2__rosidl_typesupport_fastrtps_cppExport-release.cmake\n'}
+[0.808010] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/candle_ros2__rosidl_typesupport_introspection_cExport.cmake\n'}
+[0.808247] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/candle_ros2__rosidl_typesupport_introspection_cExport-release.cmake\n'}
+[0.808478] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/candle_ros2__rosidl_typesupport_cExport.cmake\n'}
+[0.808758] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/candle_ros2__rosidl_typesupport_cExport-release.cmake\n'}
+[0.808987] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/candle_ros2__rosidl_typesupport_introspection_cppExport.cmake\n'}
+[0.809215] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/candle_ros2__rosidl_typesupport_introspection_cppExport-release.cmake\n'}
+[0.809444] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/candle_ros2__rosidl_typesupport_cppExport.cmake\n'}
+[0.809698] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/candle_ros2__rosidl_typesupport_cppExport-release.cmake\n'}
+[0.809945] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/export_candle_ros2__rosidl_generator_pyExport.cmake\n'}
+[0.810170] (candle_ros2) StdoutLine: {'line': b'-- Up-to-date: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/export_candle_ros2__rosidl_generator_pyExport-release.cmake\n'}
+[0.813016] (candle_ros2) CommandEnded: {'returncode': 0}
+[0.868619] (candle_ros2) JobEnded: {'identifier': 'candle_ros2', 'rc': 0}
+[0.871252] (ipa_ros2_control) JobStarted: {'identifier': 'ipa_ros2_control'}
+[0.893678] (ipa_ros2_control) JobProgress: {'identifier': 'ipa_ros2_control', 'progress': 'cmake'}
+[0.895587] (ipa_ros2_control) Command: {'cmd': ['/usr/bin/cmake', '/ros2_ws/src/curt_mini/ipa_ros2_control', '-DCMAKE_BUILD_TYPE=Release', '-DAMENT_CMAKE_SYMLINK_INSTALL=1', '-DCMAKE_INSTALL_PREFIX=/ros2_ws/install/ipa_ros2_control'], 'cwd': '/ros2_ws/build/ipa_ros2_control', 'env': OrderedDict({'GZ_CONFIG_PATH': '/opt/ros/jazzy/opt/sdformat_vendor/share/gz', 'HOSTNAME': 'toby-desktop', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/ros2_ws/install/candle_ros2/lib:/opt/ros/jazzy/opt/sdformat_vendor/lib:/opt/ros/jazzy/lib/x86_64-linux-gnu:/opt/ros/jazzy/opt/gz_math_vendor/lib:/opt/ros/jazzy/opt/gz_utils_vendor/lib:/opt/ros/jazzy/opt/gz_tools_vendor/lib:/opt/ros/jazzy/opt/gz_cmake_vendor/lib:/opt/ros/jazzy/lib', 'HOME': '/root', 'ROS_PYTHON_VERSION': '3', 'ROS_DISTRO': 'jazzy', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'PATH': '/opt/ros/jazzy/opt/gz_tools_vendor/bin:/opt/ros/jazzy/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin', 'LANG': 'C.UTF-8', 'RMW_IMPLEMENTATION': 'rmw_cyclonedds_cpp', 'AMENT_PREFIX_PATH': '/ros2_ws/install/candle_ros2:/opt/ros/jazzy', 'DEBIAN_FRONTEND': 'noninteractive', 'ROS_AUTOMATIC_DISCOVERY_RANGE': 'SUBNET', 'PWD': '/ros2_ws/build/ipa_ros2_control', 'LC_ALL': 'C.UTF-8', 'PYTHONPATH': '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages:/opt/ros/jazzy/lib/python3.12/site-packages', 'COLCON': '1', 'CMAKE_PREFIX_PATH': '/ros2_ws/install/candle_ros2:/opt/ros/jazzy/opt/sdformat_vendor:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_tools_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy'}), 'shell': False}
+[0.901006] (-) TimerEvent: {}
+[1.001281] (-) TimerEvent: {}
+[1.068970] (ipa_ros2_control) StdoutLine: {'line': b'-- The C compiler identification is GNU 13.3.0\n'}
+[1.101436] (-) TimerEvent: {}
+[1.201721] (-) TimerEvent: {}
+[1.238454] (ipa_ros2_control) StdoutLine: {'line': b'-- The CXX compiler identification is GNU 13.3.0\n'}
+[1.282990] (ipa_ros2_control) StdoutLine: {'line': b'-- Detecting C compiler ABI info\n'}
+[1.301889] (-) TimerEvent: {}
+[1.402176] (-) TimerEvent: {}
+[1.502470] (-) TimerEvent: {}
+[1.578301] (ipa_ros2_control) StdoutLine: {'line': b'-- Detecting C compiler ABI info - done\n'}
+[1.602620] (-) TimerEvent: {}
+[1.612407] (ipa_ros2_control) StdoutLine: {'line': b'-- Check for working C compiler: /usr/bin/cc - skipped\n'}
+[1.613299] (ipa_ros2_control) StdoutLine: {'line': b'-- Detecting C compile features\n'}
+[1.614676] (ipa_ros2_control) StdoutLine: {'line': b'-- Detecting C compile features - done\n'}
+[1.640247] (ipa_ros2_control) StdoutLine: {'line': b'-- Detecting CXX compiler ABI info\n'}
+[1.702736] (-) TimerEvent: {}
+[1.803019] (-) TimerEvent: {}
+[1.903323] (-) TimerEvent: {}
+[1.910581] (ipa_ros2_control) StdoutLine: {'line': b'-- Detecting CXX compiler ABI info - done\n'}
+[1.940022] (ipa_ros2_control) StdoutLine: {'line': b'-- Check for working CXX compiler: /usr/bin/c++ - skipped\n'}
+[1.940839] (ipa_ros2_control) StdoutLine: {'line': b'-- Detecting CXX compile features\n'}
+[1.942372] (ipa_ros2_control) StdoutLine: {'line': b'-- Detecting CXX compile features - done\n'}
+[1.952787] (ipa_ros2_control) StdoutLine: {'line': b'-- Found ament_cmake: 2.5.6 (/opt/ros/jazzy/share/ament_cmake/cmake)\n'}
+[2.003482] (-) TimerEvent: {}
+[2.103744] (-) TimerEvent: {}
+[2.203999] (-) TimerEvent: {}
+[2.304265] (-) TimerEvent: {}
+[2.360384] (ipa_ros2_control) StdoutLine: {'line': b'-- Found Python3: /usr/bin/python3 (found version "3.12.3") found components: Interpreter \n'}
+[2.404421] (-) TimerEvent: {}
+[2.504688] (-) TimerEvent: {}
+[2.554349] (ipa_ros2_control) StdoutLine: {'line': b'-- Override CMake install command with custom implementation using symlinks instead of copying resources\n'}
+[2.604801] (-) TimerEvent: {}
+[2.626315] (ipa_ros2_control) StdoutLine: {'line': b'-- Found hardware_interface: 4.45.2 (/opt/ros/jazzy/share/hardware_interface/cmake)\n'}
+[2.704956] (-) TimerEvent: {}
+[2.757265] (ipa_ros2_control) StdoutLine: {'line': b'-- Found rosidl_generator_c: 4.6.9 (/opt/ros/jazzy/share/rosidl_generator_c/cmake)\n'}
+[2.799045] (ipa_ros2_control) StdoutLine: {'line': b'-- Found rosidl_generator_cpp: 4.6.9 (/opt/ros/jazzy/share/rosidl_generator_cpp/cmake)\n'}
+[2.805096] (-) TimerEvent: {}
+[2.845228] (ipa_ros2_control) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c\n'}
+[2.873938] (ipa_ros2_control) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp\n'}
+[2.905192] (-) TimerEvent: {}
+[3.005348] (-) TimerEvent: {}
+[3.105514] (-) TimerEvent: {}
+[3.157044] (ipa_ros2_control) StdoutLine: {'line': b'-- Found TinyXML2 via Config file: /usr/lib/x86_64-linux-gnu/cmake/tinyxml2\n'}
+[3.205627] (-) TimerEvent: {}
+[3.212425] (ipa_ros2_control) StdoutLine: {'line': b'-- Found rmw_implementation_cmake: 7.3.3 (/opt/ros/jazzy/share/rmw_implementation_cmake/cmake)\n'}
+[3.215998] (ipa_ros2_control) StdoutLine: {'line': b'-- Found rmw_cyclonedds_cpp: 2.2.3 (/opt/ros/jazzy/share/rmw_cyclonedds_cpp/cmake)\n'}
+[3.247252] (ipa_ros2_control) StdoutLine: {'line': b"-- Using RMW implementation 'rmw_cyclonedds_cpp' as default\n"}
+[3.305668] (-) TimerEvent: {}
+[3.405810] (-) TimerEvent: {}
+[3.506043] (-) TimerEvent: {}
+[3.606337] (-) TimerEvent: {}
+[3.706636] (-) TimerEvent: {}
+[3.739844] (ipa_ros2_control) StdoutLine: {'line': b'-- Found tl_expected: 1.3.1 (/opt/ros/jazzy/share/tl_expected/cmake)\n'}
+[3.740225] (ipa_ros2_control) StderrLine: {'line': b'CMake Deprecation Warning at /opt/ros/jazzy/share/tl_expected/cmake/tl_expectedConfig.cmake:37 (message):\n'}
+[3.740513] (ipa_ros2_control) StderrLine: {'line': b"  Package 'tl_expected' is deprecated (This package will be removed in ROS 2\n"}
+[3.740771] (ipa_ros2_control) StderrLine: {'line': b'  Lyrical Luth.\n'}
+[3.740996] (ipa_ros2_control) StderrLine: {'line': b'\n'}
+[3.741212] (ipa_ros2_control) StderrLine: {'line': b'        Use tl/expected.hpp from libexpected-dev,\n'}
+[3.741426] (ipa_ros2_control) StderrLine: {'line': b'        or rcpputils/tl_expected/expected.hpp if the system header is not available)\n'}
+[3.741653] (ipa_ros2_control) StderrLine: {'line': b'Call Stack (most recent call first):\n'}
+[3.741867] (ipa_ros2_control) StderrLine: {'line': b'  CMakeLists.txt:19 (find_package)\n'}
+[3.742078] (ipa_ros2_control) StderrLine: {'line': b'\n'}
+[3.742292] (ipa_ros2_control) StderrLine: {'line': b'\n'}
+[3.742843] (ipa_ros2_control) StdoutLine: {'line': b'-- Found candle_ros2: 1.2.0 (/ros2_ws/install/candle_ros2/share/candle_ros2/cmake)\n'}
+[3.806717] (-) TimerEvent: {}
+[3.906950] (-) TimerEvent: {}
+[4.007216] (-) TimerEvent: {}
+[4.076721] (ipa_ros2_control) StdoutLine: {'line': b'-- Configuring done (3.2s)\n'}
+[4.107397] (-) TimerEvent: {}
+[4.189706] (ipa_ros2_control) StdoutLine: {'line': b'-- Generating done (0.1s)\n'}
+[4.205676] (ipa_ros2_control) StdoutLine: {'line': b'-- Build files have been written to: /ros2_ws/build/ipa_ros2_control\n'}
+[4.207537] (-) TimerEvent: {}
+[4.229340] (ipa_ros2_control) CommandEnded: {'returncode': 0}
+[4.230568] (ipa_ros2_control) JobProgress: {'identifier': 'ipa_ros2_control', 'progress': 'build'}
+[4.231629] (ipa_ros2_control) Command: {'cmd': ['/usr/bin/cmake', '--build', '/ros2_ws/build/ipa_ros2_control', '--', '-j12', '-l12'], 'cwd': '/ros2_ws/build/ipa_ros2_control', 'env': OrderedDict({'GZ_CONFIG_PATH': '/opt/ros/jazzy/opt/sdformat_vendor/share/gz', 'HOSTNAME': 'toby-desktop', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/ros2_ws/install/candle_ros2/lib:/opt/ros/jazzy/opt/sdformat_vendor/lib:/opt/ros/jazzy/lib/x86_64-linux-gnu:/opt/ros/jazzy/opt/gz_math_vendor/lib:/opt/ros/jazzy/opt/gz_utils_vendor/lib:/opt/ros/jazzy/opt/gz_tools_vendor/lib:/opt/ros/jazzy/opt/gz_cmake_vendor/lib:/opt/ros/jazzy/lib', 'HOME': '/root', 'ROS_PYTHON_VERSION': '3', 'ROS_DISTRO': 'jazzy', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'PATH': '/opt/ros/jazzy/opt/gz_tools_vendor/bin:/opt/ros/jazzy/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin', 'LANG': 'C.UTF-8', 'RMW_IMPLEMENTATION': 'rmw_cyclonedds_cpp', 'AMENT_PREFIX_PATH': '/ros2_ws/install/candle_ros2:/opt/ros/jazzy', 'DEBIAN_FRONTEND': 'noninteractive', 'ROS_AUTOMATIC_DISCOVERY_RANGE': 'SUBNET', 'PWD': '/ros2_ws/build/ipa_ros2_control', 'LC_ALL': 'C.UTF-8', 'PYTHONPATH': '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages:/opt/ros/jazzy/lib/python3.12/site-packages', 'COLCON': '1', 'CMAKE_PREFIX_PATH': '/ros2_ws/install/candle_ros2:/opt/ros/jazzy/opt/sdformat_vendor:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_tools_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy'}), 'shell': False}
+[4.307734] (-) TimerEvent: {}
+[4.381594] (ipa_ros2_control) StdoutLine: {'line': b'[ 50%] Building CXX object CMakeFiles/ipa_ros2_control.dir/src/curt_mini_hardware_interface.cpp.o\n'}
+[4.407856] (-) TimerEvent: {}
+[4.508141] (-) TimerEvent: {}
+[4.608415] (-) TimerEvent: {}
+[4.708637] (-) TimerEvent: {}
+[4.808776] (-) TimerEvent: {}
+[4.908927] (-) TimerEvent: {}
+[5.009098] (-) TimerEvent: {}
+[5.109267] (-) TimerEvent: {}
+[5.209442] (-) TimerEvent: {}
+[5.309623] (-) TimerEvent: {}
+[5.409768] (-) TimerEvent: {}
+[5.509912] (-) TimerEvent: {}
+[5.610085] (-) TimerEvent: {}
+[5.710261] (-) TimerEvent: {}
+[5.810431] (-) TimerEvent: {}
+[5.910576] (-) TimerEvent: {}
+[6.010728] (-) TimerEvent: {}
+[6.110887] (-) TimerEvent: {}
+[6.211033] (-) TimerEvent: {}
+[6.311201] (-) TimerEvent: {}
+[6.411366] (-) TimerEvent: {}
+[6.511540] (-) TimerEvent: {}
+[6.611697] (-) TimerEvent: {}
+[6.711842] (-) TimerEvent: {}
+[6.812017] (-) TimerEvent: {}
+[6.912192] (-) TimerEvent: {}
+[7.012367] (-) TimerEvent: {}
+[7.112513] (-) TimerEvent: {}
+[7.212645] (-) TimerEvent: {}
+[7.312789] (-) TimerEvent: {}
+[7.412961] (-) TimerEvent: {}
+[7.513136] (-) TimerEvent: {}
+[7.562681] (ipa_ros2_control) StderrLine: {'line': b'/ros2_ws/src/curt_mini/ipa_ros2_control/src/curt_mini_hardware_interface.cpp: In member function \xe2\x80\x98virtual ipa_ros2_control::CallbackReturn ipa_ros2_control::CurtMiniHardwareInterface::on_init(const hardware_interface::HardwareInfo&)\xe2\x80\x99:\n'}
+[7.562837] (ipa_ros2_control) StderrLine: {'line': b'/ros2_ws/src/curt_mini/ipa_ros2_control/src/curt_mini_hardware_interface.cpp:19:31: warning: \xe2\x80\x98virtual rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn hardware_interface::HardwareComponentInterface::on_init(const hardware_interface::HardwareInfo&)\xe2\x80\x99 is deprecated: Use on_init(const HardwareComponentInterfaceParams & params) instead. [-Wdeprecated-declarations]\n'}
+[7.562925] (ipa_ros2_control) StderrLine: {'line': b'   19 |   if (SystemInterface::on_init(info) != CallbackReturn::SUCCESS) {\n'}
+[7.563003] (ipa_ros2_control) StderrLine: {'line': b'      |       ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~\n'}
+[7.563077] (ipa_ros2_control) StderrLine: {'line': b'In file included from /opt/ros/jazzy/include/hardware_interface/hardware_interface/system_interface.hpp:18,\n'}
+[7.563150] (ipa_ros2_control) StderrLine: {'line': b'                 from /ros2_ws/src/curt_mini/ipa_ros2_control/include/ipa_ros2_control/curt_mini_hardware_interface.hpp:26,\n'}
+[7.563223] (ipa_ros2_control) StderrLine: {'line': b'                 from /ros2_ws/src/curt_mini/ipa_ros2_control/src/curt_mini_hardware_interface.cpp:1:\n'}
+[7.563294] (ipa_ros2_control) StderrLine: {'line': b'/opt/ros/jazzy/include/hardware_interface/hardware_interface/hardware_component_interface.hpp:140:26: note: declared here\n'}
+[7.563379] (ipa_ros2_control) StderrLine: {'line': b'  140 |   virtual CallbackReturn on_init(const HardwareInfo & hardware_info);\n'}
+[7.563450] (ipa_ros2_control) StderrLine: {'line': b'      |                          ^~~~~~~\n'}
+[7.613247] (-) TimerEvent: {}
+[7.713425] (-) TimerEvent: {}
+[7.813616] (-) TimerEvent: {}
+[7.913760] (-) TimerEvent: {}
+[8.013927] (-) TimerEvent: {}
+[8.114099] (-) TimerEvent: {}
+[8.214277] (-) TimerEvent: {}
+[8.314441] (-) TimerEvent: {}
+[8.414649] (-) TimerEvent: {}
+[8.514805] (-) TimerEvent: {}
+[8.614970] (-) TimerEvent: {}
+[8.715145] (-) TimerEvent: {}
+[8.815320] (-) TimerEvent: {}
+[8.915466] (-) TimerEvent: {}
+[9.015654] (-) TimerEvent: {}
+[9.115799] (-) TimerEvent: {}
+[9.215982] (-) TimerEvent: {}
+[9.316157] (-) TimerEvent: {}
+[9.416332] (-) TimerEvent: {}
+[9.516506] (-) TimerEvent: {}
+[9.616668] (-) TimerEvent: {}
+[9.716835] (-) TimerEvent: {}
+[9.817002] (-) TimerEvent: {}
+[9.917170] (-) TimerEvent: {}
+[10.017347] (-) TimerEvent: {}
+[10.117493] (-) TimerEvent: {}
+[10.217680] (-) TimerEvent: {}
+[10.317822] (-) TimerEvent: {}
+[10.417987] (-) TimerEvent: {}
+[10.518161] (-) TimerEvent: {}
+[10.618337] (-) TimerEvent: {}
+[10.718521] (-) TimerEvent: {}
+[10.818676] (-) TimerEvent: {}
+[10.918853] (-) TimerEvent: {}
+[11.019030] (-) TimerEvent: {}
+[11.119208] (-) TimerEvent: {}
+[11.219390] (-) TimerEvent: {}
+[11.319560] (-) TimerEvent: {}
+[11.419738] (-) TimerEvent: {}
+[11.519921] (-) TimerEvent: {}
+[11.620102] (-) TimerEvent: {}
+[11.720281] (-) TimerEvent: {}
+[11.820462] (-) TimerEvent: {}
+[11.920652] (-) TimerEvent: {}
+[12.020798] (-) TimerEvent: {}
+[12.120965] (-) TimerEvent: {}
+[12.221139] (-) TimerEvent: {}
+[12.321314] (-) TimerEvent: {}
+[12.421493] (-) TimerEvent: {}
+[12.521685] (-) TimerEvent: {}
+[12.621832] (-) TimerEvent: {}
+[12.722007] (-) TimerEvent: {}
+[12.822173] (-) TimerEvent: {}
+[12.922340] (-) TimerEvent: {}
+[13.022518] (-) TimerEvent: {}
+[13.122690] (-) TimerEvent: {}
+[13.222864] (-) TimerEvent: {}
+[13.323006] (-) TimerEvent: {}
+[13.423174] (-) TimerEvent: {}
+[13.523343] (-) TimerEvent: {}
+[13.623512] (-) TimerEvent: {}
+[13.723692] (-) TimerEvent: {}
+[13.823868] (-) TimerEvent: {}
+[13.924036] (-) TimerEvent: {}
+[14.024210] (-) TimerEvent: {}
+[14.124382] (-) TimerEvent: {}
+[14.224571] (-) TimerEvent: {}
+[14.324749] (-) TimerEvent: {}
+[14.424926] (-) TimerEvent: {}
+[14.525097] (-) TimerEvent: {}
+[14.625267] (-) TimerEvent: {}
+[14.725442] (-) TimerEvent: {}
+[14.825615] (-) TimerEvent: {}
+[14.925764] (-) TimerEvent: {}
+[15.025935] (-) TimerEvent: {}
+[15.126106] (-) TimerEvent: {}
+[15.226277] (-) TimerEvent: {}
+[15.326447] (-) TimerEvent: {}
+[15.426631] (-) TimerEvent: {}
+[15.526806] (-) TimerEvent: {}
+[15.626982] (-) TimerEvent: {}
+[15.727159] (-) TimerEvent: {}
+[15.827330] (-) TimerEvent: {}
+[15.927502] (-) TimerEvent: {}
+[16.027678] (-) TimerEvent: {}
+[16.127851] (-) TimerEvent: {}
+[16.228021] (-) TimerEvent: {}
+[16.328194] (-) TimerEvent: {}
+[16.428366] (-) TimerEvent: {}
+[16.528533] (-) TimerEvent: {}
+[16.628677] (-) TimerEvent: {}
+[16.728826] (-) TimerEvent: {}
+[16.829007] (-) TimerEvent: {}
+[16.929204] (-) TimerEvent: {}
+[17.029380] (-) TimerEvent: {}
+[17.129561] (-) TimerEvent: {}
+[17.229748] (-) TimerEvent: {}
+[17.329921] (-) TimerEvent: {}
+[17.430091] (-) TimerEvent: {}
+[17.530268] (-) TimerEvent: {}
+[17.630446] (-) TimerEvent: {}
+[17.730634] (-) TimerEvent: {}
+[17.830812] (-) TimerEvent: {}
+[17.930982] (-) TimerEvent: {}
+[18.031153] (-) TimerEvent: {}
+[18.131329] (-) TimerEvent: {}
+[18.231509] (-) TimerEvent: {}
+[18.331691] (-) TimerEvent: {}
+[18.431869] (-) TimerEvent: {}
+[18.532046] (-) TimerEvent: {}
+[18.632218] (-) TimerEvent: {}
+[18.732395] (-) TimerEvent: {}
+[18.832567] (-) TimerEvent: {}
+[18.932746] (-) TimerEvent: {}
+[19.032924] (-) TimerEvent: {}
+[19.133101] (-) TimerEvent: {}
+[19.233272] (-) TimerEvent: {}
+[19.333449] (-) TimerEvent: {}
+[19.433637] (-) TimerEvent: {}
+[19.533812] (-) TimerEvent: {}
+[19.633983] (-) TimerEvent: {}
+[19.734157] (-) TimerEvent: {}
+[19.834334] (-) TimerEvent: {}
+[19.934503] (-) TimerEvent: {}
+[20.034694] (-) TimerEvent: {}
+[20.134869] (-) TimerEvent: {}
+[20.235041] (-) TimerEvent: {}
+[20.335216] (-) TimerEvent: {}
+[20.435391] (-) TimerEvent: {}
+[20.535568] (-) TimerEvent: {}
+[20.635750] (-) TimerEvent: {}
+[20.735924] (-) TimerEvent: {}
+[20.836086] (-) TimerEvent: {}
+[20.936266] (-) TimerEvent: {}
+[21.036446] (-) TimerEvent: {}
+[21.136594] (-) TimerEvent: {}
+[21.236783] (-) TimerEvent: {}
+[21.336958] (-) TimerEvent: {}
+[21.437139] (-) TimerEvent: {}
+[21.537318] (-) TimerEvent: {}
+[21.637496] (-) TimerEvent: {}
+[21.737674] (-) TimerEvent: {}
+[21.837827] (-) TimerEvent: {}
+[21.938006] (-) TimerEvent: {}
+[22.038179] (-) TimerEvent: {}
+[22.138365] (-) TimerEvent: {}
+[22.238620] (-) TimerEvent: {}
+[22.338901] (-) TimerEvent: {}
+[22.439132] (-) TimerEvent: {}
+[22.471064] (ipa_ros2_control) StdoutLine: {'line': b'[100%] Linking CXX shared library libipa_ros2_control.so\n'}
+[22.539275] (-) TimerEvent: {}
+[22.639532] (-) TimerEvent: {}
+[22.739776] (-) TimerEvent: {}
+[22.840043] (-) TimerEvent: {}
+[22.940262] (-) TimerEvent: {}
+[22.969830] (ipa_ros2_control) StdoutLine: {'line': b'[100%] Built target ipa_ros2_control\n'}
+[22.979986] (ipa_ros2_control) CommandEnded: {'returncode': 0}
+[22.980345] (ipa_ros2_control) JobProgress: {'identifier': 'ipa_ros2_control', 'progress': 'install'}
+[22.980588] (ipa_ros2_control) Command: {'cmd': ['/usr/bin/cmake', '--install', '/ros2_ws/build/ipa_ros2_control'], 'cwd': '/ros2_ws/build/ipa_ros2_control', 'env': OrderedDict({'GZ_CONFIG_PATH': '/opt/ros/jazzy/opt/sdformat_vendor/share/gz', 'HOSTNAME': 'toby-desktop', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/ros2_ws/install/candle_ros2/lib:/opt/ros/jazzy/opt/sdformat_vendor/lib:/opt/ros/jazzy/lib/x86_64-linux-gnu:/opt/ros/jazzy/opt/gz_math_vendor/lib:/opt/ros/jazzy/opt/gz_utils_vendor/lib:/opt/ros/jazzy/opt/gz_tools_vendor/lib:/opt/ros/jazzy/opt/gz_cmake_vendor/lib:/opt/ros/jazzy/lib', 'HOME': '/root', 'ROS_PYTHON_VERSION': '3', 'ROS_DISTRO': 'jazzy', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'PATH': '/opt/ros/jazzy/opt/gz_tools_vendor/bin:/opt/ros/jazzy/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin', 'LANG': 'C.UTF-8', 'RMW_IMPLEMENTATION': 'rmw_cyclonedds_cpp', 'AMENT_PREFIX_PATH': '/ros2_ws/install/candle_ros2:/opt/ros/jazzy', 'DEBIAN_FRONTEND': 'noninteractive', 'ROS_AUTOMATIC_DISCOVERY_RANGE': 'SUBNET', 'PWD': '/ros2_ws/build/ipa_ros2_control', 'LC_ALL': 'C.UTF-8', 'PYTHONPATH': '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages:/opt/ros/jazzy/lib/python3.12/site-packages', 'COLCON': '1', 'CMAKE_PREFIX_PATH': '/ros2_ws/install/candle_ros2:/opt/ros/jazzy/opt/sdformat_vendor:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_tools_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy'}), 'shell': False}
+[22.988200] (ipa_ros2_control) StdoutLine: {'line': b'-- Install configuration: "Release"\n'}
+[22.988655] (ipa_ros2_control) StdoutLine: {'line': b'-- Execute custom install script\n'}
+[22.988974] (ipa_ros2_control) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/ipa_ros2_control/share/ipa_ros2_control//curt_mini_driver.xml\n'}
+[22.998361] (ipa_ros2_control) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/ipa_ros2_control/share/ipa_ros2_control/include/ipa_ros2_control/curt_mini_hardware_interface.hpp\n'}
+[23.008624] (ipa_ros2_control) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/ipa_ros2_control/share/ipa_ros2_control/launch/ros2_control.launch.py\n'}
+[23.019880] (ipa_ros2_control) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/ipa_ros2_control/share/ipa_ros2_control/environment/library_path.sh\n'}
+[23.033131] (ipa_ros2_control) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/ipa_ros2_control/share/ipa_ros2_control/environment/library_path.dsv\n'}
+[23.040388] (-) TimerEvent: {}
+[23.049998] (ipa_ros2_control) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/ipa_ros2_control/share/ament_index/resource_index/package_run_dependencies/ipa_ros2_control\n'}
+[23.073749] (ipa_ros2_control) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/ipa_ros2_control/share/ament_index/resource_index/parent_prefix_path/ipa_ros2_control\n'}
+[23.098036] (ipa_ros2_control) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/ipa_ros2_control/share/ipa_ros2_control/environment/ament_prefix_path.sh\n'}
+[23.122763] (ipa_ros2_control) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/ipa_ros2_control/share/ipa_ros2_control/environment/ament_prefix_path.dsv\n'}
+[23.140533] (-) TimerEvent: {}
+[23.147198] (ipa_ros2_control) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/ipa_ros2_control/share/ipa_ros2_control/environment/path.sh\n'}
+[23.171273] (ipa_ros2_control) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/ipa_ros2_control/share/ipa_ros2_control/environment/path.dsv\n'}
+[23.196245] (ipa_ros2_control) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/ipa_ros2_control/share/ipa_ros2_control/local_setup.bash\n'}
+[23.221056] (ipa_ros2_control) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/ipa_ros2_control/share/ipa_ros2_control/local_setup.sh\n'}
+[23.240703] (-) TimerEvent: {}
+[23.245835] (ipa_ros2_control) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/ipa_ros2_control/share/ipa_ros2_control/local_setup.zsh\n'}
+[23.270295] (ipa_ros2_control) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/ipa_ros2_control/share/ipa_ros2_control/local_setup.dsv\n'}
+[23.294913] (ipa_ros2_control) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/ipa_ros2_control/share/ipa_ros2_control/package.dsv\n'}
+[23.319511] (ipa_ros2_control) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/ipa_ros2_control/share/ament_index/resource_index/packages/ipa_ros2_control\n'}
+[23.340827] (-) TimerEvent: {}
+[23.344377] (ipa_ros2_control) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/ipa_ros2_control/share/ament_index/resource_index/hardware_interface__pluginlib__plugin/ipa_ros2_control\n'}
+[23.368894] (ipa_ros2_control) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/ipa_ros2_control/share/ipa_ros2_control/cmake/ament_cmake_export_include_directories-extras.cmake\n'}
+[23.394445] (ipa_ros2_control) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/ipa_ros2_control/share/ipa_ros2_control/cmake/ament_cmake_export_libraries-extras.cmake\n'}
+[23.419267] (ipa_ros2_control) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/ipa_ros2_control/share/ipa_ros2_control/cmake/ament_cmake_export_targets-extras.cmake\n'}
+[23.440979] (-) TimerEvent: {}
+[23.444548] (ipa_ros2_control) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/ipa_ros2_control/share/ipa_ros2_control/cmake/ipa_ros2_controlConfig.cmake\n'}
+[23.469073] (ipa_ros2_control) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/ipa_ros2_control/share/ipa_ros2_control/cmake/ipa_ros2_controlConfig-version.cmake\n'}
+[23.494176] (ipa_ros2_control) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/ipa_ros2_control/share/ipa_ros2_control/package.xml\n'}
+[23.518662] (ipa_ros2_control) StdoutLine: {'line': b'-- Installing: /ros2_ws/install/ipa_ros2_control/lib/libipa_ros2_control.so\n'}
+[23.523356] (ipa_ros2_control) StdoutLine: {'line': b'-- Set non-toolchain portion of runtime path of "/ros2_ws/install/ipa_ros2_control/lib/libipa_ros2_control.so" to ""\n'}
+[23.524071] (ipa_ros2_control) StdoutLine: {'line': b'-- Installing: /ros2_ws/install/ipa_ros2_control/share/ipa_ros2_control/cmake/export_ipa_ros2_controlExport.cmake\n'}
+[23.524425] (ipa_ros2_control) StdoutLine: {'line': b'-- Installing: /ros2_ws/install/ipa_ros2_control/share/ipa_ros2_control/cmake/export_ipa_ros2_controlExport-release.cmake\n'}
+[23.529162] (ipa_ros2_control) CommandEnded: {'returncode': 0}
+[23.541164] (-) TimerEvent: {}
+[23.574572] (ipa_ros2_control) JobEnded: {'identifier': 'ipa_ros2_control', 'rc': 0}
+[23.577486] (curt_mini) JobStarted: {'identifier': 'curt_mini'}
+[23.615285] (curt_mini) JobProgress: {'identifier': 'curt_mini', 'progress': 'cmake'}
+[23.617731] (curt_mini) Command: {'cmd': ['/usr/bin/cmake', '/ros2_ws/src/curt_mini/curt_mini', '-DCMAKE_BUILD_TYPE=Release', '-DAMENT_CMAKE_SYMLINK_INSTALL=1', '-DCMAKE_INSTALL_PREFIX=/ros2_ws/install/curt_mini'], 'cwd': '/ros2_ws/build/curt_mini', 'env': OrderedDict({'GZ_CONFIG_PATH': '/opt/ros/jazzy/opt/sdformat_vendor/share/gz', 'HOSTNAME': 'toby-desktop', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/ros2_ws/install/ipa_ros2_control/lib:/ros2_ws/install/candle_ros2/lib:/opt/ros/jazzy/opt/sdformat_vendor/lib:/opt/ros/jazzy/lib/x86_64-linux-gnu:/opt/ros/jazzy/opt/gz_math_vendor/lib:/opt/ros/jazzy/opt/gz_utils_vendor/lib:/opt/ros/jazzy/opt/gz_tools_vendor/lib:/opt/ros/jazzy/opt/gz_cmake_vendor/lib:/opt/ros/jazzy/lib', 'HOME': '/root', 'ROS_PYTHON_VERSION': '3', 'ROS_DISTRO': 'jazzy', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'PATH': '/opt/ros/jazzy/opt/gz_tools_vendor/bin:/opt/ros/jazzy/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin', 'LANG': 'C.UTF-8', 'RMW_IMPLEMENTATION': 'rmw_cyclonedds_cpp', 'AMENT_PREFIX_PATH': '/ros2_ws/install/ipa_ros2_control:/ros2_ws/install/candle_ros2:/opt/ros/jazzy', 'DEBIAN_FRONTEND': 'noninteractive', 'ROS_AUTOMATIC_DISCOVERY_RANGE': 'SUBNET', 'PWD': '/ros2_ws/build/curt_mini', 'LC_ALL': 'C.UTF-8', 'PYTHONPATH': '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages:/opt/ros/jazzy/lib/python3.12/site-packages', 'COLCON': '1', 'CMAKE_PREFIX_PATH': '/ros2_ws/install/ipa_ros2_control:/ros2_ws/install/candle_ros2:/opt/ros/jazzy/opt/sdformat_vendor:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_tools_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy'}), 'shell': False}
+[23.641388] (-) TimerEvent: {}
+[23.741707] (-) TimerEvent: {}
+[23.797067] (curt_mini) StdoutLine: {'line': b'-- The C compiler identification is GNU 13.3.0\n'}
+[23.841870] (-) TimerEvent: {}
+[23.942121] (-) TimerEvent: {}
+[23.961166] (curt_mini) StdoutLine: {'line': b'-- The CXX compiler identification is GNU 13.3.0\n'}
+[24.005018] (curt_mini) StdoutLine: {'line': b'-- Detecting C compiler ABI info\n'}
+[24.042295] (-) TimerEvent: {}
+[24.142587] (-) TimerEvent: {}
+[24.242853] (-) TimerEvent: {}
+[24.254977] (curt_mini) StdoutLine: {'line': b'-- Detecting C compiler ABI info - done\n'}
+[24.287432] (curt_mini) StdoutLine: {'line': b'-- Check for working C compiler: /usr/bin/cc - skipped\n'}
+[24.288214] (curt_mini) StdoutLine: {'line': b'-- Detecting C compile features\n'}
+[24.289522] (curt_mini) StdoutLine: {'line': b'-- Detecting C compile features - done\n'}
+[24.314644] (curt_mini) StdoutLine: {'line': b'-- Detecting CXX compiler ABI info\n'}
+[24.343001] (-) TimerEvent: {}
+[24.443289] (-) TimerEvent: {}
+[24.543574] (-) TimerEvent: {}
+[24.582067] (curt_mini) StdoutLine: {'line': b'-- Detecting CXX compiler ABI info - done\n'}
+[24.617148] (curt_mini) StdoutLine: {'line': b'-- Check for working CXX compiler: /usr/bin/c++ - skipped\n'}
+[24.618231] (curt_mini) StdoutLine: {'line': b'-- Detecting CXX compile features\n'}
+[24.620131] (curt_mini) StdoutLine: {'line': b'-- Detecting CXX compile features - done\n'}
+[24.631715] (curt_mini) StdoutLine: {'line': b'-- Found ament_cmake: 2.5.6 (/opt/ros/jazzy/share/ament_cmake/cmake)\n'}
+[24.643729] (-) TimerEvent: {}
+[24.743972] (-) TimerEvent: {}
+[24.844241] (-) TimerEvent: {}
+[24.944507] (-) TimerEvent: {}
+[25.044730] (-) TimerEvent: {}
+[25.050429] (curt_mini) StdoutLine: {'line': b'-- Found Python3: /usr/bin/python3 (found version "3.12.3") found components: Interpreter \n'}
+[25.144843] (-) TimerEvent: {}
+[25.245083] (-) TimerEvent: {}
+[25.247628] (curt_mini) StdoutLine: {'line': b'-- Override CMake install command with custom implementation using symlinks instead of copying resources\n'}
+[25.337739] (curt_mini) StdoutLine: {'line': b'-- Found rclcpp: 28.1.21 (/opt/ros/jazzy/share/rclcpp/cmake)\n'}
+[25.345231] (-) TimerEvent: {}
+[25.445477] (-) TimerEvent: {}
+[25.461132] (curt_mini) StdoutLine: {'line': b'-- Found rosidl_generator_c: 4.6.9 (/opt/ros/jazzy/share/rosidl_generator_c/cmake)\n'}
+[25.507590] (curt_mini) StdoutLine: {'line': b'-- Found rosidl_generator_cpp: 4.6.9 (/opt/ros/jazzy/share/rosidl_generator_cpp/cmake)\n'}
+[25.542233] (curt_mini) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c\n'}
+[25.545568] (-) TimerEvent: {}
+[25.565736] (curt_mini) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp\n'}
+[25.645681] (-) TimerEvent: {}
+[25.651022] (curt_mini) StdoutLine: {'line': b'-- Found rmw_implementation_cmake: 7.3.3 (/opt/ros/jazzy/share/rmw_implementation_cmake/cmake)\n'}
+[25.654306] (curt_mini) StdoutLine: {'line': b'-- Found rmw_cyclonedds_cpp: 2.2.3 (/opt/ros/jazzy/share/rmw_cyclonedds_cpp/cmake)\n'}
+[25.684305] (curt_mini) StdoutLine: {'line': b"-- Using RMW implementation 'rmw_cyclonedds_cpp' as default\n"}
+[25.745793] (-) TimerEvent: {}
+[25.765400] (curt_mini) StdoutLine: {'line': b'-- Found rclpy: 7.1.11 (/opt/ros/jazzy/share/rclpy/cmake)\n'}
+[25.774346] (curt_mini) StdoutLine: {'line': b'-- Found ament_lint_auto: 0.17.5 (/opt/ros/jazzy/share/ament_lint_auto/cmake)\n'}
+[25.845924] (-) TimerEvent: {}
+[25.946184] (-) TimerEvent: {}
+[26.011110] (curt_mini) StdoutLine: {'line': b"-- Added test 'copyright' to check source files copyright and LICENSE\n"}
+[26.025520] (curt_mini) StdoutLine: {'line': b"-- Added test 'flake8' to check Python code syntax and style conventions\n"}
+[26.025912] (curt_mini) StdoutLine: {'line': b"-- Configured 'flake8' exclude dirs and/or files: \n"}
+[26.028784] (curt_mini) StdoutLine: {'line': b"-- Added test 'lint_cmake' to check CMake code style\n"}
+[26.031466] (curt_mini) StdoutLine: {'line': b"-- Added test 'pep257' to check Python code against some of the docstring style conventions in PEP 257\n"}
+[26.039499] (curt_mini) StdoutLine: {'line': b"-- Added test 'xmllint' to check XML markup files\n"}
+[26.044972] (curt_mini) StdoutLine: {'line': b'-- Configuring done (2.4s)\n'}
+[26.046318] (-) TimerEvent: {}
+[26.059357] (curt_mini) StdoutLine: {'line': b'-- Generating done (0.0s)\n'}
+[26.065269] (curt_mini) StdoutLine: {'line': b'-- Build files have been written to: /ros2_ws/build/curt_mini\n'}
+[26.080891] (curt_mini) CommandEnded: {'returncode': 0}
+[26.082081] (curt_mini) JobProgress: {'identifier': 'curt_mini', 'progress': 'build'}
+[26.083132] (curt_mini) Command: {'cmd': ['/usr/bin/cmake', '--build', '/ros2_ws/build/curt_mini', '--', '-j12', '-l12'], 'cwd': '/ros2_ws/build/curt_mini', 'env': OrderedDict({'GZ_CONFIG_PATH': '/opt/ros/jazzy/opt/sdformat_vendor/share/gz', 'HOSTNAME': 'toby-desktop', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/ros2_ws/install/ipa_ros2_control/lib:/ros2_ws/install/candle_ros2/lib:/opt/ros/jazzy/opt/sdformat_vendor/lib:/opt/ros/jazzy/lib/x86_64-linux-gnu:/opt/ros/jazzy/opt/gz_math_vendor/lib:/opt/ros/jazzy/opt/gz_utils_vendor/lib:/opt/ros/jazzy/opt/gz_tools_vendor/lib:/opt/ros/jazzy/opt/gz_cmake_vendor/lib:/opt/ros/jazzy/lib', 'HOME': '/root', 'ROS_PYTHON_VERSION': '3', 'ROS_DISTRO': 'jazzy', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'PATH': '/opt/ros/jazzy/opt/gz_tools_vendor/bin:/opt/ros/jazzy/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin', 'LANG': 'C.UTF-8', 'RMW_IMPLEMENTATION': 'rmw_cyclonedds_cpp', 'AMENT_PREFIX_PATH': '/ros2_ws/install/ipa_ros2_control:/ros2_ws/install/candle_ros2:/opt/ros/jazzy', 'DEBIAN_FRONTEND': 'noninteractive', 'ROS_AUTOMATIC_DISCOVERY_RANGE': 'SUBNET', 'PWD': '/ros2_ws/build/curt_mini', 'LC_ALL': 'C.UTF-8', 'PYTHONPATH': '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages:/opt/ros/jazzy/lib/python3.12/site-packages', 'COLCON': '1', 'CMAKE_PREFIX_PATH': '/ros2_ws/install/ipa_ros2_control:/ros2_ws/install/candle_ros2:/opt/ros/jazzy/opt/sdformat_vendor:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_tools_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy'}), 'shell': False}
+[26.146495] (-) TimerEvent: {}
+[26.187622] (curt_mini) CommandEnded: {'returncode': 0}
+[26.189058] (curt_mini) JobProgress: {'identifier': 'curt_mini', 'progress': 'install'}
+[26.189833] (curt_mini) Command: {'cmd': ['/usr/bin/cmake', '--install', '/ros2_ws/build/curt_mini'], 'cwd': '/ros2_ws/build/curt_mini', 'env': OrderedDict({'GZ_CONFIG_PATH': '/opt/ros/jazzy/opt/sdformat_vendor/share/gz', 'HOSTNAME': 'toby-desktop', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/ros2_ws/install/ipa_ros2_control/lib:/ros2_ws/install/candle_ros2/lib:/opt/ros/jazzy/opt/sdformat_vendor/lib:/opt/ros/jazzy/lib/x86_64-linux-gnu:/opt/ros/jazzy/opt/gz_math_vendor/lib:/opt/ros/jazzy/opt/gz_utils_vendor/lib:/opt/ros/jazzy/opt/gz_tools_vendor/lib:/opt/ros/jazzy/opt/gz_cmake_vendor/lib:/opt/ros/jazzy/lib', 'HOME': '/root', 'ROS_PYTHON_VERSION': '3', 'ROS_DISTRO': 'jazzy', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'PATH': '/opt/ros/jazzy/opt/gz_tools_vendor/bin:/opt/ros/jazzy/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin', 'LANG': 'C.UTF-8', 'RMW_IMPLEMENTATION': 'rmw_cyclonedds_cpp', 'AMENT_PREFIX_PATH': '/ros2_ws/install/ipa_ros2_control:/ros2_ws/install/candle_ros2:/opt/ros/jazzy', 'DEBIAN_FRONTEND': 'noninteractive', 'ROS_AUTOMATIC_DISCOVERY_RANGE': 'SUBNET', 'PWD': '/ros2_ws/build/curt_mini', 'LC_ALL': 'C.UTF-8', 'PYTHONPATH': '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages:/opt/ros/jazzy/lib/python3.12/site-packages', 'COLCON': '1', 'CMAKE_PREFIX_PATH': '/ros2_ws/install/ipa_ros2_control:/ros2_ws/install/candle_ros2:/opt/ros/jazzy/opt/sdformat_vendor:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_tools_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy'}), 'shell': False}
+[26.211653] (curt_mini) StdoutLine: {'line': b'-- Install configuration: "Release"\n'}
+[26.213132] (curt_mini) StdoutLine: {'line': b'-- Execute custom install script\n'}
+[26.214712] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/config/gz_bridge.yaml\n'}
+[26.240102] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/config/joystick.yaml\n'}
+[26.246654] (-) TimerEvent: {}
+[26.265175] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/config/ros2_control.yaml\n'}
+[26.289538] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/config/ros2_control_simulation.yaml\n'}
+[26.312830] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/config/twist_mux.yaml\n'}
+[26.336662] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/models/curt_mini/gazebo.xacro\n'}
+[26.346796] (-) TimerEvent: {}
+[26.360048] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/models/curt_mini/meshes/base_link.STL\n'}
+[26.383291] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/models/curt_mini/meshes/wheel1_link.STL\n'}
+[26.406457] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/models/curt_mini/meshes/wheel2_link.STL\n'}
+[26.429546] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/models/curt_mini/meshes/wheel3_link.STL\n'}
+[26.446941] (-) TimerEvent: {}
+[26.452579] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/models/curt_mini/meshes/wheel4_link.STL\n'}
+[26.475847] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/models/curt_mini/properties.xacro\n'}
+[26.499137] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/models/curt_mini/robot.urdf.xacro\n'}
+[26.522166] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/models/curt_mini/ros2_control.xacro\n'}
+[26.544660] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/models/curt_mini/sensors.xacro\n'}
+[26.547081] (-) TimerEvent: {}
+[26.567899] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/bringup/autostart.tmuxp.yaml\n'}
+[26.592273] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/bringup/autostart.tmuxp.yaml.save\n'}
+[26.614856] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/bringup/joystick.launch.py\n'}
+[26.639689] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/bringup/robot_base.launch.py\n'}
+[26.647239] (-) TimerEvent: {}
+[26.664529] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/bringup/start_controller.launch.py\n'}
+[26.688464] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/environment/curt_mini.dsv\n'}
+[26.711958] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/ament_index/resource_index/package_run_dependencies/curt_mini\n'}
+[26.735696] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/ament_index/resource_index/parent_prefix_path/curt_mini\n'}
+[26.747390] (-) TimerEvent: {}
+[26.759003] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/environment/ament_prefix_path.sh\n'}
+[26.782033] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/environment/ament_prefix_path.dsv\n'}
+[26.804982] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/environment/path.sh\n'}
+[26.828398] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/environment/path.dsv\n'}
+[26.847557] (-) TimerEvent: {}
+[26.851796] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/local_setup.bash\n'}
+[26.875082] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/local_setup.sh\n'}
+[26.898285] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/local_setup.zsh\n'}
+[26.921681] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/local_setup.dsv\n'}
+[26.945168] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/package.dsv\n'}
+[26.947710] (-) TimerEvent: {}
+[26.968657] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/ament_index/resource_index/packages/curt_mini\n'}
+[26.992430] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/cmake/curt_miniConfig.cmake\n'}
+[27.015539] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/cmake/curt_miniConfig-version.cmake\n'}
+[27.038680] (curt_mini) StdoutLine: {'line': b'-- Symlinking: /ros2_ws/install/curt_mini/share/curt_mini/package.xml\n'}
+[27.047859] (-) TimerEvent: {}
+[27.065902] (curt_mini) CommandEnded: {'returncode': 0}
+[27.097828] (curt_mini) JobEnded: {'identifier': 'curt_mini', 'rc': 0}
+[27.099848] (-) EventReactorShutdown: {}

@@ -1,0 +1,190 @@
+version: '3.8'
+
+services:
+  openzen_driver:
+    image: openzen_jazzy:latest
+    build:
+      context: .
+      dockerfile: curtmini/Dockerfile
+    container_name: openzen_driver
+    init: true
+    tty: true
+    stdin_open: true
+    privileged: true
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - /dev/:/dev/
+      - ../ros2_ws/:/ros2_ws
+    environment:
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+    command:
+      - /bin/bash
+      - -c
+      - |
+        sleep 3
+        echo "=== Starting OPENZEN Driver ==="
+        colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select openzen_driver
+        source /ros2_ws/install/setup.bash
+        ros2 run openzen_driver openzen_node --ros-args --remap __ns:=/curt/imu
+
+  curtmini:
+    image: curtmini_driver:latest
+    build:
+      context: .
+      dockerfile: curtmini/Dockerfile
+    container_name: curtmini_driver
+    privileged: true
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - /dev:/dev
+      - ../ros2_ws:/ros2_ws
+      - ../config/:/config/
+      # - ../config/curtmini/joystick.yaml:/ros2_ws/src/curt_mini/curt_mini/config/joystick.yaml
+      # - ../config/curtmini/twist_mux.yaml:/ros2_ws/src/curt_mini/curt_mini/config/twist_mux.yaml
+    environment:
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+    command:
+      - bash
+      - -c
+      - |
+        echo "=== Starting CURTMINI driver ==="
+        colcon build --symlink-install --packages-select candle_ros2 curt_mini ipa_ros2_control openzen_driver --cmake-args -DCMAKE_BUILD_TYPE=Release
+        source /ros2_ws/install/setup.bash
+        ros2 launch curt_mini robot_base.launch.py
+
+  emlid_driver:
+    image: emlid_jazzy:latest
+    build:
+      context: .
+      dockerfile: emlid/Dockerfile
+    container_name: emlid_driver
+    init: true
+    tty: true
+    stdin_open: true
+    privileged: true
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - /dev/:/dev/
+      - ../ros2_ws:/ros2_ws
+      - ../config/emlid/nmea_serial_driver.py:/ros2_ws/src/nmea_navsat_driver/src/libnmea_navsat_driver/nodes/nmea_serial_driver.py
+      - ../config/emlid/nmea_serial_driver.yaml:/ros2_ws/src/nmea_navsat_driver/config/nmea_serial_driver.yaml
+    environment:
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+    command:
+      - /bin/bash
+      - -c
+      - |
+        sleep 3
+        echo "=== Starting EMLID Driver ==="
+        colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select nmea_navsat_driver
+        source /ros2_ws/install/setup.bash
+        ros2 run nmea_navsat_driver nmea_serial_driver
+
+  realsense_driver:
+    image: realsense_jazzy:latest
+    build:
+      context: .
+      dockerfile: realsense/Dockerfile
+    container_name: realsense_driver
+    init: true
+    tty: true
+    stdin_open: true
+    privileged: true
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - /dev/:/dev/
+      - ../config/realsense/rs_launch.py:/ros2_ws/src/realsense-ros/realsense2_camera/launch/rs_launch.py
+    environment:
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+    command:
+      - /bin/bash
+      - -c
+      - |
+        sleep 3
+        echo "=== Starting REALSENSE Driver ==="
+        colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select realsense2_camera realsense2_camera_msgs realsense2_description realsense_camera_info_override
+        source /ros2_ws/install/setup.bash
+        ros2 launch realsense2_camera rs_launch.py
+
+  ouster_driver:
+    image: ouster_jazzy:latest
+    build:
+      context: .
+      dockerfile: ouster/Dockerfile
+    container_name: ouster_driver
+    init: true
+    tty: true
+    stdin_open: true
+    privileged: true
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - ../ros2_ws/ouster-build:/root/ros2_ws/build
+      - ../config/ouster/driver_params.yaml:/ros2_ws/src/ouster-ros/ouster-ros/config/driver_params.yaml
+    environment:
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+    command:
+      - /bin/bash
+      - -c
+      - |
+        sleep 3
+        echo "=== Starting OUSTER Driver ==="
+        colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select ouster_ros ouster_sensor_msgs
+        source /ros2_ws/install/setup.bash    
+        ros2 launch ouster_ros driver.launch.py viz:=false
+
+  evk4_driver:
+    image: evk4_jazzy:latest
+    build:
+      context: .
+      dockerfile: evk4/Dockerfile
+    container_name: evk4_driver
+    init: true
+    tty: true
+    stdin_open: true
+    privileged: true
+    network_mode: host
+    volumes:
+      - /dev:/dev
+    environment:
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+    command:
+      - /bin/bash
+      - -c
+      - |
+        sleep 3
+        echo "=== Starting EVK4 Driver ==="
+        colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select metavision_driver
+        source /ros2_ws/install/setup.bash    
+        ros2 launch ouster_ros driver.launch.py viz:=false
+
+  recorder:
+    image: recorder_jazzy:latest
+    build:
+      context: .
+      dockerfile: recorder/Dockerfile
+    container_name: recorder
+    init: true
+    tty: true
+    stdin_open: true
+    privileged: true
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - /dev/:/dev/
+      - ../rosbags/:/rosbags/
+    environment:
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+    command:
+      - /bin/bash
+      - -c
+      - |
+        sleep 3
+        echo "=== Starting OUSTER Driver ==="
+        colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select rqml_recorder
+        source /ros2_ws/install/setup.bash    
+        ros2 launch ...

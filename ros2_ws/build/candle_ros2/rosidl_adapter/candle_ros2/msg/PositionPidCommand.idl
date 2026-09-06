@@ -1,0 +1,17 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from candle_ros2/msg/PositionPidCommand.msg
+// generated code does not contain a copyright notice
+
+#include "candle_ros2/msg/Pid.idl"
+
+module candle_ros2 {
+  module msg {
+    struct PositionPidCommand {
+      sequence<uint16> drive_ids;
+
+      sequence<candle_ros2::msg::Pid> position_pid;
+
+      sequence<candle_ros2::msg::Pid> velocity_pid;
+    };
+  };
+};

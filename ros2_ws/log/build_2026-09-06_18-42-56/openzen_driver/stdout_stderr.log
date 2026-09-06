@@ -1,0 +1,33 @@
+[ 19%] Built target spdlog
+[ 95%] Built target OpenZen
+[100%] Built target openzen_node
+-- Install configuration: "Release"
+-- Execute custom install script
+-- Up-to-date symlink: /ros2_ws/install/openzen_driver/lib/cmake/nonstd/expected-lite-config.cmake
+-- Up-to-date symlink: /ros2_ws/install/openzen_driver/lib/cmake/nonstd/expected-lite-config-version.cmake
+-- Up-to-date symlink: /ros2_ws/install/openzen_driver/include/nonstd/expected.hpp
+-- Up-to-date symlink: /ros2_ws/install/openzen_driver/lib/openzen_driver/openzen_node
+-- Up-to-date symlink: /ros2_ws/install/openzen_driver/share/openzen_driver//launch/openzen_lpms.launch.py
+-- Up-to-date symlink: /ros2_ws/install/openzen_driver/share/ament_index/resource_index/package_run_dependencies/openzen_driver
+-- Up-to-date symlink: /ros2_ws/install/openzen_driver/share/ament_index/resource_index/parent_prefix_path/openzen_driver
+-- Up-to-date symlink: /ros2_ws/install/openzen_driver/share/openzen_driver/environment/ament_prefix_path.sh
+-- Up-to-date symlink: /ros2_ws/install/openzen_driver/share/openzen_driver/environment/ament_prefix_path.dsv
+-- Up-to-date symlink: /ros2_ws/install/openzen_driver/share/openzen_driver/environment/path.sh
+-- Up-to-date symlink: /ros2_ws/install/openzen_driver/share/openzen_driver/environment/path.dsv
+-- Up-to-date symlink: /ros2_ws/install/openzen_driver/share/openzen_driver/local_setup.bash
+-- Up-to-date symlink: /ros2_ws/install/openzen_driver/share/openzen_driver/local_setup.sh
+-- Up-to-date symlink: /ros2_ws/install/openzen_driver/share/openzen_driver/local_setup.zsh
+-- Up-to-date symlink: /ros2_ws/install/openzen_driver/share/openzen_driver/local_setup.dsv
+-- Symlinking: /ros2_ws/install/openzen_driver/share/openzen_driver/package.dsv
+-- Up-to-date symlink: /ros2_ws/install/openzen_driver/share/ament_index/resource_index/packages/openzen_driver
+-- Up-to-date symlink: /ros2_ws/install/openzen_driver/share/openzen_driver/cmake/openzen_driverConfig.cmake
+-- Up-to-date symlink: /ros2_ws/install/openzen_driver/share/openzen_driver/cmake/openzen_driverConfig-version.cmake
+-- Up-to-date symlink: /ros2_ws/install/openzen_driver/share/openzen_driver/package.xml
+-- Up-to-date: /ros2_ws/install/openzen_driver/lib/libOpenZen.so
+-- Up-to-date: /ros2_ws/install/openzen_driver/include/OpenZen.h
+-- Up-to-date: /ros2_ws/install/openzen_driver/include/OpenZenCAPI.h
+-- Up-to-date: /ros2_ws/install/openzen_driver/include/ZenTypes.h
+-- Up-to-date: /ros2_ws/install/openzen_driver/lib/cmake/OpenZen/OpenZenTargets.cmake
+-- Up-to-date: /ros2_ws/install/openzen_driver/lib/cmake/OpenZen/OpenZenTargets-release.cmake
+-- Up-to-date: /ros2_ws/install/openzen_driver/lib/cmake/OpenZen/OpenZenConfig.cmake
+-- Up-to-date: /ros2_ws/install/openzen_driver/lib/cmake/OpenZen/OpenZenConfigVersion.cmake

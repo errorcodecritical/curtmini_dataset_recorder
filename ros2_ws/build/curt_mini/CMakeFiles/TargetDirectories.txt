@@ -1,0 +1,9 @@
+/ros2_ws/build/curt_mini/CMakeFiles/uninstall.dir
+/ros2_ws/build/curt_mini/CMakeFiles/curt_mini_uninstall.dir
+/ros2_ws/build/curt_mini/CMakeFiles/test.dir
+/ros2_ws/build/curt_mini/CMakeFiles/edit_cache.dir
+/ros2_ws/build/curt_mini/CMakeFiles/rebuild_cache.dir
+/ros2_ws/build/curt_mini/CMakeFiles/list_install_components.dir
+/ros2_ws/build/curt_mini/CMakeFiles/install.dir
+/ros2_ws/build/curt_mini/CMakeFiles/install/local.dir
+/ros2_ws/build/curt_mini/CMakeFiles/install/strip.dir

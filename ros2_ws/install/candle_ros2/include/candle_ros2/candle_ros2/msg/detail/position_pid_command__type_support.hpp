@@ -1,0 +1,1 @@
+/ros2_ws/build/candle_ros2/rosidl_generator_cpp/candle_ros2/msg/detail/position_pid_command__type_support.hpp

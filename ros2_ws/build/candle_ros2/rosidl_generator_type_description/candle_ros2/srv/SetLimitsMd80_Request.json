@@ -1,0 +1,46 @@
+{
+  "type_description_msg": {
+    "type_description": {
+      "type_name": "candle_ros2/srv/SetLimitsMd80_Request",
+      "fields": [
+        {
+          "name": "drive_ids",
+          "type": {
+            "type_id": 149,
+            "capacity": 0,
+            "string_capacity": 0,
+            "nested_type_name": ""
+          },
+          "default_value": ""
+        },
+        {
+          "name": "velocity_limit",
+          "type": {
+            "type_id": 154,
+            "capacity": 0,
+            "string_capacity": 0,
+            "nested_type_name": ""
+          },
+          "default_value": ""
+        },
+        {
+          "name": "torque_limit",
+          "type": {
+            "type_id": 154,
+            "capacity": 0,
+            "string_capacity": 0,
+            "nested_type_name": ""
+          },
+          "default_value": ""
+        }
+      ]
+    },
+    "referenced_type_descriptions": []
+  },
+  "type_hashes": [
+    {
+      "type_name": "candle_ros2/srv/SetLimitsMd80_Request",
+      "hash_string": "RIHS01_8b94f450537df1249814376713822b790f4d3414ef1255cb1b5865bb3e3f91f2"
+    }
+  ]
+}

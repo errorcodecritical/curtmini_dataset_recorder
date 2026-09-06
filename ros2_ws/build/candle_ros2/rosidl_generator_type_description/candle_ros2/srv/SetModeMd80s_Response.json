@@ -1,0 +1,26 @@
+{
+  "type_description_msg": {
+    "type_description": {
+      "type_name": "candle_ros2/srv/SetModeMd80s_Response",
+      "fields": [
+        {
+          "name": "drives_success",
+          "type": {
+            "type_id": 159,
+            "capacity": 0,
+            "string_capacity": 0,
+            "nested_type_name": ""
+          },
+          "default_value": ""
+        }
+      ]
+    },
+    "referenced_type_descriptions": []
+  },
+  "type_hashes": [
+    {
+      "type_name": "candle_ros2/srv/SetModeMd80s_Response",
+      "hash_string": "RIHS01_3ca9bf17ca82d93ce8f416727b45c7287d58df05c26aa9f8935f1087c4fab530"
+    }
+  ]
+}

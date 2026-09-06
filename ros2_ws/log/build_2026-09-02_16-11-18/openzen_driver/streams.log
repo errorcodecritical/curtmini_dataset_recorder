@@ -1,0 +1,121 @@
+[0.023s] Invoking command in '/ros2_ws/build/openzen_driver': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake /ros2_ws/src/openzenros2 -DCMAKE_BUILD_TYPE=Release -DAMENT_CMAKE_SYMLINK_INSTALL=1 -DCMAKE_INSTALL_PREFIX=/ros2_ws/install/openzen_driver
+[0.465s] -- The C compiler identification is GNU 13.3.0
+[0.800s] -- The CXX compiler identification is GNU 13.3.0
+[0.874s] -- Detecting C compiler ABI info
+[1.221s] -- Detecting C compiler ABI info - done
+[1.263s] -- Check for working C compiler: /usr/bin/cc - skipped
+[1.269s] -- Detecting C compile features
+[1.271s] -- Detecting C compile features - done
+[1.306s] -- Detecting CXX compiler ABI info
+[1.644s] -- Detecting CXX compiler ABI info - done
+[1.680s] -- Check for working CXX compiler: /usr/bin/c++ - skipped
+[1.681s] -- Detecting CXX compile features
+[1.683s] -- Detecting CXX compile features - done
+[1.711s] -- Found ament_cmake: 2.5.6 (/opt/ros/jazzy/share/ament_cmake/cmake)
+[2.185s] -- Found Python3: /usr/bin/python3 (found version "3.12.3") found components: Interpreter 
+[2.445s] -- Override CMake install command with custom implementation using symlinks instead of copying resources
+[2.574s] -- Found rclcpp: 28.1.21 (/opt/ros/jazzy/share/rclcpp/cmake)
+[2.729s] -- Found rosidl_generator_c: 4.6.9 (/opt/ros/jazzy/share/rosidl_generator_c/cmake)
+[2.781s] -- Found rosidl_generator_cpp: 4.6.9 (/opt/ros/jazzy/share/rosidl_generator_cpp/cmake)
+[2.845s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[2.915s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[3.211s] -- Found rmw_implementation_cmake: 7.3.3 (/opt/ros/jazzy/share/rmw_implementation_cmake/cmake)
+[3.222s] -- Found rmw_cyclonedds_cpp: 2.2.3 (/opt/ros/jazzy/share/rmw_cyclonedds_cpp/cmake)
+[3.318s] -- Using RMW implementation 'rmw_cyclonedds_cpp' as default
+[3.587s] -- Found std_msgs: 5.3.8 (/opt/ros/jazzy/share/std_msgs/cmake)
+[3.649s] -- Found sensor_msgs: 5.3.8 (/opt/ros/jazzy/share/sensor_msgs/cmake)
+[3.810s] -- Found std_srvs: 5.3.8 (/opt/ros/jazzy/share/std_srvs/cmake)
+[3.880s] [0mPlease install libbluetooth-dev for bluetooth support[0m
+[3.885s] -- Project 'expected_lite', package 'expected-lite' version: '0.2.0'
+[3.900s] [0mBinary libraries will not be downloaded[0m
+[3.908s] -- Build spdlog: 1.14.1
+[3.916s] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+[4.186s] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+[4.189s] -- Found Threads: TRUE  
+[4.189s] -- Build type: Release
+[4.218s] -- Found launch_testing_ament_cmake: 3.4.11 (/opt/ros/jazzy/share/launch_testing_ament_cmake/cmake)
+[4.227s] -- Found python_cmake_module: 0.11.1 (/opt/ros/jazzy/share/python_cmake_module/cmake)
+[4.601s] -- Found PythonExtra: /usr/bin/python3  
+[4.842s] -- Configuring done (4.7s)
+[4.904s] -- Generating done (0.0s)
+[4.925s] -- Build files have been written to: /ros2_ws/build/openzen_driver
+[4.953s] Invoked command in '/ros2_ws/build/openzen_driver' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake /ros2_ws/src/openzenros2 -DCMAKE_BUILD_TYPE=Release -DAMENT_CMAKE_SYMLINK_INSTALL=1 -DCMAKE_INSTALL_PREFIX=/ros2_ws/install/openzen_driver
+[4.957s] Invoking command in '/ros2_ws/build/openzen_driver': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --build /ros2_ws/build/openzen_driver -- -j12 -l12
+[5.107s] [  4%] [32mBuilding CXX object openzen/external/spdlog/CMakeFiles/spdlog.dir/src/color_sinks.cpp.o[0m
+[5.108s] [  4%] [32mBuilding CXX object openzen/external/spdlog/CMakeFiles/spdlog.dir/src/spdlog.cpp.o[0m
+[5.111s] [  7%] [32mBuilding CXX object openzen/external/spdlog/CMakeFiles/spdlog.dir/src/bundled_fmtlib_format.cpp.o[0m
+[5.112s] [  9%] [32mBuilding CXX object openzen/external/spdlog/CMakeFiles/spdlog.dir/src/file_sinks.cpp.o[0m
+[5.114s] [ 11%] [32mBuilding CXX object openzen/external/spdlog/CMakeFiles/spdlog.dir/src/cfg.cpp.o[0m
+[5.117s] [ 14%] [32mBuilding CXX object openzen/external/spdlog/CMakeFiles/spdlog.dir/src/stdout_sinks.cpp.o[0m
+[5.120s] [ 16%] [32mBuilding CXX object openzen/external/spdlog/CMakeFiles/spdlog.dir/src/async.cpp.o[0m
+[11.194s] [ 19%] [32m[1mLinking CXX static library libspdlog.a[0m
+[11.300s] [ 19%] Built target spdlog
+[11.372s] [ 26%] [32mBuilding CXX object openzen/CMakeFiles/OpenZen.dir/src/ISensorProperties.cpp.o[0m
+[11.372s] [ 26%] [32mBuilding CXX object openzen/CMakeFiles/OpenZen.dir/src/Sensor.cpp.o[0m
+[11.373s] [ 26%] [32mBuilding CXX object openzen/CMakeFiles/OpenZen.dir/src/OpenZen.cpp.o[0m
+[11.374s] [ 28%] [32mBuilding CXX object openzen/CMakeFiles/OpenZen.dir/src/SensorClient.cpp.o[0m
+[11.377s] [ 30%] [32mBuilding CXX object openzen/CMakeFiles/OpenZen.dir/src/SensorManager.cpp.o[0m
+[11.378s] [ 33%] [32mBuilding CXX object openzen/CMakeFiles/OpenZen.dir/src/SensorProperties.cpp.o[0m
+[11.379s] [ 35%] [32mBuilding CXX object openzen/CMakeFiles/OpenZen.dir/src/LpMatrix.cpp.o[0m
+[11.379s] [ 40%] [32mBuilding CXX object openzen/CMakeFiles/OpenZen.dir/src/communication/ConnectionNegotiator.cpp.o[0m
+[11.380s] [ 40%] [32mBuilding CXX object openzen/CMakeFiles/OpenZen.dir/bindings/OpenZenCSharp/OpenZen_wrap_csharp.cxx.o[0m
+[11.381s] [ 42%] [32mBuilding CXX object openzen/CMakeFiles/OpenZen.dir/src/communication/Modbus.cpp.o[0m
+[11.382s] [ 45%] [32mBuilding CXX object openzen/CMakeFiles/OpenZen.dir/src/communication/ModbusCommunicator.cpp.o[0m
+[11.383s] [ 47%] [32mBuilding CXX object openzen/CMakeFiles/OpenZen.dir/src/communication/SyncedModbusCommunicator.cpp.o[0m
+[12.359s] [ 50%] [32mBuilding CXX object openzen/CMakeFiles/OpenZen.dir/src/components/ComponentFactoryManager.cpp.o[0m
+[12.381s] [ 52%] [32mBuilding CXX object openzen/CMakeFiles/OpenZen.dir/src/components/ImuComponent.cpp.o[0m
+[12.615s] [ 54%] [32mBuilding CXX object openzen/CMakeFiles/OpenZen.dir/src/components/ImuIg1Component.cpp.o[0m
+[12.775s] [ 57%] [32mBuilding CXX object openzen/CMakeFiles/OpenZen.dir/src/components/GnssComponent.cpp.o[0m
+[13.239s] [ 59%] [32mBuilding CXX object openzen/CMakeFiles/OpenZen.dir/src/components/factories/ImuComponentFactory.cpp.o[0m
+[13.446s] [ 61%] [32mBuilding CXX object openzen/CMakeFiles/OpenZen.dir/src/components/factories/GnssComponentFactory.cpp.o[0m
+[13.656s] [ 64%] [32mBuilding CXX object openzen/CMakeFiles/OpenZen.dir/src/io/IoManager.cpp.o[0m
+[13.883s] [ 66%] [32mBuilding CXX object openzen/CMakeFiles/OpenZen.dir/src/io/interfaces/TestSensorInterface.cpp.o[0m
+[14.008s] [ 69%] [32mBuilding CXX object openzen/CMakeFiles/OpenZen.dir/src/io/interfaces/posix/PosixDeviceInterface.cpp.o[0m
+[15.102s] [ 71%] [32mBuilding CXX object openzen/CMakeFiles/OpenZen.dir/src/io/systems/TestSensorSystem.cpp.o[0m
+[15.182s] [ 73%] [32mBuilding CXX object openzen/CMakeFiles/OpenZen.dir/src/io/systems/linux/LinuxDeviceSystem.cpp.o[0m
+[15.526s] [ 76%] [32mBuilding CXX object openzen/CMakeFiles/OpenZen.dir/src/properties/LegacyCoreProperties.cpp.o[0m
+[15.527s] [ 78%] [32mBuilding CXX object openzen/CMakeFiles/OpenZen.dir/src/properties/Ig1CoreProperties.cpp.o[0m
+[15.617s] [ 80%] [32mBuilding CXX object openzen/CMakeFiles/OpenZen.dir/src/properties/LegacyImuProperties.cpp.o[0m
+[15.662s] [ 83%] [32mBuilding CXX object openzen/CMakeFiles/OpenZen.dir/src/properties/Ig1ImuProperties.cpp.o[0m
+[15.679s] [ 85%] [32mBuilding CXX object openzen/CMakeFiles/OpenZen.dir/src/properties/Ig1GnssProperties.cpp.o[0m
+[15.700s] [ 88%] [32mBuilding CXX object openzen/CMakeFiles/OpenZen.dir/src/utility/gnss/RTCM3NetworkSource.cpp.o[0m
+[15.786s] [ 90%] [32mBuilding CXX object openzen/CMakeFiles/OpenZen.dir/src/utility/gnss/RTCM3SerialSource.cpp.o[0m
+[16.480s] [ 92%] [32mBuilding CXX object openzen/CMakeFiles/OpenZen.dir/src/utility/posix/PosixDll.cpp.o[0m
+[19.766s] [ 95%] [32m[1mLinking CXX shared library libOpenZen.so[0m
+[20.053s] [ 95%] Built target OpenZen
+[20.102s] [ 97%] [32mBuilding CXX object CMakeFiles/openzen_node.dir/src/OpenZenNode.cpp.o[0m
+[31.972s] [100%] [32m[1mLinking CXX executable openzen_node[0m
+[32.524s] [100%] Built target openzen_node
+[32.555s] Invoked command in '/ros2_ws/build/openzen_driver' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --build /ros2_ws/build/openzen_driver -- -j12 -l12
+[32.582s] Invoking command in '/ros2_ws/build/openzen_driver': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --install /ros2_ws/build/openzen_driver
+[32.604s] -- Install configuration: "Release"
+[32.605s] -- Execute custom install script
+[32.606s] -- Symlinking: /ros2_ws/install/openzen_driver/lib/cmake/nonstd/expected-lite-config.cmake
+[32.631s] -- Symlinking: /ros2_ws/install/openzen_driver/lib/cmake/nonstd/expected-lite-config-version.cmake
+[32.656s] -- Symlinking: /ros2_ws/install/openzen_driver/include/nonstd/expected.hpp
+[32.681s] -- Symlinking: /ros2_ws/install/openzen_driver/lib/openzen_driver/openzen_node
+[32.706s] -- Symlinking: /ros2_ws/install/openzen_driver/share/openzen_driver//launch/openzen_lpms.launch.py
+[32.731s] -- Symlinking: /ros2_ws/install/openzen_driver/share/ament_index/resource_index/package_run_dependencies/openzen_driver
+[32.756s] -- Symlinking: /ros2_ws/install/openzen_driver/share/ament_index/resource_index/parent_prefix_path/openzen_driver
+[32.781s] -- Symlinking: /ros2_ws/install/openzen_driver/share/openzen_driver/environment/ament_prefix_path.sh
+[32.804s] -- Symlinking: /ros2_ws/install/openzen_driver/share/openzen_driver/environment/ament_prefix_path.dsv
+[32.829s] -- Symlinking: /ros2_ws/install/openzen_driver/share/openzen_driver/environment/path.sh
+[32.853s] -- Symlinking: /ros2_ws/install/openzen_driver/share/openzen_driver/environment/path.dsv
+[32.875s] -- Symlinking: /ros2_ws/install/openzen_driver/share/openzen_driver/local_setup.bash
+[32.898s] -- Symlinking: /ros2_ws/install/openzen_driver/share/openzen_driver/local_setup.sh
+[32.922s] -- Symlinking: /ros2_ws/install/openzen_driver/share/openzen_driver/local_setup.zsh
+[32.946s] -- Symlinking: /ros2_ws/install/openzen_driver/share/openzen_driver/local_setup.dsv
+[32.971s] -- Symlinking: /ros2_ws/install/openzen_driver/share/openzen_driver/package.dsv
+[32.995s] -- Symlinking: /ros2_ws/install/openzen_driver/share/ament_index/resource_index/packages/openzen_driver
+[33.018s] -- Symlinking: /ros2_ws/install/openzen_driver/share/openzen_driver/cmake/openzen_driverConfig.cmake
+[33.043s] -- Symlinking: /ros2_ws/install/openzen_driver/share/openzen_driver/cmake/openzen_driverConfig-version.cmake
+[33.066s] -- Symlinking: /ros2_ws/install/openzen_driver/share/openzen_driver/package.xml
+[33.088s] -- Installing: /ros2_ws/install/openzen_driver/lib/libOpenZen.so
+[33.091s] -- Installing: /ros2_ws/install/openzen_driver/include/OpenZen.h
+[33.092s] -- Installing: /ros2_ws/install/openzen_driver/include/OpenZenCAPI.h
+[33.092s] -- Installing: /ros2_ws/install/openzen_driver/include/ZenTypes.h
+[33.093s] -- Installing: /ros2_ws/install/openzen_driver/lib/cmake/OpenZen/OpenZenTargets.cmake
+[33.093s] -- Installing: /ros2_ws/install/openzen_driver/lib/cmake/OpenZen/OpenZenTargets-release.cmake
+[33.094s] -- Installing: /ros2_ws/install/openzen_driver/lib/cmake/OpenZen/OpenZenConfig.cmake
+[33.094s] -- Installing: /ros2_ws/install/openzen_driver/lib/cmake/OpenZen/OpenZenConfigVersion.cmake
+[33.099s] Invoked command in '/ros2_ws/build/openzen_driver' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --install /ros2_ws/build/openzen_driver

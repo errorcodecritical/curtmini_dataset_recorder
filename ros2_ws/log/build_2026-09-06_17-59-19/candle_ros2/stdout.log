@@ -1,0 +1,462 @@
+-- The C compiler identification is GNU 13.3.0
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found rclcpp: 28.1.21 (/opt/ros/jazzy/share/rclcpp/cmake)
+-- Found Python3: /usr/bin/python3 (found version "3.12.3") found components: Interpreter 
+-- Override CMake install command with custom implementation using symlinks instead of copying resources
+-- Found rosidl_generator_c: 4.6.9 (/opt/ros/jazzy/share/rosidl_generator_c/cmake)
+-- Found rosidl_generator_cpp: 4.6.9 (/opt/ros/jazzy/share/rosidl_generator_cpp/cmake)
+-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+-- Found rmw_implementation_cmake: 7.3.3 (/opt/ros/jazzy/share/rmw_implementation_cmake/cmake)
+-- Found rmw_cyclonedds_cpp: 2.2.3 (/opt/ros/jazzy/share/rmw_cyclonedds_cpp/cmake)
+-- Using RMW implementation 'rmw_cyclonedds_cpp' as default
+-- Found sensor_msgs: 5.3.8 (/opt/ros/jazzy/share/sensor_msgs/cmake)
+-- Found rosidl_default_generators: 1.6.1 (/opt/ros/jazzy/share/rosidl_default_generators/cmake)
+-- Found rosidl_adapter: 4.6.9 (/opt/ros/jazzy/share/rosidl_adapter/cmake)
+-- Found ament_cmake_ros: 0.12.1 (/opt/ros/jazzy/share/ament_cmake_ros/cmake)
+-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+-- Found python_cmake_module: 0.11.1 (/opt/ros/jazzy/share/python_cmake_module/cmake)
+-- Found PythonExtra: /usr/bin/python3  
+-- Found Python3: /usr/bin/python3 (found version "3.12.3") found components: Interpreter Development NumPy Development.Module Development.Embed 
+-- Found Python3: /usr/bin/python3 (found version "3.12.3") found components: Interpreter 
+-- 
+CANDLE_BUILD_SHARED: FALSE
+CANDLE_BUILD_STATIC: TRUE
+-- Configuring done (13.1s)
+-- Generating done (0.3s)
+-- Build files have been written to: /ros2_ws/build/candle_ros2
+[  1%] [34m[1mGenerating Rust code for ROS interfaces[0m
+[  1%] [32mBuilding CXX object candle/CMakeFiles/candle.dir/src/bus.cpp.o[0m
+[  1%] [32mBuilding CXX object candle/CMakeFiles/candle.dir/src/register.cpp.o[0m
+[  2%] [32mBuilding CXX object candle/CMakeFiles/candle.dir/src/md80.cpp.o[0m
+[  3%] [32mBuilding CXX object candle/CMakeFiles/candle.dir/src/crc.cpp.o[0m
+[  4%] [32mBuilding CXX object candle/CMakeFiles/candle.dir/src/spiDevice.cpp.o[0m
+[  5%] [34m[1mGenerating type hashes for ROS interfaces[0m
+[  6%] [32mBuilding CXX object candle/CMakeFiles/candle.dir/src/candle.cpp.o[0m
+[  8%] [32mBuilding CXX object candle/CMakeFiles/candle.dir/src/usbDevice.cpp.o[0m
+[  8%] [32mBuilding CXX object candle/CMakeFiles/candle.dir/src/uartDevice.cpp.o[0m
+[  8%] Built target ament_cmake_python_symlink_candle_ros2
+running egg_info
+creating candle_ros2.egg-info
+writing candle_ros2.egg-info/PKG-INFO
+writing dependency_links to candle_ros2.egg-info/dependency_links.txt
+writing top-level names to candle_ros2.egg-info/top_level.txt
+writing manifest file 'candle_ros2.egg-info/SOURCES.txt'
+reading manifest file 'candle_ros2.egg-info/SOURCES.txt'
+writing manifest file 'candle_ros2.egg-info/SOURCES.txt'
+[  8%] Built target ament_cmake_python_build_candle_ros2_egg
+[  8%] Built target candle_ros2__rosidl_generator_type_description
+[  9%] [34m[1mGenerating C code for ROS interfaces[0m
+[  9%] [34m[1mGenerating C++ code for ROS interfaces[0m
+[  9%] Built target candle_ros2__rs
+[  9%] Built target candle_ros2__cpp
+[ 10%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/msg/detail/pid__description.c.o[0m
+[ 10%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/msg/detail/impedance_command__type_support.c.o[0m
+[ 11%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/msg/detail/motion_command__description.c.o[0m
+[ 12%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/msg/detail/motion_command__functions.c.o[0m
+[ 12%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/msg/detail/pid__functions.c.o[0m
+[ 14%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/msg/detail/motion_command__type_support.c.o[0m
+[ 14%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/msg/detail/pid__type_support.c.o[0m
+[ 15%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/msg/detail/impedance_command__description.c.o[0m
+[ 16%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/msg/detail/velocity_pid_command__description.c.o[0m
+[ 17%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/msg/detail/impedance_command__functions.c.o[0m
+[ 18%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/msg/detail/velocity_pid_command__functions.c.o[0m
+[ 19%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/msg/detail/velocity_pid_command__type_support.c.o[0m
+[ 19%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/msg/detail/position_pid_command__description.c.o[0m
+[ 20%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/msg/detail/position_pid_command__functions.c.o[0m
+[ 21%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/msg/detail/position_pid_command__type_support.c.o[0m
+[ 22%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/srv/detail/add_md80s__description.c.o[0m
+[ 23%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/srv/detail/add_md80s__functions.c.o[0m
+[ 23%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/srv/detail/add_md80s__type_support.c.o[0m
+[ 24%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/srv/detail/generic_md80_msg__description.c.o[0m
+[ 25%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/srv/detail/generic_md80_msg__functions.c.o[0m
+[ 26%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/srv/detail/generic_md80_msg__type_support.c.o[0m
+[ 26%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/srv/detail/set_mode_md80s__description.c.o[0m
+[ 27%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/srv/detail/set_mode_md80s__functions.c.o[0m
+[ 28%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/srv/detail/set_mode_md80s__type_support.c.o[0m
+[ 29%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/srv/detail/set_limits_md80__description.c.o[0m
+[ 30%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/srv/detail/set_limits_md80__functions.c.o[0m
+[ 30%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_c.dir/rosidl_generator_c/candle_ros2/srv/detail/set_limits_md80__type_support.c.o[0m
+[ 31%] [32m[1mLinking C shared library libcandle_ros2__rosidl_generator_c.so[0m
+[ 31%] Built target candle_ros2__rosidl_generator_c
+[ 33%] [34m[1mGenerating C type support dispatch for ROS interfaces[0m
+[ 33%] [34m[1mGenerating C introspection for ROS interfaces[0m
+[ 33%] [34m[1mGenerating C++ introspection for ROS interfaces[0m
+[ 34%] [34m[1mGenerating C++ type support dispatch for ROS interfaces[0m
+[ 36%] [34m[1mGenerating C++ type support for eProsima Fast-RTPS[0m
+[ 36%] [34m[1mGenerating C type support for eProsima Fast-RTPS[0m
+[ 37%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_c.dir/rosidl_typesupport_c/candle_ros2/msg/position_pid_command__type_support.cpp.o[0m
+[ 37%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_c.dir/rosidl_typesupport_c/candle_ros2/msg/motion_command__type_support.cpp.o[0m
+[ 39%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_c.dir/rosidl_typesupport_c/candle_ros2/msg/velocity_pid_command__type_support.cpp.o[0m
+[ 39%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_c.dir/rosidl_typesupport_c/candle_ros2/msg/pid__type_support.cpp.o[0m
+[ 40%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_c.dir/rosidl_typesupport_c/candle_ros2/msg/impedance_command__type_support.cpp.o[0m
+[ 41%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_c.dir/rosidl_typesupport_c/candle_ros2/srv/add_md80s__type_support.cpp.o[0m
+[ 42%] [32m[1mLinking CXX static library libcandle.a[0m
+[ 42%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_c.dir/rosidl_typesupport_c/candle_ros2/srv/generic_md80_msg__type_support.cpp.o[0m
+[ 43%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_c.dir/rosidl_typesupport_c/candle_ros2/srv/set_mode_md80s__type_support.cpp.o[0m
+[ 44%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_c.dir/rosidl_typesupport_c/candle_ros2/srv/set_limits_md80__type_support.cpp.o[0m
+[ 44%] Built target candle
+[ 45%] [32m[1mLinking CXX shared library libcandle_ros2__rosidl_typesupport_c.so[0m
+[ 45%] Built target candle_ros2__rosidl_typesupport_c
+[ 46%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/candle_ros2/msg/detail/motion_command__type_support.cpp.o[0m
+[ 46%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/candle_ros2/msg/detail/position_pid_command__type_support.cpp.o[0m
+[ 47%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/candle_ros2/msg/detail/pid__type_support.cpp.o[0m
+[ 48%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/candle_ros2/msg/detail/impedance_command__type_support.cpp.o[0m
+[ 49%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/candle_ros2/srv/detail/set_mode_md80s__type_support.cpp.o[0m
+[ 50%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/candle_ros2/srv/detail/generic_md80_msg__type_support.cpp.o[0m
+[ 51%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/candle_ros2/srv/detail/add_md80s__type_support.cpp.o[0m
+[ 52%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/candle_ros2/msg/detail/velocity_pid_command__type_support.cpp.o[0m
+[ 52%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/candle_ros2/msg/impedance_command__type_support.cpp.o[0m
+[ 52%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/candle_ros2/msg/detail/impedance_command__type_support.c.o[0m
+[ 53%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/candle_ros2/msg/motion_command__type_support.cpp.o[0m
+[ 54%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/candle_ros2/msg/detail/motion_command__type_support.c.o[0m
+[ 55%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/candle_ros2/msg/pid__type_support.cpp.o[0m
+[ 56%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/candle_ros2/msg/detail/dds_fastrtps/impedance_command__type_support.cpp.o[0m
+[ 57%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/candle_ros2/srv/detail/set_limits_md80__type_support.cpp.o[0m
+[ 58%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/candle_ros2/msg/velocity_pid_command__type_support.cpp.o[0m
+[ 59%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/candle_ros2/msg/detail/pid__type_support.c.o[0m
+[ 60%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/candle_ros2/msg/detail/dds_fastrtps/motion_command__type_support.cpp.o[0m
+[ 61%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/candle_ros2/msg/detail/velocity_pid_command__type_support.c.o[0m
+[ 61%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/candle_ros2/msg/position_pid_command__type_support.cpp.o[0m
+[ 62%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/candle_ros2/msg/detail/position_pid_command__type_support.c.o[0m
+[ 63%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/candle_ros2/msg/detail/impedance_command__type_support_c.cpp.o[0m
+[ 63%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/candle_ros2/srv/detail/add_md80s__type_support.c.o[0m
+[ 64%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/candle_ros2/srv/add_md80s__type_support.cpp.o[0m
+[ 65%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/candle_ros2/srv/detail/generic_md80_msg__type_support.c.o[0m
+[ 65%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/candle_ros2/msg/detail/dds_fastrtps/pid__type_support.cpp.o[0m
+[ 66%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/candle_ros2/srv/detail/set_mode_md80s__type_support.c.o[0m
+[ 67%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/candle_ros2/msg/detail/motion_command__type_support_c.cpp.o[0m
+[ 68%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/candle_ros2/srv/detail/set_limits_md80__type_support.c.o[0m
+[ 69%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/candle_ros2/srv/generic_md80_msg__type_support.cpp.o[0m
+[ 70%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/candle_ros2/srv/set_mode_md80s__type_support.cpp.o[0m
+[ 71%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/candle_ros2/msg/detail/dds_fastrtps/velocity_pid_command__type_support.cpp.o[0m
+[ 72%] [32m[1mLinking C shared library libcandle_ros2__rosidl_typesupport_introspection_c.so[0m
+[ 72%] Built target candle_ros2__rosidl_typesupport_introspection_c
+[ 73%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/candle_ros2/msg/detail/pid__type_support_c.cpp.o[0m
+[ 74%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/candle_ros2/srv/set_limits_md80__type_support.cpp.o[0m
+[ 75%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/candle_ros2/msg/detail/dds_fastrtps/position_pid_command__type_support.cpp.o[0m
+[ 75%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/candle_ros2/msg/detail/velocity_pid_command__type_support_c.cpp.o[0m
+[ 76%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/candle_ros2/srv/detail/dds_fastrtps/add_md80s__type_support.cpp.o[0m
+[ 77%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/candle_ros2/msg/detail/position_pid_command__type_support_c.cpp.o[0m
+[ 78%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/candle_ros2/srv/detail/add_md80s__type_support_c.cpp.o[0m
+[ 79%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/candle_ros2/srv/detail/generic_md80_msg__type_support_c.cpp.o[0m
+[ 79%] [32m[1mLinking CXX shared library libcandle_ros2__rosidl_typesupport_introspection_cpp.so[0m
+[ 80%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/candle_ros2/srv/detail/dds_fastrtps/generic_md80_msg__type_support.cpp.o[0m
+[ 81%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/candle_ros2/srv/detail/set_mode_md80s__type_support_c.cpp.o[0m
+[ 81%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/candle_ros2/srv/detail/set_limits_md80__type_support_c.cpp.o[0m
+[ 81%] Built target candle_ros2__rosidl_typesupport_introspection_cpp
+[ 81%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/candle_ros2/srv/detail/dds_fastrtps/set_mode_md80s__type_support.cpp.o[0m
+[ 82%] [32mBuilding CXX object CMakeFiles/candle_ros2__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/candle_ros2/srv/detail/dds_fastrtps/set_limits_md80__type_support.cpp.o[0m
+[ 82%] [32m[1mLinking CXX shared library libcandle_ros2__rosidl_typesupport_cpp.so[0m
+[ 82%] Built target candle_ros2__rosidl_typesupport_cpp
+[ 83%] [32m[1mLinking CXX shared library libcandle_ros2__rosidl_typesupport_fastrtps_c.so[0m
+[ 83%] Built target candle_ros2__rosidl_typesupport_fastrtps_c
+[ 84%] [32m[1mLinking CXX shared library libcandle_ros2__rosidl_typesupport_fastrtps_cpp.so[0m
+[ 84%] Built target candle_ros2__rosidl_typesupport_fastrtps_cpp
+[ 84%] Built target candle_ros2
+[ 85%] [32mBuilding CXX object CMakeFiles/candle_ros2_node.dir/src/md80_node.cpp.o[0m
+[ 86%] [34m[1mGenerating Python code for ROS interfaces[0m
+[ 86%] Built target candle_ros2__py
+[ 87%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_py.dir/rosidl_generator_py/candle_ros2/srv/_add_md80s_s.c.o[0m
+[ 88%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_py.dir/rosidl_generator_py/candle_ros2/msg/_pid_s.c.o[0m
+[ 90%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_py.dir/rosidl_generator_py/candle_ros2/msg/_impedance_command_s.c.o[0m
+[ 90%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_py.dir/rosidl_generator_py/candle_ros2/msg/_motion_command_s.c.o[0m
+[ 91%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_py.dir/rosidl_generator_py/candle_ros2/msg/_position_pid_command_s.c.o[0m
+[ 92%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_py.dir/rosidl_generator_py/candle_ros2/srv/_generic_md80_msg_s.c.o[0m
+[ 92%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_py.dir/rosidl_generator_py/candle_ros2/msg/_velocity_pid_command_s.c.o[0m
+[ 93%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_py.dir/rosidl_generator_py/candle_ros2/srv/_set_mode_md80s_s.c.o[0m
+[ 93%] [32mBuilding C object CMakeFiles/candle_ros2__rosidl_generator_py.dir/rosidl_generator_py/candle_ros2/srv/_set_limits_md80_s.c.o[0m
+[ 94%] [32m[1mLinking C shared library libcandle_ros2__rosidl_generator_py.so[0m
+[ 94%] Built target candle_ros2__rosidl_generator_py
+[ 97%] [32mBuilding C object CMakeFiles/candle_ros2_s__rosidl_typesupport_fastrtps_c.dir/rosidl_generator_py/candle_ros2/_candle_ros2_s.ep.rosidl_typesupport_fastrtps_c.c.o[0m
+[ 97%] [32mBuilding C object CMakeFiles/candle_ros2_s__rosidl_typesupport_introspection_c.dir/rosidl_generator_py/candle_ros2/_candle_ros2_s.ep.rosidl_typesupport_introspection_c.c.o[0m
+[ 97%] [32mBuilding C object CMakeFiles/candle_ros2_s__rosidl_typesupport_c.dir/rosidl_generator_py/candle_ros2/_candle_ros2_s.ep.rosidl_typesupport_c.c.o[0m
+[ 99%] [32m[1mLinking C shared module rosidl_generator_py/candle_ros2/candle_ros2_s__rosidl_typesupport_fastrtps_c.so[0m
+[ 99%] [32m[1mLinking C shared module rosidl_generator_py/candle_ros2/candle_ros2_s__rosidl_typesupport_introspection_c.so[0m
+[ 99%] [32m[1mLinking C shared module rosidl_generator_py/candle_ros2/candle_ros2_s__rosidl_typesupport_c.so[0m
+[ 99%] Built target candle_ros2_s__rosidl_typesupport_fastrtps_c
+[ 99%] Built target candle_ros2_s__rosidl_typesupport_introspection_c
+[ 99%] Built target candle_ros2_s__rosidl_typesupport_c
+[100%] [32m[1mLinking CXX executable candle_ros2_node[0m
+[100%] Built target candle_ros2_node
+-- Install configuration: "Release"
+-- Execute custom install script
+-- Symlinking: /ros2_ws/install/candle_ros2/share/ament_index/resource_index/rosidl_interfaces/candle_ros2
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/ImpedanceCommand.json
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/MotionCommand.json
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/Pid.json
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/VelocityPidCommand.json
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/PositionPidCommand.json
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/AddMd80s.json
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/GenericMd80Msg.json
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/SetModeMd80s.json
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/SetLimitsMd80.json
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__functions.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__struct.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__type_support.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__functions.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__struct.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__type_support.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__functions.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__struct.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__type_support.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__functions.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__struct.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__type_support.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__functions.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__struct.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__type_support.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/impedance_command.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/motion_command.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/pid.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/position_pid_command.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/rosidl_generator_c__visibility_control.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/velocity_pid_command.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/add_md80s.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__functions.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__struct.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__type_support.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__functions.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__struct.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__type_support.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__functions.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__struct.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__type_support.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__functions.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__struct.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__type_support.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/generic_md80_msg.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/set_limits_md80.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/set_mode_md80s.h
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/environment/library_path.sh
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/environment/library_path.dsv
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__rosidl_typesupport_fastrtps_c.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__rosidl_typesupport_fastrtps_c.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__rosidl_typesupport_fastrtps_c.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__rosidl_typesupport_fastrtps_c.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__rosidl_typesupport_fastrtps_c.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/rosidl_typesupport_fastrtps_c__visibility_control.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__rosidl_typesupport_fastrtps_c.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__rosidl_typesupport_fastrtps_c.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__rosidl_typesupport_fastrtps_c.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__rosidl_typesupport_fastrtps_c.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__builder.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__struct.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__traits.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__type_support.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__builder.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__struct.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__traits.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__type_support.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__builder.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__struct.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__traits.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__type_support.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__builder.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__struct.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__traits.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__type_support.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__builder.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__struct.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__traits.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__type_support.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/impedance_command.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/motion_command.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/pid.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/position_pid_command.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/rosidl_generator_cpp__visibility_control.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/velocity_pid_command.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/add_md80s.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__builder.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__struct.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__traits.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__type_support.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__builder.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__struct.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__traits.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__type_support.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__builder.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__struct.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__traits.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__type_support.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__builder.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__struct.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__traits.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__type_support.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/generic_md80_msg.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/set_limits_md80.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/set_mode_md80s.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__rosidl_typesupport_fastrtps_cpp.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__rosidl_typesupport_fastrtps_cpp.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__rosidl_typesupport_fastrtps_cpp.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__rosidl_typesupport_fastrtps_cpp.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__rosidl_typesupport_fastrtps_cpp.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/rosidl_typesupport_fastrtps_cpp__visibility_control.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__rosidl_typesupport_fastrtps_cpp.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__rosidl_typesupport_fastrtps_cpp.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__rosidl_typesupport_fastrtps_cpp.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__rosidl_typesupport_fastrtps_cpp.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__rosidl_typesupport_introspection_c.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__rosidl_typesupport_introspection_c.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__rosidl_typesupport_introspection_c.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__rosidl_typesupport_introspection_c.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__rosidl_typesupport_introspection_c.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/rosidl_typesupport_introspection_c__visibility_control.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__rosidl_typesupport_introspection_c.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__rosidl_typesupport_introspection_c.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__rosidl_typesupport_introspection_c.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__rosidl_typesupport_introspection_c.h
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/impedance_command__rosidl_typesupport_introspection_cpp.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/motion_command__rosidl_typesupport_introspection_cpp.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/pid__rosidl_typesupport_introspection_cpp.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/position_pid_command__rosidl_typesupport_introspection_cpp.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/msg/detail/velocity_pid_command__rosidl_typesupport_introspection_cpp.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/add_md80s__rosidl_typesupport_introspection_cpp.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/generic_md80_msg__rosidl_typesupport_introspection_cpp.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_limits_md80__rosidl_typesupport_introspection_cpp.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/include/candle_ros2/candle_ros2/srv/detail/set_mode_md80s__rosidl_typesupport_introspection_cpp.hpp
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/environment/pythonpath.sh
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/environment/pythonpath.dsv
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2-1.2.0-py3.12.egg-info/PKG-INFO
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2-1.2.0-py3.12.egg-info/SOURCES.txt
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2-1.2.0-py3.12.egg-info/dependency_links.txt
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2-1.2.0-py3.12.egg-info/top_level.txt
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/__init__.py
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/_candle_ros2_s.ep.rosidl_typesupport_c.c
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/_candle_ros2_s.ep.rosidl_typesupport_fastrtps_c.c
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/_candle_ros2_s.ep.rosidl_typesupport_introspection_c.c
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/candle_ros2_s__rosidl_typesupport_c.so
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/candle_ros2_s__rosidl_typesupport_fastrtps_c.so
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/candle_ros2_s__rosidl_typesupport_introspection_c.so
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/__init__.py
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_impedance_command.py
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_impedance_command_s.c
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_motion_command.py
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_motion_command_s.c
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_pid.py
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_pid_s.c
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_position_pid_command.py
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_position_pid_command_s.c
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_velocity_pid_command.py
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_velocity_pid_command_s.c
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/__init__.py
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_add_md80s.py
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_add_md80s_s.c
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_generic_md80_msg.py
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_generic_md80_msg_s.c
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_set_limits_md80.py
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_set_limits_md80_s.c
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_set_mode_md80s.py
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_set_mode_md80s_s.c
+-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/candle_ros2_s__rosidl_typesupport_fastrtps_c.so
+-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/candle_ros2_s__rosidl_typesupport_introspection_c.so
+-- Up-to-date symlink: /ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/candle_ros2_s__rosidl_typesupport_c.so
+-- Symlinking: /ros2_ws/install/candle_ros2/share/ament_index/resource_index/rust_packages/candle_ros2
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/rust/Cargo.toml
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/rust/build.rs
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/rust/src/lib.rs
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/rust/src/msg.rs
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/rust/src/msg/rmw.rs
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/rust/src/srv.rs
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/rust/src/srv/rmw.rs
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/ImpedanceCommand.idl
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/MotionCommand.idl
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/Pid.idl
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/VelocityPidCommand.idl
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/PositionPidCommand.idl
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/AddMd80s.idl
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/GenericMd80Msg.idl
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/SetModeMd80s.idl
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/SetLimitsMd80.idl
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/ImpedanceCommand.msg
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/MotionCommand.msg
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/Pid.msg
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/VelocityPidCommand.msg
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/msg/PositionPidCommand.msg
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/AddMd80s.srv
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/GenericMd80Msg.srv
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/SetModeMd80s.srv
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/srv/SetLimitsMd80.srv
+-- Symlinking: /ros2_ws/install/candle_ros2/lib/candle_ros2/candle_ros2_node
+-- Symlinking: /ros2_ws/install/candle_ros2/share/ament_index/resource_index/package_run_dependencies/candle_ros2
+-- Symlinking: /ros2_ws/install/candle_ros2/share/ament_index/resource_index/parent_prefix_path/candle_ros2
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/environment/ament_prefix_path.sh
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/environment/ament_prefix_path.dsv
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/environment/path.sh
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/environment/path.dsv
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/local_setup.bash
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/local_setup.sh
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/local_setup.zsh
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/local_setup.dsv
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/package.dsv
+-- Symlinking: /ros2_ws/install/candle_ros2/share/ament_index/resource_index/packages/candle_ros2
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/rosidl_cmake-extras.cmake
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/ament_cmake_export_dependencies-extras.cmake
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/ament_cmake_export_include_directories-extras.cmake
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/ament_cmake_export_libraries-extras.cmake
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/ament_cmake_export_targets-extras.cmake
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/rosidl_cmake_export_typesupport_targets-extras.cmake
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/rosidl_cmake_export_typesupport_libraries-extras.cmake
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/rosidl_cmake_aggregate_target-extras.cmake
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/candle_ros2Config.cmake
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/candle_ros2Config-version.cmake
+-- Symlinking: /ros2_ws/install/candle_ros2/share/candle_ros2/package.xml
+-- Installing: /ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_generator_c.so
+-- Set non-toolchain portion of runtime path of "/ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_generator_c.so" to ""
+-- Installing: /ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_typesupport_fastrtps_c.so
+-- Set non-toolchain portion of runtime path of "/ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_typesupport_fastrtps_c.so" to ""
+-- Installing: /ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_typesupport_fastrtps_cpp.so
+-- Set non-toolchain portion of runtime path of "/ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_typesupport_fastrtps_cpp.so" to ""
+-- Installing: /ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_typesupport_introspection_c.so
+-- Set non-toolchain portion of runtime path of "/ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_typesupport_introspection_c.so" to ""
+-- Installing: /ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_typesupport_c.so
+-- Set non-toolchain portion of runtime path of "/ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_typesupport_c.so" to ""
+-- Installing: /ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_typesupport_introspection_cpp.so
+-- Set non-toolchain portion of runtime path of "/ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_typesupport_introspection_cpp.so" to ""
+-- Installing: /ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_typesupport_cpp.so
+-- Set non-toolchain portion of runtime path of "/ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_typesupport_cpp.so" to ""
+Listing '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2'...
+Compiling '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/__init__.py'...
+Listing '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg'...
+Compiling '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/__init__.py'...
+Compiling '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_impedance_command.py'...
+Compiling '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_motion_command.py'...
+Compiling '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_pid.py'...
+Compiling '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_position_pid_command.py'...
+Compiling '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/msg/_velocity_pid_command.py'...
+Listing '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv'...
+Compiling '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/__init__.py'...
+Compiling '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_add_md80s.py'...
+Compiling '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_generic_md80_msg.py'...
+Compiling '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_set_limits_md80.py'...
+Compiling '/ros2_ws/install/candle_ros2/lib/python3.12/site-packages/candle_ros2/srv/_set_mode_md80s.py'...
+-- Installing: /ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_generator_py.so
+-- Set non-toolchain portion of runtime path of "/ros2_ws/install/candle_ros2/lib/libcandle_ros2__rosidl_generator_py.so" to ""
+-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/export_candle_ros2__rosidl_generator_cExport.cmake
+-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/export_candle_ros2__rosidl_generator_cExport-release.cmake
+-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/export_candle_ros2__rosidl_typesupport_fastrtps_cExport.cmake
+-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/export_candle_ros2__rosidl_typesupport_fastrtps_cExport-release.cmake
+-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/export_candle_ros2__rosidl_generator_cppExport.cmake
+-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/export_candle_ros2__rosidl_typesupport_fastrtps_cppExport.cmake
+-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/export_candle_ros2__rosidl_typesupport_fastrtps_cppExport-release.cmake
+-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/candle_ros2__rosidl_typesupport_introspection_cExport.cmake
+-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/candle_ros2__rosidl_typesupport_introspection_cExport-release.cmake
+-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/candle_ros2__rosidl_typesupport_cExport.cmake
+-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/candle_ros2__rosidl_typesupport_cExport-release.cmake
+-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/candle_ros2__rosidl_typesupport_introspection_cppExport.cmake
+-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/candle_ros2__rosidl_typesupport_introspection_cppExport-release.cmake
+-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/candle_ros2__rosidl_typesupport_cppExport.cmake
+-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/candle_ros2__rosidl_typesupport_cppExport-release.cmake
+-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/export_candle_ros2__rosidl_generator_pyExport.cmake
+-- Installing: /ros2_ws/install/candle_ros2/share/candle_ros2/cmake/export_candle_ros2__rosidl_generator_pyExport-release.cmake

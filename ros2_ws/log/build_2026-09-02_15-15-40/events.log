@@ -1,0 +1,20 @@
+[0.000000] (-) TimerEvent: {}
+[0.000488] (-) JobUnselected: {'identifier': 'candle_ros2'}
+[0.000880] (-) JobUnselected: {'identifier': 'curt_description'}
+[0.000965] (-) JobUnselected: {'identifier': 'curt_mini'}
+[0.001036] (-) JobUnselected: {'identifier': 'hector_recorder'}
+[0.001200] (-) JobUnselected: {'identifier': 'hector_recorder_msgs'}
+[0.001360] (-) JobUnselected: {'identifier': 'imu_mag_fusion'}
+[0.001523] (-) JobUnselected: {'identifier': 'ipa_ros2_control'}
+[0.001617] (-) JobUnselected: {'identifier': 'metavision_driver'}
+[0.001681] (-) JobUnselected: {'identifier': 'nmea_navsat_driver'}
+[0.001732] (-) JobUnselected: {'identifier': 'openzen_driver'}
+[0.001783] (-) JobUnselected: {'identifier': 'ouster_ros'}
+[0.001846] (-) JobUnselected: {'identifier': 'ouster_sensor_msgs'}
+[0.001888] (-) JobUnselected: {'identifier': 'realsense2_camera'}
+[0.001916] (-) JobUnselected: {'identifier': 'realsense2_camera_msgs'}
+[0.001944] (-) JobUnselected: {'identifier': 'realsense2_description'}
+[0.001972] (-) JobUnselected: {'identifier': 'realsense_camera_info_override'}
+[0.001998] (-) JobUnselected: {'identifier': 'rqml_recorder'}
+[0.002025] (-) JobUnselected: {'identifier': 'xsens_driver'}
+[0.002052] (-) EventReactorShutdown: {}

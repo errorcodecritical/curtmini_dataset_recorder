@@ -1,0 +1,59 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"_install",
+			"install"
+		],
+		"files" : 
+		[
+			"/opt/ros/jazzy/share/ament_cmake_core/cmake/symlink_install/install.cmake",
+			"openzen/external/expected-lite/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 1
+			},
+			{
+				"command" : 1,
+				"file" : 1,
+				"line" : 108,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 43,
+				"parent" : 1
+			}
+		]
+	},
+	"installers" : 
+	[
+		{
+			"backtrace" : 2,
+			"component" : "Unspecified",
+			"destination" : "lib/cmake/nonstd",
+			"exportName" : "expected-lite-targets",
+			"exportTargets" : 
+			[
+				{
+					"id" : "expected-lite::@342c33ba65c554a42825",
+					"index" : 0
+				}
+			],
+			"paths" : 
+			[
+				"openzen/external/expected-lite/CMakeFiles/Export/a3fc768116ad60a78bdd14a434b43d2d/expected-lite-targets.cmake"
+			],
+			"type" : "export"
+		}
+	],
+	"paths" : 
+	{
+		"build" : "openzen/external/expected-lite",
+		"source" : "openzen/external/expected-lite"
+	}
+}

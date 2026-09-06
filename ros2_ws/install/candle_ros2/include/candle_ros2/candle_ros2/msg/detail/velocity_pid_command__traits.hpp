@@ -1,0 +1,1 @@
+/ros2_ws/build/candle_ros2/rosidl_generator_cpp/candle_ros2/msg/detail/velocity_pid_command__traits.hpp

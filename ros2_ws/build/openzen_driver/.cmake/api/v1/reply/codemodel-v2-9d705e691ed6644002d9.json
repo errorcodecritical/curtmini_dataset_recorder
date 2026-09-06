@@ -1,0 +1,261 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Release-b1d8cae4dcbd7c1b011f.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.20"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						1,
+						2,
+						4
+					]
+				},
+				{
+					"build" : "openzen",
+					"childIndexes" : 
+					[
+						2
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-openzen-Release-01e316e045d3816d0e72.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.10"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "openzen",
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"build" : "openzen/external",
+					"childIndexes" : 
+					[
+						3,
+						4,
+						6,
+						7
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-openzen.external-Release-733c242f9bed16d68340.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.10"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 1,
+					"source" : "openzen/external"
+				},
+				{
+					"build" : "openzen/external/expected-lite",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-openzen.external.expected-lite-Release-1511d0dcaa4c82cd0830.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.5"
+					},
+					"parentIndex" : 2,
+					"projectIndex" : 2,
+					"source" : "openzen/external/expected-lite"
+				},
+				{
+					"build" : "openzen/external/gsl",
+					"childIndexes" : 
+					[
+						5
+					],
+					"jsonFile" : "directory-openzen.external.gsl-Release-fe17379ee8652d41e861.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.14"
+					},
+					"parentIndex" : 2,
+					"projectIndex" : 3,
+					"source" : "openzen/external/gsl"
+				},
+				{
+					"build" : "openzen/external/gsl/include",
+					"jsonFile" : "directory-openzen.external.gsl.include-Release-d9d86e9bf1cf9f5338db.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.14"
+					},
+					"parentIndex" : 4,
+					"projectIndex" : 3,
+					"source" : "openzen/external/gsl/include"
+				},
+				{
+					"build" : "openzen/external/cereal",
+					"jsonFile" : "directory-openzen.external.cereal-Release-794cc1d9c33064a6dd67.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.6"
+					},
+					"parentIndex" : 2,
+					"projectIndex" : 4,
+					"source" : "openzen/external/cereal"
+				},
+				{
+					"build" : "openzen/external/spdlog",
+					"jsonFile" : "directory-openzen.external.spdlog-Release-f242417a9c5abf37d4c5.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.10"
+					},
+					"parentIndex" : 2,
+					"projectIndex" : 5,
+					"source" : "openzen/external/spdlog",
+					"targetIndexes" : 
+					[
+						3
+					]
+				}
+			],
+			"name" : "Release",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1
+					],
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "openzen_driver",
+					"targetIndexes" : 
+					[
+						1,
+						2,
+						4
+					]
+				},
+				{
+					"childIndexes" : 
+					[
+						2,
+						3,
+						4,
+						5
+					],
+					"directoryIndexes" : 
+					[
+						1,
+						2
+					],
+					"name" : "OpenZen",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						3
+					],
+					"name" : "expected_lite",
+					"parentIndex" : 1
+				},
+				{
+					"directoryIndexes" : 
+					[
+						4,
+						5
+					],
+					"name" : "GSL",
+					"parentIndex" : 1
+				},
+				{
+					"directoryIndexes" : 
+					[
+						6
+					],
+					"name" : "cereal",
+					"parentIndex" : 1
+				},
+				{
+					"directoryIndexes" : 
+					[
+						7
+					],
+					"name" : "spdlog",
+					"parentIndex" : 1,
+					"targetIndexes" : 
+					[
+						3
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 1,
+					"id" : "OpenZen::@0b48a4b74985284bed5b",
+					"jsonFile" : "target-OpenZen-Release-4df4734a651fcf06f351.json",
+					"name" : "OpenZen",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "openzen_driver_uninstall::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-openzen_driver_uninstall-Release-e418ba9ccf3bea30cea7.json",
+					"name" : "openzen_driver_uninstall",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "openzen_node::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-openzen_node-Release-048be498637612b306c4.json",
+					"name" : "openzen_node",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 7,
+					"id" : "spdlog::@b30138644a75e831769d",
+					"jsonFile" : "target-spdlog-Release-c227595bdefe37385472.json",
+					"name" : "spdlog",
+					"projectIndex" : 5
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "uninstall::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-uninstall-Release-590c3dcaeb802d6dea41.json",
+					"name" : "uninstall",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/ros2_ws/build/openzen_driver",
+		"source" : "/ros2_ws/src/openzenros2"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 6
+	}
+}
