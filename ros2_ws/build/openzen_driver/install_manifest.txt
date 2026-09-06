@@ -1,8 +1,0 @@
-/ros2_ws/install/openzen_driver/lib/libOpenZen.so
-/ros2_ws/install/openzen_driver/include/OpenZen.h
-/ros2_ws/install/openzen_driver/include/OpenZenCAPI.h
-/ros2_ws/install/openzen_driver/include/ZenTypes.h
-/ros2_ws/install/openzen_driver/lib/cmake/OpenZen/OpenZenTargets.cmake
-/ros2_ws/install/openzen_driver/lib/cmake/OpenZen/OpenZenTargets-release.cmake
-/ros2_ws/install/openzen_driver/lib/cmake/OpenZen/OpenZenConfig.cmake
-/ros2_ws/install/openzen_driver/lib/cmake/OpenZen/OpenZenConfigVersion.cmake

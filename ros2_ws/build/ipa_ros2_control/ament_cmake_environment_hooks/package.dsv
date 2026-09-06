@@ -1,4 +1,0 @@
-source;share/ipa_ros2_control/local_setup.bash
-source;share/ipa_ros2_control/local_setup.dsv
-source;share/ipa_ros2_control/local_setup.sh
-source;share/ipa_ros2_control/local_setup.zsh

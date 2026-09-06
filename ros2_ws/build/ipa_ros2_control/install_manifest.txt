@@ -1,3 +1,0 @@
-/ros2_ws/install/ipa_ros2_control/lib/libipa_ros2_control.so
-/ros2_ws/install/ipa_ros2_control/share/ipa_ros2_control/cmake/export_ipa_ros2_controlExport.cmake
-/ros2_ws/install/ipa_ros2_control/share/ipa_ros2_control/cmake/export_ipa_ros2_controlExport-release.cmake

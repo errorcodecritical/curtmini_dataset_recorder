@@ -1,1 +1,0 @@
-/ros2_ws/src/curt_mini/ipa_ros2_control/launch/ros2_control.launch.py

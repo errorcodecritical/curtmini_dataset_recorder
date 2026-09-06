@@ -1,1 +1,0 @@
-/ros2_ws/src/nmea_navsat_driver/launch/nmea_serial_driver.launch.py

@@ -1,1 +1,0 @@
-/ros2_ws/build/candle_ros2/rosidl_typesupport_fastrtps_cpp/candle_ros2/srv/detail/add_md80s__rosidl_typesupport_fastrtps_cpp.hpp

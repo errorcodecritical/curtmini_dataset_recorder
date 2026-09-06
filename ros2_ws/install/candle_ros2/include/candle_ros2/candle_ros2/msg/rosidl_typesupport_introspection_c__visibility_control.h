@@ -1,1 +1,0 @@
-/ros2_ws/build/candle_ros2/rosidl_typesupport_introspection_c/candle_ros2/msg/rosidl_typesupport_introspection_c__visibility_control.h

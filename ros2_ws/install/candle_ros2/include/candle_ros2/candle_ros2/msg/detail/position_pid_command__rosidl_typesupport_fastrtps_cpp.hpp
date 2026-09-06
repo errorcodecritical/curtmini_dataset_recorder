@@ -1,1 +1,0 @@
-/ros2_ws/build/candle_ros2/rosidl_typesupport_fastrtps_cpp/candle_ros2/msg/detail/position_pid_command__rosidl_typesupport_fastrtps_cpp.hpp

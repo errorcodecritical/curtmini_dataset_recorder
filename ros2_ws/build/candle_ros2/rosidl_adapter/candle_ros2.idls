@@ -1,9 +1,0 @@
-/ros2_ws/build/candle_ros2/rosidl_adapter/candle_ros2:msg/ImpedanceCommand.idl
-/ros2_ws/build/candle_ros2/rosidl_adapter/candle_ros2:msg/MotionCommand.idl
-/ros2_ws/build/candle_ros2/rosidl_adapter/candle_ros2:msg/Pid.idl
-/ros2_ws/build/candle_ros2/rosidl_adapter/candle_ros2:msg/VelocityPidCommand.idl
-/ros2_ws/build/candle_ros2/rosidl_adapter/candle_ros2:msg/PositionPidCommand.idl
-/ros2_ws/build/candle_ros2/rosidl_adapter/candle_ros2:srv/AddMd80s.idl
-/ros2_ws/build/candle_ros2/rosidl_adapter/candle_ros2:srv/GenericMd80Msg.idl
-/ros2_ws/build/candle_ros2/rosidl_adapter/candle_ros2:srv/SetModeMd80s.idl
-/ros2_ws/build/candle_ros2/rosidl_adapter/candle_ros2:srv/SetLimitsMd80.idl

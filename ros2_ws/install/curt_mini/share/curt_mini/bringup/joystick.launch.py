@@ -1,1 +1,0 @@
-/ros2_ws/src/curt_mini/curt_mini/bringup/joystick.launch.py
