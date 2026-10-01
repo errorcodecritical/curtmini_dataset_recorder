@@ -7,7 +7,7 @@
 	url = https://github.com/ros-event-camera/metavision_driver.git
 [submodule "ros2_ws/src/ouster-ros"]
 	path = ros2_ws/src/ouster-ros
-	url = https://github.com/ouster-lidar/ouster-ros.git
+	url = https://github.com/errorcodecritical/ouster-ros
 	branch = ros2
 [submodule "ros2_ws/src/realsense-ros"]
 	path = ros2_ws/src/realsense-ros
