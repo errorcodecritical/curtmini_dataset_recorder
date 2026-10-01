@@ -1,6 +1,32 @@
 version: '3.8'
 
 services:
+  roudi:
+    build:
+      context: ..
+      dockerfile: docker/roudi/Dockerfile
+    image: ros2_roudi:latest
+    container_name: roudi
+    privileged: true
+    user: "0:0"
+    network_mode: none
+    ipc: host
+    restart: unless-stopped
+    volumes:
+      - /dev/shm:/dev/shm
+      - /tmp:/tmp
+      - ../config/iceoryx/roudi_config.toml:/roudi_config.toml
+    environment:
+      - IOX_DOMAIN_ID=0
+    command:
+      - bash
+      - -c
+      - | 
+        echo '=== Starting RouDi ==='
+        umask 0000
+        iox-roudi -c /roudi_config.toml
+
+
   openzen_driver:
     image: openzen_jazzy:latest
     build:
@@ -16,8 +42,12 @@ services:
     volumes:
       - /dev/:/dev/
       - ../ros2_ws/:/ros2_ws
+      - ../config/cyclonedds/cyclonedds-local.xml:/cyclonedds-config.xml
     environment:
+      - ROS_DOMAIN_ID=0
+      - IOX_DOMAIN_ID=0
       - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - CYCLONEDDS_URI=file:///cyclonedds-config.xml
     command:
       - /bin/bash
       - -c
@@ -41,12 +71,14 @@ services:
       - /dev/ttyACM1:/dev/ttyACM1
     volumes:
       - /dev:/dev
-      - ../ros2_ws:/ros2_ws
-      - ../config/:/config/
       - /run/udev/data:/run/udev/data:ro
+      - ../ros2_ws:/ros2_ws
+      - ../config/cyclonedds/cyclonedds-local.xml:/cyclonedds-config.xml
     environment:
+      - ROS_DOMAIN_ID=0
+      - IOX_DOMAIN_ID=0
       - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-      # - CYCLONEDDS_URI=/opt/ros/cyclonedds-config.xml
+      - CYCLONEDDS_URI=file:///cyclonedds-config.xml
     command:
       - bash
       - -c
@@ -71,10 +103,14 @@ services:
     volumes:
       - /dev/:/dev/
       - ../ros2_ws:/ros2_ws
+      - ../config/cyclonedds/cyclonedds-local.xml:/cyclonedds-config.xml
       - ../config/emlid/nmea_serial_driver.py:/ros2_ws/src/nmea_navsat_driver/src/libnmea_navsat_driver/nodes/nmea_serial_driver.py
       - ../config/emlid/nmea_serial_driver.yaml:/ros2_ws/src/nmea_navsat_driver/config/nmea_serial_driver.yaml
     environment:
+      - ROS_DOMAIN_ID=0
+      - IOX_DOMAIN_ID=0
       - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - CYCLONEDDS_URI=file:///cyclonedds-config.xml
     command:
       - /bin/bash
       - -c
@@ -99,9 +135,14 @@ services:
     restart: unless-stopped
     volumes:
       - /dev/:/dev/
+      - ../ros2_ws:/ros2_ws
+      - ../config/cyclonedds/cyclonedds-local.xml:/cyclonedds-config.xml
       - ../config/realsense/rs_launch.py:/ros2_ws/src/realsense-ros/realsense2_camera/launch/rs_launch.py
     environment:
+      - ROS_DOMAIN_ID=0
+      - IOX_DOMAIN_ID=0
       - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - CYCLONEDDS_URI=file:///cyclonedds-config.xml
     command:
       - /bin/bash
       - -c
@@ -126,9 +167,13 @@ services:
     restart: unless-stopped
     volumes:
       - ../ros2_ws/ouster-build:/root/ros2_ws/build
+      - ../config/cyclonedds/cyclonedds-local.xml:/cyclonedds-config.xml
       - ../config/ouster/driver_params.yaml:/ros2_ws/src/ouster-ros/ouster-ros/config/driver_params.yaml
     environment:
+      - ROS_DOMAIN_ID=0
+      - IOX_DOMAIN_ID=0
       - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - CYCLONEDDS_URI=file:///cyclonedds-config.xml
     command:
       - /bin/bash
       - -c
@@ -152,8 +197,13 @@ services:
     network_mode: host
     volumes:
       - /dev:/dev
+      - ../ros2_ws:/ros2_ws
+      - ../config/cyclonedds/cyclonedds-local.xml:/cyclonedds-config.xml
     environment:
+      - ROS_DOMAIN_ID=0
+      - IOX_DOMAIN_ID=0
       - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - CYCLONEDDS_URI=file:///cyclonedds-config.xml
     command:
       - /bin/bash
       - -c
@@ -178,9 +228,14 @@ services:
     restart: unless-stopped
     volumes:
       - /dev/:/dev/
+      - ../ros2_ws:/ros2_ws
+      - ../config/cyclonedds/cyclonedds-local.xml:/cyclonedds-config.xml
       - ../rosbags/:/rosbags/
     environment:
+      - ROS_DOMAIN_ID=0
+      - IOX_DOMAIN_ID=0
       - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - CYCLONEDDS_URI=file:///cyclonedds-config.xml
     command:
       - /bin/bash
       - -c

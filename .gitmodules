@@ -18,3 +18,6 @@
 [submodule "ros2_ws/src/norlab_xsens_driver"]
 	path = ros2_ws/src/norlab_xsens_driver
 	url = https://github.com/norlab-ulaval/norlab_xsens_driver.git
+[submodule "ros2_ws/src/traversability_mapping"]
+	path = ros2_ws/src/traversability_mapping
+	url = https://github.com/errorcodecritical/traversability_mapping

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CycloneDDS xmlns="https://cdds.io/config" 
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+            xsi:schemaLocation="https://cdds.io/config https://raw.githubusercontent.com/eclipse-cyclonedds/cyclonedds/master/etc/cyclonedds.xsd">
+  
+  <!-- Domain 0: Local-only transport -->
+  <Domain id="0">
+    <General>
+      <AllowMulticast>false</AllowMulticast>
+      <Interfaces>
+        <NetworkInterface address="127.0.0.1"/>
+      </Interfaces>
+    </General>
+    <SharedMemory>
+      <Enable>true</Enable>
+    </SharedMemory>
+  </Domain>
+
+  <!-- Domain 133: Inter-Robot Wi-Fi Exchange -->
+  <Domain id="133">
+    <General>
+      <AllowMulticast>spdp</AllowMulticast>
+      <Interfaces>
+        <NetworkInterface name="wlP1p1s0" priority="default" multicast="default"/>
+      </Interfaces>
+    </General>
+    <Discovery>
+      <ParticipantIndex>auto</ParticipantIndex>
+      <SPDPMulticastAddress>239.255.0.1</SPDPMulticastAddress>
+      <Peers>
+        <Peer Address="239.255.0.1"/>
+      </Peers>
+    </Discovery>
+    <SharedMemory>
+      <Enable>false</Enable> <!-- Disables zero-copy across Wi-Fi -->
+    </SharedMemory>
+    <Internal>
+      <SocketReceiveBufferSize min="100MB"/>
+      <SocketSendBufferSize min="100MB"/>
+      <Watermarks>
+        <WhcHigh>100MB</WhcHigh>
+      </Watermarks>
+    </Internal>
+  </Domain>
+</CycloneDDS>
