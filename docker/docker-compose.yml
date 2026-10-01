@@ -166,7 +166,7 @@ services:
     network_mode: host
     restart: unless-stopped
     volumes:
-      - ../ros2_ws/ouster-build:/root/ros2_ws/build
+      - ../ros2_ws:/ros2_ws
       - ../config/cyclonedds/cyclonedds-local.xml:/cyclonedds-config.xml
       - ../config/ouster/driver_params.yaml:/ros2_ws/src/ouster-ros/ouster-ros/config/driver_params.yaml
     environment:

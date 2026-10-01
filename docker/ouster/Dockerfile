@@ -13,7 +13,8 @@ RUN apt-get update \
     libspdlog-dev \
     libcurl4-openssl-dev \
     libpcap-dev \
-    libopencv-dev
+    libopencv-dev \
+    libzip-dev
 
 #Install ROS Packages
 RUN apt-get install -y ros-jazzy-pcl-ros \
