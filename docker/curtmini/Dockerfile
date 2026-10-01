@@ -8,7 +8,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt update \
     && apt install -y \
     libasio-dev \
-    iproute2
+    iproute2 \
+    udev
 
 #Install ROS Packages
 RUN apt-get install -y \
