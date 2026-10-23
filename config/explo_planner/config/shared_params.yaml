@@ -1,0 +1,628 @@
+# SHARED PARAMETERS — the one parameter file loaded by all three launch files
+# (exploration_experiment, exploitation_experiment, multi_robot_exploration)
+# and by hand-run `ros2 run ... --params-file` invocations. Everything the
+# planner nodes share lives here; the launch files are the source of truth for
+# the per-run values they declare as arguments (robot, use_sim_time, max_steps,
+# output_csv, ...) — those launch defaults are passed on top of this file and
+# win over the same keys below.
+#
+# Namespace wildcard. A bare `explo_planner:` key only matches a node whose
+# FULLY-QUALIFIED name is `/explo_planner`, i.e. one launched at the root
+# namespace. multi_robot_exploration.launch.py launches with namespace=<robot>,
+# giving `/atlas/explo_planner` — under the bare key every parameter below was
+# silently dropped and the node fell back to its C++ defaults (ROI ±15 instead
+# of ±30, nav speed 0.5 instead of 0.15, ...) with no warning. `/**` matches the
+# node in any namespace, so single- and multi-robot launches both load this file.
+/**:
+  ros__parameters:
+    # FIELD DEFAULT: false. The node's 10 Hz tick timer runs off the node
+    # clock, so with use_sim_time: true and no /clock publisher the timer never
+    # fires and the planner does nothing at all — silently, with no warning.
+    # Sim/bag runs must pass use_sim_time:=true to the launch file (all three
+    # launch files declare the argument and it overrides this value).
+    use_sim_time: false
+    robot_name: "bunker"
+    max_steps: 200
+    output_csv: "/tmp/exploration_eig.csv"
+    map_resolution: 0.10
+
+    # Frames — planner reads dscovox map (in map_frame) and uses TF
+    # map_frame -> base_frame for the robot pose. Goals are published in
+    # map_frame for the nav stack to consume.
+    map_frame: "map"
+    base_frame: ""   # empty -> defaults to <robot_name>/base_link
+
+    # 2D inflated OccupancyGrid used for the candidate free/occupied filter,
+    # cost-grid reachability and path cost. Master switch, OFF by default: the
+    # planner does not subscribe to it and does not consult a 2D map in either
+    # exploration OR exploitation — costs are straight-line, there is no 2D
+    # obstacle/reachability filtering, and obstacle avoidance is delegated to
+    # the downstream navigator (the dscovox merger publishes no planning_map).
+    # Set use_planning_map: true — and point planning_map_topic at a publisher
+    # (e.g. the scovox_node) — to restore 2D filtering as a hard startup
+    # precondition in both phases.
+    # planning_map_topic: "/<robot>/dscovox_node/planning_map"  # default
+    use_planning_map: false
+    # How planning_map_topic is consumed. "direct": each message IS the map
+    # (it must cover the ROI). "accumulate": each message is a robot-centred
+    # rolling window — traversability_mapping's /occupancy_map_local, or a nav2
+    # rolling costmap — stitched into one grid over the ROI bounding box +
+    # margin, snapshotted as the planning map at most every refresh_sec and
+    # republished on ~/traversability_map. A raw 20 m window would make
+    # everything beyond ~10 m off-map, i.e. blocked. The grid is sized once
+    # (ROI ~101 x 66 m + 5 m margin at 0.2 m = ~211 k cells, 0.2 MB; the
+    # CostGrid built from it ~3 MB) and never grows; max_cells caps it by
+    # coarsening the resolution.
+    planning_map_mode: "direct"
+    planning_map_accum_resolution: 0.2
+    planning_map_accum_margin_m: 5.0
+    planning_map_accum_max_cells: 4000000
+    planning_map_accum_refresh_sec: 1.0
+    # Cells >= this are obstacles: goal filter, snap and CostGrid alike.
+    planning_map_obstacle_threshold: 50
+    # Path cost on the planning map (CostGrid). trav_weight: a passable cell
+    # with value v costs step * (1 + trav_weight * v / 100), so rough/steep
+    # ground counts as longer; unseen (-1) cells count as v = unknown_value
+    # (0..99). clearance_m: passable cells this close to an obstacle are
+    # never goals, and cost clearance_penalty x their step. All inert at
+    # these defaults (metric Dijkstra, no zone).
+    planning_map_trav_weight: 0.0
+    planning_map_unknown_value: 0.0
+    planning_map_clearance_m: 0.0
+    planning_map_clearance_penalty: 1.0
+    # Frontier candidates on an obstacle, in the clearance zone or unreachable
+    # move to the nearest good cell within this radius before scoring (0 =
+    # just reject them). Only acts with a planning map.
+    candidate_snap_radius_m: 2.0
+    # Blocked cells within this radius of the robot are passable for its own
+    # path search (the cells stay obstacles for goals). A LiDAR that sees the
+    # robot's own body draws an obstacle ring around it when parked, which
+    # otherwise walls the search in and turns the reachability filter off.
+    # 0 = off.
+    planning_map_robot_clear_m: 0.0
+
+    # Navigation
+    #
+    # ARRIVAL GATE — must be strictly LOOSER than the navigator's own goal
+    # checker. nav2's shipped general_goal_checker defaults are xy 0.25 /
+    # yaw 0.25 with stateful: true, so once XY latches the controller rotates
+    # only until yaw is inside 0.25 and then stops — frequently in
+    # (0.20, 0.25], i.e. just outside a 0.2 gate. The planner then never sees
+    # arrival, holds for goal_rotate_timeout_sec, and failGoal("budget-rotate")
+    # blacklists the goal the robot is standing on (a failed_goal_radius_m disc
+    # around its own position for failed_goal_ttl_sec). On a vantage that burns
+    # one of three, and three burns closes the target PARTIAL with no capture.
+    # The node warns at startup if either value is <= nav2's default.
+    # Set these from the actual goal_checker params on each platform.
+    goal_xy_tolerance: 0.4
+    goal_yaw_tolerance: 0.4
+    # Deadline for the in-place rotation after the XY goal is reached, timed
+    # from arrival. Separate from the nav_* travel budget on purpose: sharing
+    # that budget failed (and blacklisted) goals the robot was already
+    # standing on whenever it arrived near the end of its travel allowance.
+    goal_rotate_timeout_sec: 15.0
+    # Keep-alive interval (s) for re-sending an UNCHANGED goal pose. A changed
+    # pose always publishes immediately, and so does the first goal after a
+    # subscriber appears (a goal published while the navigator is down is
+    # dropped silently — there is no action feedback to notice it with).
+    #
+    # This used to be unthrottled at the 10 Hz tick rate, which is actively
+    # harmful with nav2: bt_navigator turns every goal_pose message into a new
+    # NavigateToPose goal, preempting the running one and rewriting the BT
+    # blackboard "goal". GoalUpdated — the first child of the RecoveryFallback
+    # in the default navigate_to_pose_w_replanning_and_recovery tree — then
+    # returns SUCCESS, which halts the recovery RoundRobin before
+    # Spin/Wait/BackUp can finish while still counting as a completed recovery
+    # against RecoveryNode's number_of_retries="6". At 10 Hz that exhausted all
+    # six retries in under a second, turning any transient planning or control
+    # failure into an immediate nav2 ABORT instead of a recovery.
+    #
+    # 5.0 s lets the costmap-clearing sequence and Spin complete; Wait(5) and
+    # BackUp(~6 s) may still be cut once. Set 0 for publish-on-change only —
+    # strictly the best setting for recoveries, once nav2 bringup is known
+    # reliable enough not to need the keep-alive.
+    goal_republish_sec: 5.0
+    # Diagnostics only: WARN when a published goal is farther than this (m)
+    # from the robot — likely beyond nav2's costmap, where the global planner
+    # rejects it. 0 disables.
+    far_goal_warn_m: 50.0
+    integrate_wait: 2.0
+
+    # Smart navigate timeout. Total budget per NAVIGATE cycle is computed
+    # at entry from the distance to the goal: the planned path's length in
+    # metres on the planning map when there is one (a detour round a hedge
+    # counts), else the straight line:
+    #   budget = clamp(dist / speed_est * safety, min, max)
+    # so a 2 m hop gets ~8 s and an 8 m hop gets ~32 s. Tune speed_est down
+    # if the controller is slower than expected (obstacle avoidance, tight
+    # corridors); tune safety up if you want more headroom. The budget is
+    # the backstop: nav2_abort_limit fails a goal nav2 gives up on within
+    # seconds, and the watchdog below fails a robot that stops moving.
+    nav_speed_estimate_mps: 0.15
+    nav_safety_factor: 3.0
+    nav_min_timeout_sec: 30.0
+    nav_max_timeout_sec: 180.0
+
+    # No-progress watchdog (runs in parallel with the budget). If the robot
+    # is not at least progress_min_distance_m (net, straight line) from
+    # where it stood when the window opened, at the end of each
+    # progress_window_sec, the goal fails immediately — the wedged-robot
+    # case, and a robot rocking in place (walked travel grows, net does not).
+    #
+    # HARDWARE: these values are TOO TIGHT for the Bunker Mini / CURT Mini
+    # pair. CURT stands still for up to 22.6 s on a healthy run — longer
+    # than this whole window — and a 180 deg in-place turn adds ~13 s of
+    # zero translation on a skid-steer that cannot strafe. Layer
+    # config/exploration_real_robot.yaml (params_file:= on either launch
+    # file) to get 120.0 / 0.25 instead (a backstop behind nav2's own
+    # progress checker; see that file).
+    progress_window_sec: 15.0
+    progress_min_distance_m: 0.2
+
+    # Teleport guard for distance tracking. cumulative_distance_ is integrated
+    # from per-tick map->base_link TF deltas at 10 Hz; a localization
+    # relocalization (NDT/EKF correction) teleports the pose by metres in one
+    # tick. A single-tick delta above this (m) is treated as a discontinuity,
+    # not travel, so it doesn't inflate distance_traveled or spoof the
+    # no-progress watchdog. At 10 Hz this can't reject real motion (a 1 m/s
+    # robot moves 0.1 m/tick). Set 0 to disable and reproduce raw integration.
+    max_pose_jump_m: 1.0
+    # Diagnostics only (no behaviour change): WARN when the map->base TF is
+    # older than this (s), or has failed to look up for this long while the
+    # planner keeps using its last pose. Zero-stamp (all-static) chains are
+    # not aged. <= 0 disables.
+    tf_stale_warn_sec: 1.0
+
+    # Failed-goal blacklist. After a navigate timeout, the failed goal is
+    # parked for failed_goal_ttl_sec; subsequent picks reject any candidate
+    # within failed_goal_radius_m of an active entry. Prevents the planner
+    # from re-picking the same unreachable goal when the robot is stuck.
+    failed_goal_radius_m: 2.0
+    failed_goal_ttl_sec: 60.0
+
+    # Coverage-based termination. Once the unknown fraction in the ROI drops
+    # below done_unknown_fraction for done_min_consecutive_steps measurements
+    # in a row (each on a new step or a new fused map; a PLAN retry on the same
+    # map is not counted again), the planner declares the map saturated and
+    # transitions to DONE. Set done_unknown_fraction <= 0 to disable (then
+    # only max_steps stops the planner).
+    done_unknown_fraction: 0.05
+    done_min_consecutive_steps: 3
+    # Where that unknown fraction is measured:
+    #   planning_map — 2D unknown (-1) cells of the latched planning_map
+    #                  (legacy). INACTIVE when no planning_map is published.
+    #   scovox       — 2.5D column coverage of the fused 3D map: fraction of
+    #                  ROI-footprint x/y columns with NO observed voxel in the
+    #                  ingested z band. Works with no planning_map (the field
+    #                  config). NB: in flat mode the ingest band is the
+    #                  absolute [roi_min_z, roi_max_z] — on terrain outside
+    #                  it the map cache stays empty and coverage reads 100 %
+    #                  unknown (never done); set a per-area z band or
+    #                  terrain_relative_z there.
+    #   auto         — planning_map when one has been received, else scovox.
+    # The two sources measure different quantities; re-calibrate
+    # done_unknown_fraction when switching (calibrate scovox on an R0 bag
+    # replay: watch where the logged fraction plateaus).
+    # Pinned to scovox for field trials: we do not publish a planning_map, so
+    # "auto" would resolve to scovox anyway — but pinning it removes the one
+    # risk of "auto" (a stray/late planning_map switching the source mid-run and
+    # mixing two differently-calibrated metrics in the same coverage-done
+    # streak; see doc/limitations.md). Set back to "auto" for sim runs that do
+    # publish a planning_map and want the 2D measure.
+    done_coverage_source: "scovox"
+    # What DONE does:
+    #   shutdown — stop the node (legacy sim-experiment behaviour).
+    #   idle     — keep spinning; targets released after coverage-done still
+    #              pull the planner into the exploit sub-loop and it returns
+    #              to idle when the queue drains. Use for field runs where
+    #              the target scheduler releases lists at the coverage-done
+    #              cue (a shutdown would race the release).
+    # FIELD DEFAULT: idle. A shutdown at coverage-done races the target
+    # scheduler's release cue and kills the exploitation phase outright.
+    done_action: "idle"
+
+    # Candidate generation
+    # Polar enabled: with frontier-only mode the planner exhausted reachable
+    # candidates (~70 cand) when the robot pushed to ROI corners and entered
+    # an oscillation loop until the planner timeout fired.  Polar adds
+    # n_radial*n_rings*n_yaw = 96 grid samples around the robot, giving
+    # consistent fallback options.  Affects both A/B map types equally.
+    # Disabled for field runs (frontier-only); re-enable if the corner
+    # oscillation above reappears.
+    candidate_enable_polar: false
+    candidate_n_radial: 8
+    candidate_n_rings: 3
+    candidate_min_radius: 2.0
+    candidate_max_radius: 8.0
+    candidate_n_yaw: 4
+    candidate_robot_z: 0.3
+    candidate_occ_thresh: 0.7
+
+    # Frontier-centroid clustering bin size (m). Frontier cells (free voxels
+    # adjacent to unknown space) are binned into cubes of this edge length and
+    # one centroid per bin is emitted as a long-range candidate. Larger ->
+    # fewer, coarser frontier targets.
+    frontier_cluster_radius_m: 5.0
+
+    # Region of interest (XY rectangle, metres). The planner will not select
+    # candidates outside it, and it also bounds the fused-map ingest clip, the
+    # FOV raycast and the coverage-done measure. KEEP IN SYNC with the dscovox
+    # planning_map size + origin in simple_nav_3d.launch.py (when
+    # use_planning_map is on) so the global planner covers the same area.
+    #
+    # The four roi_min/max_x/y bounds are in the ROI FRAME: the map frame
+    # yawed by roi_yaw_deg about map point (roi_origin_x, roi_origin_y):
+    #   x' =  cos(yaw) (x - origin_x) + sin(yaw) (y - origin_y)
+    #   y' = -sin(yaw) (x - origin_x) + cos(yaw) (y - origin_y)
+    # roi_yaw_deg: 0 with origin (0, 0) makes the ROI frame the map frame
+    # (a plain axis-aligned box, the pre-rotation behaviour).
+    #
+    # FIELD (hmr_localisation gt_map, map frame = NDT `map`): the "road frame"
+    # of hmr_localisation/scripts/analysis/gt_map_aligned_topdown.py —
+    # x' along the road (25.75 deg to map x, fitted to the point cloud's
+    # straight edges), y' = 0 on the far road edge, x' = 0 50 m west of the
+    # map origin along the road. The box is x' [0, 100] x y' [0, 25]: the
+    # tree block between the road and the building line. Map-frame corners
+    # (-40.30, -31.54), (49.77, 11.90), (38.91, 34.42), (-51.16, -9.02);
+    # the map origin (deployment point) is inside, at x' 50, y' 10.9.
+    # Picture: hmr_localisation/docs/explo_roi_box.png.
+    #
+    # NB this is NOT the forest-inspection "row frame" u/v of
+    # doc/experiment_script_forest_inspection.md §2 (24.82 deg, origin at the
+    # map origin, no offset) — 0.93 deg apart, ~1.6 m at 100 m. To run that
+    # script's AO instead: roi_yaw_deg 24.82, origin (0, 0),
+    # x [-40, 100], y [-24.16, 35.84].
+    roi_yaw_deg: 25.75
+    roi_origin_x: -40.30
+    roi_origin_y: -31.54
+    roi_min_x: 0.0
+    roi_max_x: 100.0
+    roi_min_y: 0.0
+    roi_max_y: 25.0
+
+    # Vertical ROI band (map frame, metres): candidate goals are clamped to
+    # z in [roi_min_z, roi_max_z]. Values here mirror the code defaults
+    # (explo_planner_node.cpp). KEEP IN SYNC with the multi-robot shared-map
+    # z-band — scovox_node share_roi_z_min/share_roi_z_max (sender wire
+    # filter) and dscovox_node share_roi_z_min/share_roi_z_max (receiver
+    # ingest clip): when that band is enabled it must be a SUPERSET of this
+    # planner band, otherwise free voxels near the band edge never reach the
+    # fused map and read as unknown here (starved candidates / phantom
+    # frontiers at the boundary).
+    #
+    # WITH terrain_relative_z: true (below) THIS BAND IS RELATIVE TO THE
+    # ROBOT'S OWN z, not absolute — it rides with the robot, which is what makes
+    # the AO's ~14 m of relief workable. Do NOT put the absolute -10 … +7 span
+    # from the field script §5 here: that would be a 17 m robot-relative slab.
+    # The absolute span belongs on the scovox_node / dscovox_node
+    # share_roi_z_min/share_roi_z_max wire+ingest filters, which are absolute
+    # and must remain a SUPERSET of everywhere this band can sit (i.e. cover the
+    # AO's full +5.3 … -8.6 ground range plus this band) — otherwise free voxels
+    # near the edge never reach the fused map and read as unknown here
+    # (starved candidates / phantom frontiers at the boundary).
+    #
+    # Values below are the ones proven in the terrain-mode bag run
+    # (exploration_fused_bag.yaml, alongside this file): enough below to catch ground
+    # on a downslope, enough above for canopy and overhangs.
+    #
+    # INVARIANT — the band must contain the whole ground-search window from
+    # anywhere the robot can sit before a re-band. Ground search runs over
+    # [z_robot - ground_search_below_m, z_robot + ground_search_above_m], and
+    # z_robot drifts up to one hysteresis step from the band reference before
+    # loadLatestMap() re-bands, where
+    #   hysteresis = clamp(0.25 * 0.5 * (roi_max_z - roi_min_z), 0.5, 2.0)
+    # so both of these must hold:
+    #   -roi_min_z >= ground_search_below_m + hysteresis
+    #    roi_max_z >= ground_search_above_m + hysteresis
+    # Here hysteresis = 0.125 * 9.5 = 1.1875, so the floor needs 5.1875 (have
+    # 5.5) and the ceiling needs 2.1875 (have 4.0). The previous -5.0 was
+    # 0.125 m short: on a downslope, ground search reached below the ingested
+    # slab, found no voxel, and groundZAt returned NaN — which the exploitation
+    # path used to paper over by standing the vantage at the robot's own
+    # altitude (see exploitZAt).
+    roi_min_z: -5.5
+    roi_max_z:  4.0
+
+    # ---- Terrain-relative (3D) mode ----
+    # REQUIRED in the field (script §11 open item 4): the AO spans ~14 m of
+    # relief, so an absolute candidate_robot_z and absolute z clamping misplace
+    # candidates and their EIG raycasts wherever the ground leaves the band.
+    # With this on, the map z-band rides with the robot (above), candidates snap
+    # to local ground + candidate_z_clearance, and the 3D occupancy check runs
+    # at that height — in flat mode the generator is handed a nullptr map and
+    # that check is skipped entirely, leaving goal feasibility wholly to nav2.
+    # Exploitation vantage sightlines also snap to local ground (exploitZAt);
+    # the ring geometry itself is still flat-world (single standoff circle).
+    terrain_relative_z: true
+    candidate_z_clearance: 0.3      # candidate/vantage height above local ground
+    ground_search_below_m: 4.0      # ground search window below the reference z
+    ground_search_above_m: 1.0      # ... and above
+    ground_stack_max_m: 0.6         # max occupied stack still treated as ground
+
+    # FOV evaluation (matches simulated RGBD: 320x240, 60deg HFOV)
+    fov_hfov: 1.047              # 60 degrees
+    fov_vfov: 0.785              # ~45 degrees (from 320x240 aspect)
+    fov_min_range: 0.3
+    fov_max_range: 10.0
+    fov_h_rays: 16
+    fov_v_rays: 12
+    fov_occ_stop: 0.7
+
+    # ----------------------------------------------------------------
+    # Utility math + multi-robot coordination
+    # ----------------------------------------------------------------
+    # Per-candidate utility is SSMI-style information-per-distance
+    # (Asgharivaskasi & Atanasov, TRO 2023):
+    #
+    #   U(c) = info_gain(c) / (ε + path_cost(c))      ε = 0.1 m
+    #
+    # Longer paths dilute a candidate's score; unreachable candidates
+    # (infinite cost) get U = −∞ and sort last. info_gain comes from FOV
+    # raycasting (EIG / entropy / frontier count); path_cost comes from
+    # CostGrid (bounded Dijkstra over planning_map). The denominator form
+    # is parameter-free — there are no separate α/β weights.
+
+    # Bounded grid Dijkstra. 0 = auto = candidate_max_radius + 2 m slack
+    # (so the entire candidate disc is covered, plus a margin for diagonals).
+    # ~5 k cells flooded at the auto bound -> well under 1 ms per PLAN tick;
+    # set this >> map size to fall through to a full unbounded flood (~5 ms).
+    cost_grid_radius_cap_m: 0.0
+
+    # SSMI ablation: when true, a candidate's info_gain is the sum of the score
+    # function over poses sampled every trajectory_sample_spacing_m along its
+    # Dijkstra path, not just the endpoint. OFF for field trials — it multiplies
+    # the per-candidate raycast cost by the path length in samples, and with 96
+    # polar candidates per PLAN tick that is the one setting that can push a tick
+    # past the 10 Hz budget.
+    # NB exploration_experiment.launch.py declares both as launch arguments and
+    # always passes them, so its defaults (false / 1.5) win over these two lines;
+    # the values here are what the exploitation and multi-robot launches use.
+    trajectory_scoring: false
+    trajectory_sample_spacing_m: 1.5
+
+    # Multi-robot coordination. When false the MinPos branch is skipped and
+    # single-robot behaviour is bit-for-bit preserved (the utility math
+    # above still runs in single-robot mode).
+    # FIELD DEFAULT: true (script §5 — phase 1 runs two robots). Harmless on a
+    # single robot: the intent table is simply empty, and rendezvous stays inert
+    # while rendezvous_expected_peers is 0.
+    coordination_enabled: true
+
+    # MinPos parameters. claim_radius is the disc each robot reserves around
+    # its currently-selected goal; ttl is how long an unrefreshed claim
+    # survives before peers can take its target.
+    coord_claim_radius_m: 0.0       # 0 = auto = fov_max_range (Burgard 2005)
+    coord_claim_ttl_sec: 5.0        # 5 x heartbeat; stalled peer releases ~5 s
+    # Extra retention for EXPLOIT claims past their TTL, used only by the
+    # vantage-contest lookups. The TTL assumes the 1 Hz heartbeat is HEARD at
+    # 1 Hz, but the receiving planner is a single-threaded executor whose
+    # EXPLOIT_PLAN retry ticks (fused-map refresh, whole-grid floods) can
+    # starve the intent subscription for multiple seconds; in a 2-robot sim
+    # run the driving winner's claim aged out of the parked loser's table
+    # twice and the loser re-selected the winner's vantage each time. Grace
+    # keeps an engagement contestable across such gaps. Barrier release and
+    # rendezvous presence stay on the raw TTL (a dead peer still frees the
+    # team in ~5 s); a dead winner frees its vantage in ttl + grace.
+    coord_claim_grace_sec: 10.0     # 2 x ttl; 0 = legacy single-TTL behaviour
+    coord_intent_topic: "/exploration/intents"
+    coord_heartbeat_hz: 1.0
+    # EXPLOIT claims use a separate, much smaller MinPos disc: vantages on one
+    # trunk sit only ~(radius + standoff) apart, so the exploration-scale disc
+    # would swallow the whole ring and veto the tree instead of splitting the
+    # angles across the team. 0 = auto = vantage_visited_tol_m.
+    coord_vantage_claim_radius_m: 0.0
+
+    # Rendezvous at the mission START POINT (multi-robot). ON by default: a
+    # robot that exhausts its exploration goals drives back to where it started
+    # exploring and holds there. The team launches within one comms bubble, so
+    # every robot back at its own start pose is in radio range of the others by
+    # construction — one deterministic meeting point, used both for
+    # reconnection (teammate out of comms -> wait at home, then re-plan on the
+    # merged map) and for ending the mission (team complete -> park at home,
+    # keep beaconing, go DONE there). It only activates with
+    # coordination_enabled AND a positive expected-peer count, so single-robot
+    # runs are unaffected (it stays inert).
+    # The multi_robot launch sets rendezvous_expected_peers from the team size;
+    # set it here for a hand-launched hardware trial (team size - 1).
+    rendezvous_enabled: true
+    rendezvous_expected_peers: 0      # teammates to wait for; 0 = inert
+    # Barrier give-up (seconds). 0 = wait forever (STAY until all connected).
+    # Bounded in the field: a robot whose teammate died must not hold the
+    # rendezvous forever. A robot that gives up still parks in DONE beaconing its
+    # presence, so a late teammate can still find it; 600 s comfortably covers
+    # a map-length return leg plus map fusion.
+    rendezvous_max_wait_sec: 600.0
+    # Ceiling on the return-home leg (seconds). Separate from
+    # nav_max_timeout_sec (sized for short exploration hops): the return can
+    # be a map-length drive, and a hop-sized cap aborts it mid-field —
+    # exactly the long-range reconnections the return exists for.
+    return_nav_max_timeout_sec: 600.0
+
+    # ----------------------------------------------------------------
+    # Proximity stop (coordinated yield)
+    # ----------------------------------------------------------------
+    # While DRIVING (NAVIGATE / RETURN_NAV), yield to a teammate moving
+    # nearby: cancel the in-flight nav2 goal (action cancel — the planner
+    # never touches nav2 config), hold still, and resume the same goal once
+    # the peer has cleared off (hysteresis) or parked. Right of way is the
+    # lexicographically SMALLER robot_name — the same total order as the
+    # MinPos tiebreak — so exactly one robot of any pair yields: never both
+    # stopped (standoff), never both driving (race). Field team: "bunker" <
+    # "curt", so curt yields. Stationary states (dwell, integrate, plan) are
+    # exempt: an already-still robot is an ordinary costmap obstacle for the
+    # peer driving past it.
+    # Peer poses come from the 1 Hz intent heartbeat plus any topics listed
+    # in proximity_peer_pose_topics. On hardware, configure the localiser
+    # poses there — intents alone are too coarse for safety-of-life margins
+    # (two robots closing at 2x0.8 m/s move 1.6 m between heartbeats).
+    # This layer is best-effort COORDINATION, not a certified safety stop: it
+    # needs live peer data, both planners up, and nav2 honouring the cancel.
+    # The crewed 1.5 m panic stop (experiment script §8) stays the backstop.
+    # Single-robot runs: no peer is ever tracked, so the guard is inert.
+    proximity_stop_enabled: true
+    # hold_dist is sized against the REACTION budget, not just the panic
+    # line: peer pose age (~0.1 s on a 10 Hz localiser topic, up to 1 s on
+    # intents alone) + the 10 Hz tick + cancel propagation through
+    # bt_navigator + braking is >1 s, and only the yielding robot stops —
+    # the pair keeps closing at the peer's ~0.8 m/s throughout the stop.
+    # From 5 m that leaves ~2 m of margin above the 1.5 m panic line; the
+    # old 3 m default (2x the panic line on paper) was consumed entirely by
+    # that latency at 2x0.8 m/s head-on closing.
+    proximity_hold_dist_m: 5.0     # yield below this
+    proximity_resume_dist_m: 6.0   # resume beyond this (hysteresis)
+    # Freshness gates, asymmetric on purpose. Data older than pose_stale_sec
+    # cannot START a hold (never brake on a ghost); an active hold with no
+    # data for hold_release_stale_sec RELEASES (peer presumed gone/far —
+    # comms got a fair chance to recover first).
+    proximity_pose_stale_sec: 3.0
+    proximity_hold_release_stale_sec: 10.0
+    # A peer that moved < peer_static_move_m in peer_static_sec is "parked"
+    # and not held against — a parked robot is a static obstacle the
+    # navigator avoids on its own, and holding against one deadlocks (e.g. a
+    # teammate waiting at its rendezvous point, or a dead planner). Kept
+    # ABOVE exploit_dwell_sec (8 s) so a mid-capture dwell is waited out
+    # rather than driven past.
+    proximity_peer_static_sec: 10.0
+    proximity_peer_static_move_m: 0.3
+    # ...but a peer parked INSIDE this floor keeps the hold: "it stopped" is
+    # no licence to drive even closer than the panic line, and the costmap —
+    # the one component this feature cannot configure — should not be the
+    # only thing between two robots at 1.2 m. Matches the documented panic
+    # threshold. Inside it the hold runs until the peer moves off or
+    # max_hold_sec fires.
+    proximity_parked_keep_dist_m: 1.5
+    # Hold-time escape hatch (seconds; 0 = unbounded). The parked/stale
+    # releases break most wait cycles on their own, but a DEAD teammate
+    # parked inside parked_keep_dist_m would otherwise hold forever — after
+    # this long the drive resumes anyway, loudly.
+    proximity_max_hold_sec: 120.0
+    # Extra peer pose sources, "<robot_name>:<topic>" (map frame, any rate).
+    # On hardware point these at the peers' localiser poses (~10 Hz), e.g.
+    #   bunker:  proximity_peer_pose_topics: ["curt:/curt/pcl_pose"]
+    #   curt:    proximity_peer_pose_topics: ["bunker:/bunker/pcl_pose"]
+    # (a shared list naming every robot works too — each planner skips its
+    # own entry). Unset (the default) = intents only; the planner WARNs at
+    # startup in that mode, and keeps warning while a configured topic has
+    # delivered nothing.
+    #proximity_peer_pose_topics: [""]
+    # NavigateToPose action used for the cancel. "" = auto =
+    # /<robot_name>/navigate_to_pose (matches the goal_topic convention).
+    proximity_nav_cancel_action: ""
+    # NavigateToPose action the planner watches: <action>/_action/status
+    # for results (ABORTED / CANCELED / SUCCEEDED before the planner's own
+    # arrival gate), _action/feedback for nav2's recovery count and distance
+    # to go, and, on Jazzy, _action/get_result for the reason of an ABORT
+    # (error_code / error_msg). All of it lands in the log and the "Goal end"
+    # line; ABORTs also feed nav2_abort_limit. Default (unset) =
+    # /<robot_name>/navigate_to_pose; "" disables the watch (and the limit).
+    #nav_status_action: "/atlas/navigate_to_pose"
+    # Fail the goal (failGoal "nav2-aborted", blacklisted like any failure)
+    # after nav2 ABORTs it this many times in a row with the robot still
+    # within progress_min_distance_m (0.25 m if that is 0) of where the
+    # first ABORT found it. The keep-alive (goal_republish_sec) re-sends an
+    # aborted goal, so without this nav2 giving up never sticks and the
+    # robot waits out the nav budget at a goal nav2 cannot plan to (off its
+    # costmap, no path). 2 = the re-send got one more try and failed the
+    # same way. 0 = log only.
+    nav2_abort_limit: 2
+    # ...or after ONE abort when nav2 had already run at least 2 recovery
+    # behaviours (costmap clears, spin, wait, back-up, from its feedback)
+    # within 1 m of where it aborts. That abort comes at the end of nav2's
+    # own recovery rounds (default tree: 6, ~2.5-3 min for a wedged robot),
+    # and a re-send would only run them again from the same place. An
+    # instant refusal (GOAL_OUTSIDE_MAP and the like, no recoveries) still
+    # gets the re-send. Needs nav2_abort_limit > 0.
+    nav2_abort_final_after_recovery: true
+
+    # ----------------------------------------------------------------
+    # Perceptive exploitation
+    # ----------------------------------------------------------------
+    # When a tree target arrives on targets_topic the planner switches
+    # EXPLORE -> EXPLOIT and circles the trunk at n_vantages occlusion-free
+    # vantage points (3 => ~120 deg apart), dwelling exploit_dwell_sec at each
+    # so the rosbag captures overlapping RGB-D/LiDAR views (fusion is offline).
+    # A target is "successfully exploited" once min_vantages_required clear-LoS
+    # vantages are dwelled — a TEAM quota when coordination_enabled: robots on
+    # the same trunk broadcast which ring angles they captured (dwelled_mask on
+    # their intents) and the union counts, so the ring is covered once,
+    # cooperatively, and the trunk closes for everyone. It reverts to EXPLORE
+    # when the queue empties. The
+    # topic is shared, so a future tree detector publishes the same TreeTarget
+    # message with no planner change. Set exploitation_enabled: false for pure
+    # exploration (the overlay then never subscribes or activates).
+    exploitation_enabled: true
+    targets_topic: "/exploration/targets"
+    n_vantages: 3                   # viewpoints per trunk (3 => 120 deg apart)
+    min_vantages_required: 3        # clear-LoS dwells for a "successful" target
+    vantage_standoff_m: 2.0         # standoff added to trunk radius (m), then
+                                    # clamped to [fov_min_range+r, fov_max_range]
+    # Angle of the first vantage around the trunk. 30 deg per field script §5:
+    # the plantation rows run at 24.82 deg to map x, so a 0 deg start puts the
+    # first vantage of every 120 deg ring straight down a row — the two other
+    # vantages then land in the neighbouring canopy and fail LoS together.
+    vantage_start_angle_deg: 30.0
+    exploit_dwell_sec: 8.0          # hold time at each vantage (s)
+
+    # Vantage-ring RENDEZVOUS BARRIER (multi-robot). ON by default: a robot that
+    # has arrived at its vantage does NOT start its dwell clock until every peer
+    # holding an active exploit claim on the SAME trunk has flagged itself STAGED.
+    # Staging is declared by the producer, never inferred by the observer: each
+    # robot sets `staged` on its own intent when it ENTERS its dwell at the vantage
+    # — after nav arrival AND the post-arrival rotation settle — and every claim it
+    # publishes while driving anywhere carries staged=false. The flag rides the
+    # 1 Hz intent heartbeat, so a robot parked on its last vantage keeps reading as
+    # staged to the team.
+    # Once every same-target claim is flagged, all of them dwell simultaneously —
+    # the point of the ring: overlapping views of ONE trunk state, not
+    # min_vantages_required sequential single-robot views of a trunk that moved in
+    # the wind between them — and each dwell then RUNS TO COMPLETION. The barrier
+    # is a START condition only: a peer moving on to its next angle (staged=false
+    # again) no longer restarts anyone's dwell clock, which used to cost the robot
+    # left behind its accumulated dwell and a full re-capture.
+    # The wait is implemented as a per-tick re-anchor of the dwell start, so the
+    # CSV dwell_sec stays an honest capture length (wait time is not counted as
+    # dwell), and it releases as soon as the last peer stages, when no peer claims
+    # this trunk, or when a peer's claim ages out of the table (a dead teammate
+    # stops holding the team ~coord_claim_ttl_sec after it was last heard).
+    # `staged` is a RobotIntent WIRE field, so every team member must run the same
+    # build: an older peer's intents never flag it, and its teammates then hold
+    # their barriers until the give-up path below.
+    # Not to be confused with rendezvous_* above: that is the COMMS-reconnection
+    # barrier at the home pose. This one is per-vantage capture sync.
+    # Without it (observed, 2-robot sim, 3/3 quota): one robot finished an angle,
+    # was by construction the closest robot to every remaining angle, took the one
+    # its peer had been driving toward for 19 s, both converged on the same point,
+    # the proximity right-of-way braked the loser 8 times, and the winner closed
+    # the target solo while the peer arrived 5 s late to dwell an angle that no
+    # longer counted. The selection-time exploit-claim yield fixes the poach; this
+    # is what makes the captures simultaneous.
+    exploit_dwell_sync_enabled: true
+    # Barrier give-up (s), measured from arrival at the vantage rather than from
+    # the (re-anchored) dwell start. 0 = WAIT UNTIL THE PEER ARRIVES, the default.
+    # A wall-clock deadline cannot tell a teammate that is merely far away from one
+    # that is wedged, and the two need opposite responses: observed at 60 s, a robot
+    # abandoned a peer that was still driving and needed 111 s to cross the plot to
+    # the next trunk, so that capture went solo for nothing.
+    # An unbounded wait does not hang the run. A robot that is waiting is standing
+    # on its vantage, so it is staged and never holds a peer's barrier — only a
+    # DRIVING peer holds one, and a driving peer still runs its own timers. It
+    # arrives; or it goes silent and its claim ages out on coord_claim_ttl_sec; or
+    # its own exploit_target_timeout_sec closes that trunk and it stops claiming it.
+    # Every one of those releases the barrier.
+    # Set a positive value to force a deadline anyway: on expiry the robot WARNs
+    # loudly and dwells solo, and that capture is not simultaneous with the team's.
+    exploit_dwell_sync_max_wait_sec: 0.0
+
+    # Per-target give-up budget (s): wall-clock on ONE trunk since the last
+    # progress event — activation, approach-waypoint arrival, or a completed
+    # dwell each re-arm it, and proximity-hold time is refunded. When it
+    # expires the target closes PARTIAL and the planner moves on, so one bad
+    # tree cannot eat the battery. Keep it ABOVE nav_max_timeout_sec (180):
+    # failed hops deliberately keep charging the timer (that is what makes a
+    # genuinely unreachable ring terminate), so a smaller value closes every
+    # tree PARTIAL after its FIRST failed vantage approach with no retry.
+    # 300 = one worst-case failed hop + 120 s to re-select and reach another
+    # angle; two consecutive failed hops on the same trunk still give up.
+    exploit_target_timeout_sec: 300.0
+    target_dedup_radius_m: 1.5      # re-reported trees within this are ignored
+    vantage_visited_tol_m: 0.75     # proximity that counts a vantage "dwelled"

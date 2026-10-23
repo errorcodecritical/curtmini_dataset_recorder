@@ -1,0 +1,136 @@
+include:
+  - path: ./docker/docker-compose.yml
+  - path: ./ext/hmr_localisation/compose.yaml
+  - path: ./ext/scovox/compose.yaml
+
+# Service overrides
+services:
+  ros:
+    # The submodule composes know nothing about RouDi. Each of these three
+    # services already blocks on /dev/shm/iceoryx_mgmt in its command, but
+    # without depends_on `docker compose up` will not order them, so a missing
+    # RouDi makes them hang instead of fail.
+    depends_on:
+      - roudi
+    volumes:
+      - /dev/shm:/dev/shm
+      - /tmp:/tmp
+      - ./config/hmr_localisation/config:/ws/config
+      - ./config/cyclonedds/cyclonedds-bridge.xml:/cyclonedds-config.xml
+      # compose.yaml points its two bag mounts at <repo>/../bags and
+      # <repo>/../../Bags (the HMR_Explo layout). Neither exists here, so both
+      # land on this repo's rosbags/ instead of letting docker create them.
+      - ./rosbags:/ws/bags
+      - ./rosbags:/ws/extra_bags
+    environment:
+      - ROS_DOMAIN_ID=0
+      - IOX_DOMAIN_ID=0
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - CYCLONEDDS_URI=file:///cyclonedds-config.xml
+    command:
+      - bash
+      - -c
+      - |
+        echo "=== Starting HMR LOC node ==="
+        until [ -e /dev/shm/iceoryx_mgmt ]; do
+          echo "waiting for RouDi shared memory..."
+          sleep 1
+        done
+        source install/setup.bash
+        ros2 launch lidar_localization_ros2 lidar_localization.launch.py \
+          localization_param_dir:=/ws/config/gt_ouster_ndt_tree_curt.yaml \
+          cloud_topic:=/ouster/points imu_topic:=/curt/imu/data imu_frame_id:=imu_curt \
+          base_frame_id:=base_link_curt use_sim_time:=false \
+          publish_lidar_tf:=false publish_imu_tf:=false
+    cpuset: "0-3"   # nav2 holds 8-15; 4-7 go to scovox/explo_planner
+
+  explo_planner:
+    build:
+        context: ./ext/scovox
+        dockerfile: docker/Dockerfile
+    image: scovox:jazzy
+    container_name: explo_planner
+    # Host networking + IPC: trivial DDS discovery and X11 (RViz) on one machine.
+    network_mode: host
+    ipc: host
+    depends_on:
+      - roudi
+    volumes:
+      - /dev/shm:/dev/shm
+      - /tmp:/tmp
+      - ./config/cyclonedds/cyclonedds-bridge.xml:/cyclonedds-config.xml
+      - ./ext/scovox:/scovox
+      - ./ext/explo_planner/explo_planner:/scovox/src/explo_planner # we are parasitizing the scovox workspace so we don't have to make a separate one
+      - ./ext/explo_planner/explo_planner_msgs:/scovox/src/explo_planner_msgs
+      - ./config/explo_planner/config:/config
+    environment:
+      - ROS_DOMAIN_ID=0
+      - IOX_DOMAIN_ID=0
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - CYCLONEDDS_URI=file:///cyclonedds-config.xml
+    working_dir: /scovox
+    command:
+      - bash
+      - -c
+      - |
+        echo "=== Starting EXPLO PLANNER node ==="
+        until [ -e /dev/shm/iceoryx_mgmt ]; do
+          echo "waiting for RouDi shared memory..."
+          sleep 1
+        done
+        source install/setup.bash
+        colcon build --packages-select explo_planner explo_planner_msgs --symlink-install
+        source install/setup.bash
+        ros2 run explo_planner explo_planner_node --ros-args \
+          --params-file /config/shared_params.yaml \
+          -p robot_name:=curt \
+          -p base_frame:=base_link_curt \
+          -p map_frame:=map \
+          -p dscovox_topic:=/dscovox_node/scovox \
+          -p map_resolution:=0.20 \
+          -r /curt/goal_pose:=/goal_pose
+    cpuset: "7"       # single core; planning is bursty, not continuous
+
+  scovox:
+    # compose.yaml asks for runtime: nvidia so in-container RViz gets hardware
+    # GL. That needs nvidia-container-toolkit on the host; the Jetson has it,
+    # this NUC is unconfirmed. The mapping nodes themselves are CPU-only, so
+    # runc keeps the service startable. Flip back to nvidia once the NUC's GPU
+    # situation is settled and RViz is actually run inside this container.
+    depends_on:
+      - roudi
+    runtime: runc
+    volumes:
+      - /dev/shm:/dev/shm
+      - /tmp:/tmp
+      - ./config/scovox/config:/scovox/config
+      - ./config/cyclonedds/cyclonedds-bridge.xml:/cyclonedds-config.xml
+      # compose.yaml's bag mount points outside this repo (HMR_Explo layout).
+      - ./rosbags:/scovox/bags
+    environment:
+      - ROS_DOMAIN_ID=0
+      - IOX_DOMAIN_ID=0
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - CYCLONEDDS_URI=file:///cyclonedds-config.xml
+    command:
+      - bash
+      - -c
+      - |
+        echo "=== Starting SCOVOX node ==="
+        until [ -e /dev/shm/iceoryx_mgmt ]; do
+          echo "waiting for RouDi shared memory..."
+          sleep 1
+        done
+        colcon build --packages-select scovox_core scovox_mapping scovox_msgs seg_pipeline --symlink-install
+        source install/setup.bash
+        ros2 run scovox_mapping scovox_mapping_node --ros-args \
+          -r __node:=scovox_node \
+          -p use_sim_time:=false \
+          --params-file /scovox/config/scovox_lidar_raw_deskew.yaml &
+        ros2 run scovox_mapping dscovox_mapping_node --ros-args \
+          -r __node:=dscovox_node \
+          -p use_sim_time:=false \
+          -p "input_topics:=['/scovox_node/scovox_bin']" \
+          -p map_frame:=map \
+          -p pointcloud_min_interval_s:=0.5
+    cpuset: "4-6"     # voxel mapping + dscovox merge

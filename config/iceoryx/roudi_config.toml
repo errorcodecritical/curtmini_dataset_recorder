@@ -19,22 +19,31 @@
 version = 1
 
 [[segment]]
-  # small control/status messages (odom, imu, joint states, tf)
+  # Tier 1: Small control/telemetry (IMU, Odometry, TF, JointStates)
   [[segment.mempool]]
-  size = 1024
+  size = 4096
+  count = 10000
+
+  # Tier 2: Compressed images, 2D laserscans, status diagnostics
+  [[segment.mempool]]
+  size = 262144        # 256 KiB
   count = 5000
 
-  # mid-size messages (compressed images, small point clouds, laser scans)
+  # Tier 3: Medium point clouds, HD compressed video
   [[segment.mempool]]
-  size = 65536
-  count = 2000
+  size = 4194304       # 4 MiB
+  count = 1000
 
-  # large messages (raw camera frames, medium point clouds)
+  # Tier 4: Standard point clouds (Hesai/Velodyne/OAK-D depth)
   [[segment.mempool]]
-  size = 1048576
-  count = 200
+  size = 16777216      # 16 MiB
+  count = 300
 
-  # largest messages (full Hesai point clouds, uncompressed high-res frames)
+  # Tier 5: dense fused point clouds (scovox / dscovox merged grids).
+  # Headroom only -- no curt sensor reaches 64 MiB: the worst raw payloads are
+  # the Ouster OS-128 cloud at ~6 MiB and the RealSense depth cloud at ~4.7 MiB,
+  # both of which land in Tier 4. Count is deliberately low; raise it only if
+  # RouDi logs "no more chunks available" for this size class.
   [[segment.mempool]]
-  size = 8388608
-  count = 50
+  size = 67108864      # 64 MiB
+  count = 30

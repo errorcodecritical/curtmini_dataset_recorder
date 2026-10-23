@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   roudi:
@@ -11,6 +10,7 @@ services:
     user: "0:0"
     network_mode: none
     ipc: host
+    shm_size: '13gb'
     restart: unless-stopped
     volumes:
       - /dev/shm:/dev/shm
@@ -26,6 +26,120 @@ services:
         umask 0000
         iox-roudi -c /roudi_config.toml
 
+  xsens_driver:
+    build:
+      context: ..
+      dockerfile: docker/xsens/Dockerfile
+    image: ros2_xsens_driver:latest
+    container_name: xsens
+    privileged: true
+    user: "0:0"
+    network_mode: host
+    ipc: host
+    depends_on:
+      - roudi
+    volumes:
+      - /dev/:/dev/
+      - /tmp:/tmp
+      - ../ros2_ws:/ros2_ws
+      - ../config/cyclonedds/cyclonedds-local.xml:/cyclonedds-config.xml
+      - ../config/xsens/mtdevice.py:/ros2_ws/src/norlab_xsens_driver/xsens_driver/mtdevice.py
+      - ../config/xsens/mtnode.py:/ros2_ws/src/norlab_xsens_driver/xsens_driver/mtnode.py
+      - ../config/xsens/xsens_driver.launch.xml:/ros2_ws/src/norlab_xsens_driver/launch/xsens_driver.launch.xml
+    environment:
+      - ROS_DOMAIN_ID=0
+      - IOX_DOMAIN_ID=0
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - CYCLONEDDS_URI=file:///cyclonedds-config.xml
+    command:
+      - bash
+      - -c
+      - |
+        echo "=== Starting XSENS driver ==="
+        until [ -e /dev/shm/iceoryx_mgmt ]; do
+          echo "waiting for RouDi shared memory..."
+          sleep 1
+        done
+        colcon build --symlink-install --packages-select xsens_driver --cmake-args -DCMAKE_BUILD_TYPE=Release
+        source /ros2_ws/install/setup.bash
+        ros2 launch xsens_driver xsens_driver.launch.xml
+
+  traversability_mapping:
+    build:
+      context: ..
+      dockerfile: docker/traversability_mapping/Dockerfile
+    image: ros2_traversability_mapping:latest
+    container_name: traversability_mapping
+    privileged: true
+    user: "0:0"
+    network_mode: host
+    ipc: host
+    depends_on:
+      - roudi
+    volumes:
+      - /dev/:/dev/
+      - /tmp:/tmp
+      - ../ros2_ws:/ros2_ws
+      - ../config/cyclonedds/cyclonedds-local.xml:/cyclonedds-config.xml
+      - ../config/traversability_mapping/config:/ros2_ws/src/traversability_mapping/traversability_mapping/config
+    environment:
+      - ROS_DOMAIN_ID=0
+      - IOX_DOMAIN_ID=0
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - CYCLONEDDS_URI=file:///cyclonedds-config.xml
+    command:
+      - bash
+      - -c
+      - |
+        echo "=== Starting TRAVERSABILITY node ==="
+        until [ -e /dev/shm/iceoryx_mgmt ]; do
+          echo "waiting for RouDi shared memory..."
+          sleep 1
+        done
+        colcon build --symlink-install --packages-select traversability_mapping elevation_msgs --cmake-args -DCMAKE_BUILD_TYPE=Release
+        source /ros2_ws/install/setup.bash
+        ros2 launch traversability_mapping traversability_mapping.launch.py
+
+  openzen_driver:
+    image: openzen_jazzy:latest
+    build:
+      context: .
+      dockerfile: curtmini/Dockerfile
+    container_name: openzen_driver
+    init: true
+    tty: true
+    stdin_open: true
+    privileged: true
+    user: "0:0"
+    network_mode: host
+    ipc: host
+    depends_on:
+      - roudi
+    restart: unless-stopped
+    volumes:
+      - /dev/:/dev/
+      - /tmp:/tmp
+      - ../ros2_ws/:/ros2_ws
+      - ../config/cyclonedds/cyclonedds-local.xml:/cyclonedds-config.xml
+    environment:
+      - ROS_DOMAIN_ID=0
+      - IOX_DOMAIN_ID=0
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - CYCLONEDDS_URI=file:///cyclonedds-config.xml
+    command:
+      - /bin/bash
+      - -c
+      - |
+        sleep 3
+        echo "=== Starting OPENZEN Driver ==="
+        until [ -e /dev/shm/iceoryx_mgmt ]; do
+          echo "waiting for RouDi shared memory..."
+          sleep 1
+        done
+        colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select openzen_driver
+        source /ros2_ws/install/setup.bash
+        ros2 run openzen_driver openzen_node --ros-args --remap __ns:=/curt/imu
+
   curtmini:
     image: curtmini_driver:latest
     build:
@@ -33,12 +147,17 @@ services:
       dockerfile: curtmini/Dockerfile
     container_name: curtmini_driver
     privileged: true
+    user: "0:0"
     network_mode: host
+    ipc: host
+    depends_on:
+      - roudi
     restart: unless-stopped
     devices:
       - /dev/ttyACM1:/dev/ttyACM1
     volumes:
       - /dev:/dev
+      - /tmp:/tmp
       - /run/udev/data:/run/udev/data:ro
       - ../ros2_ws:/ros2_ws
       - ../config/cyclonedds/cyclonedds-local.xml:/cyclonedds-config.xml
@@ -52,6 +171,10 @@ services:
       - -c
       - |
         echo "=== Starting CURTMINI driver ==="
+        until [ -e /dev/shm/iceoryx_mgmt ]; do
+          echo "waiting for RouDi shared memory..."
+          sleep 1
+        done
         colcon build --symlink-install --packages-select candle_ros2 curt_mini ipa_ros2_control openzen_driver curt_description --cmake-args -DCMAKE_BUILD_TYPE=Release
         source /ros2_ws/install/setup.bash
         ros2 launch curt_mini robot_base.launch.py
@@ -66,10 +189,15 @@ services:
     tty: true
     stdin_open: true
     privileged: true
+    user: "0:0"
     network_mode: host
+    ipc: host
+    depends_on:
+      - roudi
     restart: unless-stopped
     volumes:
       - /dev/:/dev/
+      - /tmp:/tmp
       - ../ros2_ws:/ros2_ws
       - ../config/cyclonedds/cyclonedds-local.xml:/cyclonedds-config.xml
       - ../config/emlid/nmea_serial_driver.py:/ros2_ws/src/nmea_navsat_driver/src/libnmea_navsat_driver/nodes/nmea_serial_driver.py
@@ -85,6 +213,10 @@ services:
       - |
         sleep 3
         echo "=== Starting EMLID Driver ==="
+        until [ -e /dev/shm/iceoryx_mgmt ]; do
+          echo "waiting for RouDi shared memory..."
+          sleep 1
+        done
         colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select nmea_navsat_driver
         source /ros2_ws/install/setup.bash
         ros2 run nmea_navsat_driver nmea_serial_driver
@@ -99,10 +231,15 @@ services:
     tty: true
     stdin_open: true
     privileged: true
+    user: "0:0"
     network_mode: host
+    ipc: host
+    depends_on:
+      - roudi
     restart: unless-stopped
     volumes:
       - /dev/:/dev/
+      - /tmp:/tmp
       - ../ros2_ws:/ros2_ws
       - ../config/cyclonedds/cyclonedds-local.xml:/cyclonedds-config.xml
       - ../config/realsense/rs_launch.py:/ros2_ws/src/realsense-ros/realsense2_camera/launch/rs_launch.py
@@ -117,9 +254,91 @@ services:
       - |
         sleep 3
         echo "=== Starting REALSENSE Driver ==="
+        until [ -e /dev/shm/iceoryx_mgmt ]; do
+          echo "waiting for RouDi shared memory..."
+          sleep 1
+        done
         colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select realsense2_camera realsense2_camera_msgs realsense2_description realsense_camera_info_override
         source /ros2_ws/install/setup.bash
         ros2 launch realsense2_camera rs_launch.py
+
+  mapir_driver:
+    build:
+      context: ..
+      dockerfile: docker/mapir/Dockerfile
+    image: ros2_mapir_driver:latest
+    container_name: mapir
+    privileged: true
+    user: "0:0"
+    network_mode: host
+    ipc: host
+    depends_on:
+      - roudi
+    volumes:
+      - /dev/:/dev/
+      - /tmp:/tmp
+      - ../ros2_ws:/ros2_ws
+      - ../config/cyclonedds/cyclonedds-local.xml:/cyclonedds-config.xml
+      - ../config/mapir:/config/mapir
+      - ../config/mapir/mapir_camera_params.yaml:/ros2_ws/src/mapir-camera-ros2/config/mapir_camera_params.yaml
+      - ../config/mapir/mapir_camera.launch.py:/ros2_ws/src/mapir-camera-ros2/launch/mapir_camera.launch.py
+    environment:
+      - ROS_DOMAIN_ID=0
+      - IOX_DOMAIN_ID=0
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - CYCLONEDDS_URI=file:///cyclonedds-config.xml
+    command:
+      - bash
+      - -c
+      - |
+        echo "=== Starting MAPIR driver ==="
+        until [ -e /dev/shm/iceoryx_mgmt ]; do
+          echo "waiting for RouDi shared memory..."
+          sleep 1
+        done
+        colcon build --symlink-install --packages-select mapir_camera_ros2 --cmake-args -DCMAKE_BUILD_TYPE=Release
+        source /ros2_ws/install/setup.bash
+        ros2 launch mapir_camera_ros2 mapir_camera.launch.py namespace:=mapir camera_impl:=cpp camera_info_url:=file:///config/mapir/mapir3_ocn_camera_info.yaml
+
+  rm3100_driver:
+    build:
+      context: ..
+      dockerfile: docker/rm3100/Dockerfile
+    image: ros2_rm3100_driver:latest
+    container_name: rm3100
+    privileged: true
+    user: "0:0"
+    network_mode: host
+    ipc: host
+    depends_on:
+      - roudi
+    volumes:
+      - /dev/:/dev/
+      - /tmp:/tmp
+      - ../ros2_ws:/ros2_ws
+      - ../config/cyclonedds/cyclonedds-local.xml:/cyclonedds-config.xml
+      - ../config/rm3100/params.yaml:/ros2_ws/src/go1_magnetometer_rm3100/config/params.yaml
+      - ../config/rm3100/rm3100_driver.launch.py:/ros2_ws/src/go1_magnetometer_rm3100/launch/rm3100_driver.launch.py
+      - ../config/rm3100/rm3100_driver.py:/ros2_ws/src/go1_magnetometer_rm3100/src/rm3100_driver.py
+    environment:
+      - ROS_DOMAIN_ID=0
+      - IOX_DOMAIN_ID=0
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - CYCLONEDDS_URI=file:///cyclonedds-config.xml
+    command:
+      - bash
+      - -c
+      - |
+        echo "=== Starting RM3100 driver ==="
+        until [ -e /dev/shm/iceoryx_mgmt ]; do
+          echo "waiting for RouDi shared memory..."
+          sleep 1
+        done
+        colcon build --symlink-install --packages-select rm3100_driver imu_mag_fusion --cmake-args -DCMAKE_BUILD_TYPE=Release
+        source /ros2_ws/install/setup.bash
+        while ! ip link show can0 &> /dev/null; do echo "Waiting for can0..."; sleep 1; done
+        ros2 launch imu_mag_fusion imu_mag_fusion.launch.py &
+        ros2 launch rm3100_driver rm3100_driver.launch.py
 
   ouster_driver:
     image: ouster_jazzy:latest
@@ -131,9 +350,15 @@ services:
     tty: true
     stdin_open: true
     privileged: true
+    user: "0:0"
     network_mode: host
+    ipc: host
+    depends_on:
+      - roudi
     restart: unless-stopped
     volumes:
+      - /dev/shm:/dev/shm
+      - /tmp:/tmp
       - ../ros2_ws:/ros2_ws
       - ../config/cyclonedds/cyclonedds-local.xml:/cyclonedds-config.xml
       - ../config/ouster/driver_params.yaml:/ros2_ws/src/ouster-ros/ouster-ros/config/driver_params.yaml
@@ -148,6 +373,10 @@ services:
       - |
         sleep 3
         echo "=== Starting OUSTER Driver ==="
+        until [ -e /dev/shm/iceoryx_mgmt ]; do
+          echo "waiting for RouDi shared memory..."
+          sleep 1
+        done
         colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select ouster_ros ouster_sensor_msgs
         source /ros2_ws/install/setup.bash    
         ros2 launch ouster_ros driver.launch.py viz:=false
@@ -162,9 +391,15 @@ services:
     tty: true
     stdin_open: true
     privileged: true
+    user: "0:0"
     network_mode: host
+    ipc: host
+    depends_on:
+      - roudi
+    restart: unless-stopped
     volumes:
       - /dev:/dev
+      - /tmp:/tmp
       - ../ros2_ws:/ros2_ws
       - ../config/cyclonedds/cyclonedds-local.xml:/cyclonedds-config.xml
     environment:
@@ -178,9 +413,51 @@ services:
       - |
         sleep 3
         echo "=== Starting EVK4 Driver ==="
+        until [ -e /dev/shm/iceoryx_mgmt ]; do
+          echo "waiting for RouDi shared memory..."
+          sleep 1
+        done
         colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select metavision_driver
         source /ros2_ws/install/setup.bash    
-        ros2 launch ouster_ros driver.launch.py viz:=false
+        export LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:/usr/local/lib
+        export HDF5_PLUGIN_PATH=$$HDF5_PLUGIN_PATH:/usr/local/lib/hdf5/plugin
+        ros2 launch metavision_driver driver_composition.launch.py serial:="00051972"
+
+  nav2:
+    build:
+      context: ..
+      dockerfile: docker/traversability_mapping/Dockerfile
+    image: ros2_navigation2:latest
+    container_name: nav2
+    privileged: true
+    user: "0:0"
+    network_mode: host
+    ipc: host
+    depends_on:
+      - roudi
+    volumes:
+      - /dev/:/dev/
+      - /tmp:/tmp 
+      - ../ros2_ws:/ros2_ws
+      - ../config/cyclonedds/cyclonedds-local.xml:/cyclonedds-config.xml
+      - ../config/nav2/nav2_params.yaml:/nav2_params.yaml
+    environment:
+      - ROS_DOMAIN_ID=0
+      - IOX_DOMAIN_ID=0
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - CYCLONEDDS_URI=file:///cyclonedds-config.xml
+    command:
+      - bash
+      - -c
+      - |
+        echo "=== Starting NAV2 node ==="
+        until [ -e /dev/shm/iceoryx_mgmt ]; do
+          echo "waiting for RouDi shared memory..."
+          sleep 1
+        done
+        source /ros2_ws/install/setup.bash
+        ros2 launch nav2_bringup navigation_launch.py use_sim_time:=false params_file:=/nav2_params.yaml
+    cpuset: "8-15"
 
   recorder:
     image: recorder_jazzy:latest
@@ -192,10 +469,15 @@ services:
     tty: true
     stdin_open: true
     privileged: true
+    user: "0:0"
     network_mode: host
+    ipc: host
+    depends_on:
+      - roudi
     restart: unless-stopped
     volumes:
       - /dev/:/dev/
+      - /tmp:/tmp
       - ../ros2_ws:/ros2_ws
       - ../config/cyclonedds/cyclonedds-local.xml:/cyclonedds-config.xml
       - ../rosbags/:/rosbags/
@@ -209,7 +491,46 @@ services:
       - -c
       - |
         sleep 3
-        echo "=== Starting OUSTER Driver ==="
-        colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select rqml_recorder
-        source /ros2_ws/install/setup.bash    
-        ros2 launch ...
+        echo "=== Building RECORDER ==="
+        until [ -e /dev/shm/iceoryx_mgmt ]; do
+          echo "waiting for RouDi shared memory..."
+          sleep 1
+        done
+        colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select hector_recorder_msgs hector_recorder
+        source /ros2_ws/install/setup.bash
+        exec bash
+
+  network_bridge:
+    build:
+      context: ..
+      dockerfile: docker/roudi/Dockerfile
+    image: ros2_roudi:latest
+    container_name: network_bridge
+    privileged: true
+    user: "0:0"
+    network_mode: host
+    ipc: host
+    depends_on:
+      - roudi
+    volumes:
+      - /dev/:/dev/
+      - /tmp:/tmp
+      - ../ros2_ws:/ros2_ws
+      - ../config/cyclonedds/cyclonedds-bridge.xml:/cyclonedds-config.xml
+      - ../config/bridge/bridge_config.yaml:/bridge_config.yaml
+    environment:
+      - ROS_DOMAIN_ID=0
+      - IOX_DOMAIN_ID=0
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - CYCLONEDDS_URI=file:///cyclonedds-config.xml
+    command:
+      - bash
+      - -c
+      - |
+        echo "=== Starting NETWORK BRIDGE node ==="
+        until [ -e /dev/shm/iceoryx_mgmt ]; do
+          echo "waiting for RouDi shared memory..."
+          sleep 1
+        done
+        source /ros2_ws/install/setup.bash
+        ros2 run domain_bridge domain_bridge /bridge_config.yaml

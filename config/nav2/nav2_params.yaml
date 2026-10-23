@@ -1,8 +1,8 @@
 bt_navigator:
   ros__parameters:
     global_frame: map
-    robot_base_frame: base_link
-    odom_topic: /bunker_odom
+    robot_base_frame: base_link_curt
+    odom_topic: /odometry/wheel
     bt_loop_duration: 10
     filter_duration: 0.3
     default_server_timeout: 20
@@ -187,7 +187,7 @@ local_costmap:
       update_frequency: 5.0
       publish_frequency: 5.0
       global_frame: odom
-      robot_base_frame: base_link
+      robot_base_frame: base_link_curt
       use_sim_time: False
       rolling_window: True
       width: 6
@@ -212,7 +212,7 @@ global_costmap:
       publish_frequency: 2.0
       rolling_window: true
       global_frame: map
-      robot_base_frame: base_link
+      robot_base_frame: base_link_curt
       use_sim_time: false
       track_unknown_space: true
       width: 200
@@ -332,7 +332,7 @@ behavior_server:
       plugin: "nav2_behaviors::AssistedTeleop"
     local_frame: odom
     global_frame: map
-    robot_base_frame: base_link
+    robot_base_frame: base_link_curt
     transform_tolerance: 0.5
     simulate_ahead_time: 2.0
     max_rotational_vel: 1.0
@@ -382,7 +382,7 @@ velocity_smoother:
     min_velocity: [-0.5, 0.0, -2.0]
     max_accel: [2.5, 0.0, 3.2]
     max_decel: [-2.5, 0.0, -3.2]
-    odom_topic: "/bunker_odom"
+    odom_topic: "/odometry/wheel"
     odom_duration: 0.1
     deadband_velocity: [0.0, 0.0, 0.0]
     velocity_timeout: 1.0
@@ -390,7 +390,7 @@ velocity_smoother:
 collision_monitor:
   ros__parameters:
     enabled: true
-    base_frame_id: "base_link"
+    robot_base_frame: "base_link_curt"
     odom_frame_id: "odom"
     cmd_vel_in_topic: "/cmd_vel_smoothed"
     cmd_vel_out_topic: "/cmd_vel/nav"
@@ -428,7 +428,7 @@ docking_server:
     undock_linear_tolerance: 0.05
     undock_angular_tolerance: 0.1
     max_retries: 3
-    base_frame: "base_link"
+    robot_base_frame: "base_link_curt"
     fixed_frame: "odom"
     dock_prestaging_tolerance: 0.5
     introspection_mode: "disabled"
@@ -475,7 +475,7 @@ docking_server:
 
 loopback_simulator:
   ros__parameters:
-    base_frame_id: "base_link"
+    robot_base_frame: "base_link_curt"
     odom_frame_id: "odom"
     map_frame_id: "map"
     scan_frame_id: "base_scan" # tb4_loopback_simulator.launch.py remaps to 'rplidar_link'
