@@ -26,38 +26,6 @@ services:
         umask 0000
         iox-roudi -c /roudi_config.toml
 
-
-  openzen_driver:
-    image: openzen_jazzy:latest
-    build:
-      context: .
-      dockerfile: curtmini/Dockerfile
-    container_name: openzen_driver
-    init: true
-    tty: true
-    stdin_open: true
-    privileged: true
-    network_mode: host
-    restart: unless-stopped
-    volumes:
-      - /dev/:/dev/
-      - ../ros2_ws/:/ros2_ws
-      - ../config/cyclonedds/cyclonedds-local.xml:/cyclonedds-config.xml
-    environment:
-      - ROS_DOMAIN_ID=0
-      - IOX_DOMAIN_ID=0
-      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-      - CYCLONEDDS_URI=file:///cyclonedds-config.xml
-    command:
-      - /bin/bash
-      - -c
-      - |
-        sleep 3
-        echo "=== Starting OPENZEN Driver ==="
-        colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select openzen_driver
-        source /ros2_ws/install/setup.bash
-        ros2 run openzen_driver openzen_node --ros-args --remap __ns:=/curt/imu
-
   curtmini:
     image: curtmini_driver:latest
     build:
