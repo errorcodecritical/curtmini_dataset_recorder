@@ -21,3 +21,14 @@
 [submodule "ros2_ws/src/traversability_mapping"]
 	path = ros2_ws/src/traversability_mapping
 	url = https://github.com/errorcodecritical/traversability_mapping
+[submodule "ext/hmr_localisation"]
+	path = ext/hmr_localisation
+	url = https://github.com/kalhansb/hmr_localisation
+	branch = field-experiments
+[submodule "ext/scovox"]
+	path = ext/scovox
+	url = https://github.com/kalhansb/scovox
+	branch = field-experiments
+[submodule "ext/explo_planner"]
+	path = ext/explo_planner
+	url = https://github.com/kalhansb/explo_planner
