@@ -35,21 +35,33 @@ def launch_robot():
     twist_mux_path = PathJoinSubstitution([robot_dir, "config", "twist_mux.yaml"])
 
     # start the state publisher
-    urdf_path = PathJoinSubstitution([robot_dir, "models", robot, "robot.urdf.xacro"])
-    robot_description = Command(
-        [
-            "xacro ",
-            urdf_path,
-            " simulation:=",
-            sim_configuration,
-        ]
-    )
-    state_publisher = Node(
-        package="robot_state_publisher",
-        executable="robot_state_publisher",
-        parameters=[
-            {"robot_description": ParameterValue(robot_description, value_type=str)}
-        ],
+    # urdf_path = PathJoinSubstitution([robot_dir, "models", robot, "robot.urdf.xacro"])
+    # robot_description = Command(
+    #     [
+    #         "xacro ",
+    #         urdf_path,
+    #         " simulation:=",
+    #         sim_configuration,
+    #     ]
+    # )
+    # state_publisher = Node(
+    #     package="robot_state_publisher",
+    #     executable="robot_state_publisher",
+    #     parameters=[
+    #         {"robot_description": ParameterValue(robot_description, value_type=str)}
+    #     ],
+    # )
+  
+    state_publisher = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            PathJoinSubstitution(
+                [
+                    FindPackageShare("curt_description"),
+                    "launch",
+                    "robot_state_publisher.launch.py",
+                ]
+            )
+        ),
     )
 
     # start the hardware interface

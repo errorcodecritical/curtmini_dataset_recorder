@@ -100,45 +100,47 @@ services:
         source /ros2_ws/install/setup.bash
         ros2 launch traversability_mapping traversability_mapping.launch.py
 
-  openzen_driver:
-    image: openzen_jazzy:latest
-    build:
-      context: .
-      dockerfile: curtmini/Dockerfile
-    container_name: openzen_driver
-    init: true
-    tty: true
-    stdin_open: true
-    privileged: true
-    user: "0:0"
-    network_mode: host
-    ipc: host
-    depends_on:
-      - roudi
-    restart: unless-stopped
-    volumes:
-      - /dev/:/dev/
-      - /tmp:/tmp
-      - ../ros2_ws/:/ros2_ws
-      - ../config/cyclonedds/cyclonedds-local.xml:/cyclonedds-config.xml
-    environment:
-      - ROS_DOMAIN_ID=0
-      - IOX_DOMAIN_ID=0
-      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-      - CYCLONEDDS_URI=file:///cyclonedds-config.xml
-    command:
-      - /bin/bash
-      - -c
-      - |
-        sleep 3
-        echo "=== Starting OPENZEN Driver ==="
-        until [ -e /dev/shm/iceoryx_mgmt ]; do
-          echo "waiting for RouDi shared memory..."
-          sleep 1
-        done
-        colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select openzen_driver
-        source /ros2_ws/install/setup.bash
-        ros2 run openzen_driver openzen_node --ros-args --remap __ns:=/curt/imu
+  # openzen_driver:
+  #   image: openzen_jazzy:latest
+  #   build:
+  #     context: .
+  #     dockerfile: curtmini/Dockerfile
+  #   container_name: openzen_driver
+  #   init: true
+  #   tty: true
+  #   stdin_open: true
+  #   privileged: true
+  #   user: "0:0"
+  #   network_mode: host
+  #   ipc: host
+  #   depends_on:
+  #     - roudi
+  #   restart: unless-stopped
+  #   volumes:
+  #     - /dev/:/dev/
+  #     - /tmp:/tmp
+  #     - ../ros2_ws/:/ros2_ws
+  #     - ../config/cyclonedds/cyclonedds-local.xml:/cyclonedds-config.xml
+  #     - ../config/openzen/openzen_lpms.launch.py:/ros2_ws/src/openzenros2/launch/openzen_lpms.launch.py
+  #     - ../config/openzen/OpenZenNode.cpp:/ros2_ws/src/openzenros2/src/OpenZenNode.cpp
+  #   environment:
+  #     - ROS_DOMAIN_ID=0
+  #     - IOX_DOMAIN_ID=0
+  #     - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+  #     - CYCLONEDDS_URI=file:///cyclonedds-config.xml
+  #   command:
+  #     - /bin/bash
+  #     - -c
+  #     - |
+  #       sleep 3
+  #       echo "=== Starting OPENZEN Driver ==="
+  #       until [ -e /dev/shm/iceoryx_mgmt ]; do
+  #         echo "waiting for RouDi shared memory..."
+  #         sleep 1
+  #       done
+  #       colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select openzen_driver
+  #       source /ros2_ws/install/setup.bash
+  #       ros2 run openzen_driver openzen_node --ros-args --remap __ns:=/imu
 
   curtmini:
     image: curtmini_driver:latest
@@ -379,7 +381,18 @@ services:
         done
         colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select ouster_ros ouster_sensor_msgs
         source /ros2_ws/install/setup.bash    
-        ros2 launch ouster_ros driver.launch.py viz:=false
+        ros2 launch ouster_ros driver.launch.py viz:=false &
+        ros2 run pcl_ros filter_voxel_grid_node --ros-args \
+          -r __node:=voxel_grid \
+          -r input:=/ouster/points \
+          -r output:=/ouster/points_filtered \
+          -p leaf_size:=0.20 \
+          -p leaf_size:=0.20 \
+          -p filter_field_name:=z \
+          -p filter_limit_min:=-10.0 \
+          -p filter_limit_max:=10.0 \
+          -p input_frame:=os_lidar \
+          -p output_frame:=os_lidar
 
   evk4_driver:
     image: evk4_jazzy:latest
