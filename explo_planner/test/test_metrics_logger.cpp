@@ -1,0 +1,446 @@
+#include <gtest/gtest.h>
+
+#include <algorithm>
+#include <cstdlib>
+#include <filesystem>
+#include <fstream>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <system_error>
+#include <vector>
+
+#include "explo_planner/metrics_logger.hpp"
+
+using namespace explo_planner;
+
+namespace {
+
+// A private directory per test, removed on scope exit. mkdtemp (rather than a
+// fixed name) keeps concurrent runs and other users off each other's paths: a
+// fixed /tmp name owned by another user would make remove_all throw out of the
+// test body as an uncaught exception rather than a clean failure.
+class TempDir {
+ public:
+  TempDir() {
+    std::string pattern =
+        (std::filesystem::temp_directory_path() / "explo_metrics_XXXXXX")
+            .string();
+    std::vector<char> buf(pattern.begin(), pattern.end());
+    buf.push_back('\0');
+    const char* made = ::mkdtemp(buf.data());
+    if (made == nullptr) throw std::runtime_error("mkdtemp failed");
+    path_ = made;
+  }
+  ~TempDir() {
+    std::error_code ec;
+    std::filesystem::remove_all(path_, ec);  // never throw from a destructor
+  }
+  TempDir(const TempDir&) = delete;
+  TempDir& operator=(const TempDir&) = delete;
+
+  std::filesystem::path file(const std::string& name) const {
+    return path_ / name;
+  }
+  const std::filesystem::path& path() const { return path_; }
+
+ private:
+  std::filesystem::path path_;
+};
+
+std::vector<std::string> readLines(const std::filesystem::path& p) {
+  std::vector<std::string> lines;
+  std::ifstream in(p);
+  std::string line;
+  while (std::getline(in, line))
+    if (!line.empty()) lines.push_back(line);
+  return lines;
+}
+
+// Keeps a trailing empty field ("a,b," is three fields): the last column,
+// pick_fallback, is empty on most rows.
+std::vector<std::string> splitCsv(const std::string& line) {
+  std::vector<std::string> fields;
+  std::string::size_type start = 0;
+  while (true) {
+    const auto comma = line.find(',', start);
+    fields.push_back(line.substr(start, comma - start));
+    if (comma == std::string::npos) break;
+    start = comma + 1;
+  }
+  return fields;
+}
+
+// Value of a named column in a header+row pair, by header name.
+std::string valueOf(const std::vector<std::string>& names,
+                    const std::vector<std::string>& values,
+                    const std::string& column) {
+  for (size_t i = 0; i < names.size() && i < values.size(); ++i)
+    if (names[i] == column) return values[i];
+  return "<missing column>";
+}
+
+}  // namespace
+
+// The header and the row must agree on how many columns there are. Adding a
+// StepMetrics field to logStep() but not to writeHeader() (or the reverse)
+// shifts every column after it, which silently corrupts the analysis of a
+// finished run rather than failing it.
+TEST(MetricsLogger, HeaderAndRowHaveSameColumnCount) {
+  TempDir dir;
+  auto csv = dir.file("m.csv");
+  {
+    MetricsLogger log(csv.string());
+    log.logStep(StepMetrics{});
+  }
+  auto lines = readLines(csv);
+  ASSERT_EQ(lines.size(), 2u);  // header + one row
+  EXPECT_EQ(splitCsv(lines[0]).size(), splitCsv(lines[1]).size());
+  // Pin the width too: a field added to StepMetrics but wired into NEITHER
+  // writeHeader nor logStep is invisible to the comparison above.
+  EXPECT_EQ(splitCsv(lines[0]).size(), 65u)
+      << "column count changed — update writeHeader, logStep, and the "
+         "expected list in ColumnOrderMatchesHeaderNames together";
+}
+
+// Column ORDER, not just count: every column gets a distinct value, so a value
+// written into the wrong position is caught by name. Numbers are compared
+// numerically so this test stays about the schema and does not also pin the
+// stream's number formatting (that is EpochTimeKeepsMillisecondResolution's
+// job). sim_time_sec deliberately carries a realistic wall-clock epoch.
+TEST(MetricsLogger, ColumnOrderMatchesHeaderNames) {
+  constexpr double kEpoch = 1758912345.678;  // ~2025-09-26, as on hardware
+
+  StepMetrics m;
+  m.step                    = 1;
+  m.sim_time_sec            = kEpoch;
+  m.total_observed_voxels   = 3;
+  m.frontier_voxels         = 4;
+  m.distance_traveled       = 5;
+  m.selected_score          = 6;
+  m.plan_time_ms            = 7;
+  m.mean_eig                = 8;
+  m.mean_entropy            = 9;
+  m.mean_variance           = 10;
+  m.mean_info_gain          = 11;
+  m.mean_path_cost          = 12;
+  m.selected_info_gain      = 13;
+  m.selected_path_cost      = 14;
+  m.selected_utility        = 15;
+  m.coord_active_peers      = 16;
+  m.rejected_by_minpos      = 17;
+  m.rejected_by_unreachable = 18;
+  m.phase                   = "exploit";
+  m.target_id               = 20;
+  m.vantage_index           = 21;
+  m.n_vantages_valid        = 22;
+  m.vantage_los_clear       = 23;
+  m.dwell_sec               = 24;
+  m.prox_hold_count         = 25;
+  m.prox_hold_total_sec     = 26;
+  m.goal_outcome            = "nav2-aborted";
+  m.nav_elapsed_sec         = 28;
+  m.goal_path_length_m      = 29;
+  m.nav2_aborts             = 30;
+  m.nav2_recoveries         = 31;
+  m.nav2_error_code         = 32;
+  m.pick_fallback           = "revisit";
+  m.row_type                = "end";
+  m.run_end_reason          = "step-budget";
+  m.planner_state           = "DONE";
+  m.state_elapsed_sec       = 37;
+  m.robot_x                 = 38;
+  m.robot_y                 = 39;
+  m.robot_z                 = 40;
+  m.robot_yaw               = 41;
+  m.robot_in_roi            = 42;
+  m.goal_x                  = 43;
+  m.goal_y                  = 44;
+  m.goal_z                  = 45;
+  m.goal_yaw                = 46;
+  m.goal_dist_m             = 47;
+  m.goal_trav_value         = 48;
+  m.area_mapped_m2          = 49;
+  m.roi_area_m2             = 50;
+  m.unknown_fraction        = 51;
+  m.done_streak             = 52;
+  m.area_traversable_m2     = 53;
+  m.area_obstacle_m2        = 54;
+  m.area_driven_m2          = 55;
+  m.n_candidates            = 56;
+  m.rejected_too_close      = 57;
+  m.rejected_map            = 58;
+  m.rejected_clearance      = 59;
+  m.rejected_blacklist      = 60;
+  m.nav2_status             = "EXECUTING";
+  m.nav2_publishers         = 62;
+  m.goal_subscribers        = 63;
+  m.map_age_sec             = 64;
+  m.plan_map_age_sec        = 65;
+
+  TempDir dir;
+  auto csv = dir.file("m.csv");
+  {
+    MetricsLogger log(csv.string());
+    log.logStep(m);
+  }
+  auto lines = readLines(csv);
+  ASSERT_EQ(lines.size(), 2u);
+
+  const std::vector<std::pair<std::string, double>> expected = {
+      {"step", 1},
+      {"sim_time_sec", kEpoch},
+      {"total_observed_voxels", 3},
+      {"frontier_voxels", 4},
+      {"distance_traveled", 5},
+      {"selected_score", 6},
+      {"plan_time_ms", 7},
+      {"mean_eig", 8},
+      {"mean_entropy", 9},
+      {"mean_variance", 10},
+      {"mean_info_gain", 11},
+      {"mean_path_cost", 12},
+      {"selected_info_gain", 13},
+      {"selected_path_cost", 14},
+      {"selected_utility", 15},
+      {"coord_active_peers", 16},
+      {"rejected_by_minpos", 17},
+      {"rejected_by_unreachable", 18},
+      {"phase", 0},  // string column, value checked separately below
+      {"target_id", 20},
+      {"vantage_index", 21},
+      {"n_vantages_valid", 22},
+      {"vantage_los_clear", 23},
+      {"dwell_sec", 24},
+      {"prox_hold_count", 25},
+      {"prox_hold_total_sec", 26},
+      {"goal_outcome", 0},  // string column
+      {"nav_elapsed_sec", 28},
+      {"goal_path_length_m", 29},
+      {"nav2_aborts", 30},
+      {"nav2_recoveries", 31},
+      {"nav2_error_code", 32},
+      {"pick_fallback", 0},  // string column
+      {"row_type", 0},  // string column
+      {"run_end_reason", 0},  // string column
+      {"planner_state", 0},  // string column
+      {"state_elapsed_sec", 37},
+      {"robot_x", 38},
+      {"robot_y", 39},
+      {"robot_z", 40},
+      {"robot_yaw", 41},
+      {"robot_in_roi", 42},
+      {"goal_x", 43},
+      {"goal_y", 44},
+      {"goal_z", 45},
+      {"goal_yaw", 46},
+      {"goal_dist_m", 47},
+      {"goal_trav_value", 48},
+      {"area_mapped_m2", 49},
+      {"roi_area_m2", 50},
+      {"unknown_fraction", 51},
+      {"done_streak", 52},
+      {"area_traversable_m2", 53},
+      {"area_obstacle_m2", 54},
+      {"area_driven_m2", 55},
+      {"n_candidates", 56},
+      {"rejected_too_close", 57},
+      {"rejected_map", 58},
+      {"rejected_clearance", 59},
+      {"rejected_blacklist", 60},
+      {"nav2_status", 0},  // string column
+      {"nav2_publishers", 62},
+      {"goal_subscribers", 63},
+      {"map_age_sec", 64},
+      {"plan_map_age_sec", 65},
+  };
+  const std::vector<std::pair<std::string, std::string>> text_columns = {
+      {"phase", "exploit"}, {"goal_outcome", "nav2-aborted"},
+      {"pick_fallback", "revisit"}, {"row_type", "end"},
+      {"run_end_reason", "step-budget"}, {"planner_state", "DONE"},
+      {"nav2_status", "EXECUTING"}};
+
+  auto names  = splitCsv(lines[0]);
+  auto values = splitCsv(lines[1]);
+  ASSERT_EQ(names.size(), expected.size());
+  ASSERT_EQ(values.size(), expected.size());
+  for (size_t i = 0; i < expected.size(); ++i) {
+    EXPECT_EQ(names[i], expected[i].first) << "header column " << i;
+    const auto text = std::find_if(
+        text_columns.begin(), text_columns.end(),
+        [&](const auto& c) { return c.first == expected[i].first; });
+    if (text != text_columns.end()) {
+      EXPECT_EQ(values[i], text->second) << "value for column " << i;
+      continue;
+    }
+    // Millisecond tolerance: enough to catch a swapped or shifted column,
+    // loose enough not to depend on the exact text formatting.
+    EXPECT_NEAR(std::stod(values[i]), expected[i].second, 1e-3)
+        << "value for column " << i << " (" << names[i] << ")";
+  }
+}
+
+// sim_time_sec comes from this->now().seconds(), which with the shipped
+// use_sim_time: false is a wall-clock epoch (~1.76e9). At the stream's default
+// 6 significant digits every row of a run collapses to the same text
+// (1.75891e+09, ~1000 s resolution), destroying the only time reference a
+// finished experiment has. Two rows a few seconds apart must stay distinct and
+// round-trip to millisecond accuracy.
+TEST(MetricsLogger, EpochTimeKeepsMillisecondResolution) {
+  constexpr double kT0 = 1758912345.678;
+  constexpr double kDt = 3.234;
+
+  TempDir dir;
+  auto csv = dir.file("m.csv");
+  {
+    MetricsLogger log(csv.string());
+    StepMetrics a;
+    a.step = 1;
+    a.sim_time_sec = kT0;
+    log.logStep(a);
+    StepMetrics b;
+    b.step = 2;
+    b.sim_time_sec = kT0 + kDt;
+    log.logStep(b);
+  }
+  auto lines = readLines(csv);
+  ASSERT_EQ(lines.size(), 3u);
+  auto names = splitCsv(lines[0]);
+  const std::string t0_text = valueOf(names, splitCsv(lines[1]), "sim_time_sec");
+  const std::string t1_text = valueOf(names, splitCsv(lines[2]), "sim_time_sec");
+
+  EXPECT_NE(t0_text, t1_text)
+      << "both rows wrote the same timestamp text (" << t0_text
+      << "); every row of a real run would share one time";
+  EXPECT_NEAR(std::stod(t0_text), kT0, 1e-3);
+  EXPECT_NEAR(std::stod(t1_text), kT0 + kDt, 1e-3);
+  EXPECT_NEAR(std::stod(t1_text) - std::stod(t0_text), kDt, 2e-3);
+}
+
+// An explore-phase step leaves every exploitation, proximity and goal-outcome
+// column at the defaults metrics_logger.hpp documents, so a CSV row always
+// attributes itself to a phase and an empty goal_outcome means "no goal ended".
+TEST(MetricsLogger, ExploreRowCarriesDocumentedDefaults) {
+  TempDir dir;
+  auto csv = dir.file("m.csv");
+  {
+    MetricsLogger log(csv.string());
+    log.logStep(StepMetrics{});
+  }
+  auto lines = readLines(csv);
+  ASSERT_EQ(lines.size(), 2u);
+  auto names  = splitCsv(lines[0]);
+  auto values = splitCsv(lines[1]);
+  EXPECT_EQ(valueOf(names, values, "phase"), "explore");
+  EXPECT_EQ(valueOf(names, values, "target_id"), "-1");
+  EXPECT_EQ(valueOf(names, values, "vantage_index"), "-1");
+  EXPECT_EQ(valueOf(names, values, "n_vantages_valid"), "0");
+  EXPECT_EQ(valueOf(names, values, "vantage_los_clear"), "0");
+  EXPECT_EQ(valueOf(names, values, "dwell_sec"), "0");
+  EXPECT_EQ(valueOf(names, values, "prox_hold_count"), "0");
+  EXPECT_EQ(valueOf(names, values, "prox_hold_total_sec"), "0");
+  EXPECT_EQ(valueOf(names, values, "goal_outcome"), "");
+  EXPECT_EQ(valueOf(names, values, "nav_elapsed_sec"), "0");
+  EXPECT_EQ(valueOf(names, values, "goal_path_length_m"), "0");
+  EXPECT_EQ(valueOf(names, values, "nav2_aborts"), "0");
+  EXPECT_EQ(valueOf(names, values, "nav2_recoveries"), "0");
+  EXPECT_EQ(valueOf(names, values, "nav2_error_code"), "-1");
+  EXPECT_EQ(valueOf(names, values, "pick_fallback"), "");
+  EXPECT_EQ(valueOf(names, values, "row_type"), "step");
+  EXPECT_EQ(valueOf(names, values, "run_end_reason"), "");
+  EXPECT_EQ(valueOf(names, values, "robot_in_roi"), "-1");
+  EXPECT_EQ(valueOf(names, values, "goal_trav_value"), "-2");
+  EXPECT_EQ(valueOf(names, values, "unknown_fraction"), "-1");
+  EXPECT_EQ(valueOf(names, values, "area_traversable_m2"), "-1");
+  EXPECT_EQ(valueOf(names, values, "nav2_publishers"), "-1");
+  EXPECT_EQ(valueOf(names, values, "plan_map_age_sec"), "-1");
+}
+
+// The header is written once, on the first row — not per row.
+TEST(MetricsLogger, HeaderWrittenOnceAcrossManyRows) {
+  TempDir dir;
+  auto csv = dir.file("m.csv");
+  {
+    MetricsLogger log(csv.string());
+    for (int i = 0; i < 3; ++i) {
+      StepMetrics m;
+      m.step = i;
+      log.logStep(m);
+    }
+  }
+  auto lines = readLines(csv);
+  ASSERT_EQ(lines.size(), 4u);  // 1 header + 3 rows
+  EXPECT_EQ(splitCsv(lines[0])[0], "step");
+  EXPECT_EQ(splitCsv(lines[1])[0], "0");
+  EXPECT_EQ(splitCsv(lines[2])[0], "1");
+  EXPECT_EQ(splitCsv(lines[3])[0], "2");
+}
+
+// Header emission is lazy: a run that never completes a step leaves an empty
+// file, not a header-only one that reads as a valid zero-row experiment.
+TEST(MetricsLogger, NoStepsLeavesFileEmpty) {
+  TempDir dir;
+  auto csv = dir.file("m.csv");
+  { MetricsLogger log(csv.string()); }
+  EXPECT_TRUE(std::filesystem::exists(csv));
+  EXPECT_EQ(std::filesystem::file_size(csv), 0u);
+}
+
+// Every row is flushed as it is logged, so a run killed mid-experiment keeps
+// the steps it already completed.
+TEST(MetricsLogger, RowsAreFlushedBeforeDestruction) {
+  TempDir dir;
+  auto csv = dir.file("m.csv");
+  MetricsLogger log(csv.string());  // deliberately still alive below
+  StepMetrics m;
+  m.step = 7;
+  log.logStep(m);
+  auto lines = readLines(csv);  // read while the logger holds the file open
+  ASSERT_EQ(lines.size(), 2u);
+  EXPECT_EQ(splitCsv(lines[1])[0], "7");
+}
+
+// A re-run truncates: the CSV holds only the new run, never new rows appended
+// under a previous run's header.
+TEST(MetricsLogger, ReopenTruncatesPreviousRun) {
+  TempDir dir;
+  auto csv = dir.file("m.csv");
+  {
+    MetricsLogger log(csv.string());
+    StepMetrics m;
+    m.step = 111;
+    log.logStep(m);
+  }
+  {
+    MetricsLogger log(csv.string());
+    StepMetrics m;
+    m.step = 222;
+    log.logStep(m);
+  }
+  auto lines = readLines(csv);
+  ASSERT_EQ(lines.size(), 2u);  // not 3, and not 4
+  EXPECT_EQ(splitCsv(lines[1])[0], "222");
+}
+
+// An unwritable path must throw at construction rather than silently no-op
+// every subsequent write and produce an empty experiment.
+// A file where a folder should be (not a permission check: tests may run as
+// root).
+TEST(MetricsLogger, UnwritablePathThrows) {
+  TempDir dir;
+  auto blocker = dir.path() / "a_file";
+  std::ofstream(blocker) << "x";
+  EXPECT_THROW(MetricsLogger log((blocker / "m.csv").string()),
+               std::runtime_error);
+}
+
+// Missing folders above the CSV are created.
+TEST(MetricsLogger, CreatesMissingDirectories) {
+  TempDir dir;
+  auto nested = dir.path() / "a" / "b" / "m.csv";
+  {
+    MetricsLogger log(nested.string());
+    log.logStep(StepMetrics{});
+  }
+  EXPECT_EQ(readLines(nested).size(), 2u);
+}

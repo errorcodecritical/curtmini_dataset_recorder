@@ -1,0 +1,155 @@
+"""Launch one explo_planner_node per robot for an Exp 7 trial.
+
+Thin wrapper around exploration_experiment.launch.py: declares the robot
+team, picks the planner, and stamps coordination on. Every planner loads
+config/shared_params.yaml (the parameters shared by every launch); the
+arguments declared below are passed on top of it — their defaults here are
+the source of truth for those per-run values. Does NOT launch Gazebo,
+robots, scovox_node, or dscovox_node -- those come from
+single_robot_sim.launch.py + per-robot simple_nav_3d.launch.py invocations
+(the per-robot dscovox_node lives inside simple_nav_3d's mapping=="dscovox"
+block already; the only change there is wiring the peers list, see
+simple_nav_3d.launch.py:peers).
+
+Each planner reads its OWN robot's per-robot fused view via the existing
+default /<robot>/dscovox_node/scovox -- there is no central merger.
+"""
+
+import os
+
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument, OpaqueFunction
+from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import Node
+
+
+def launch_setup(context):
+    pkg_dir = get_package_share_directory("explo_planner")
+    shared_params = os.path.join(pkg_dir, "config", "shared_params.yaml")
+    # Optional overlay layered ON TOP of shared_params.yaml — e.g. the hardware
+    # set, config/exploration_real_robot.yaml, whose per-robot
+    # `/<robot>/explo_planner:` blocks carry each platform's base_frame. Unset
+    # falls back to shared_params itself, i.e. loading it twice: a no-op.
+    # Unlike the single-robot launch, base_frame is NOT in the per-node dict
+    # below, so the overlay is the mechanism for it here.
+    params_file = LaunchConfiguration("params_file").perform(context) or shared_params
+
+    robots_raw = LaunchConfiguration("robots").perform(context)
+    robots = [r.strip() for r in robots_raw.split(",") if r.strip()]
+    if not robots:
+        raise RuntimeError("multi_robot_exploration: 'robots' is empty")
+
+    planner = LaunchConfiguration("planner").perform(context)
+    output_dir = os.path.expanduser(LaunchConfiguration("output_dir").perform(context))
+    config_id = LaunchConfiguration("config_id").perform(context)
+    world = LaunchConfiguration("world").perform(context)
+    max_steps = LaunchConfiguration("max_steps").perform(context)
+    use_sim_time = LaunchConfiguration("use_sim_time").perform(context).lower() \
+        in ("true", "1", "yes", "on")
+    coordination_enabled = LaunchConfiguration("coordination_enabled").perform(context)
+    rendezvous_enabled = LaunchConfiguration("rendezvous_enabled").perform(context)
+    rendezvous_max_wait_sec = LaunchConfiguration("rendezvous_max_wait_sec").perform(context)
+    proximity_stop_enabled = LaunchConfiguration("proximity_stop_enabled").perform(context)
+
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Rendezvous barrier: each robot waits for its (team size - 1) teammates.
+    expected_peers = max(len(robots) - 1, 0)
+
+    nodes = []
+    for robot in robots:
+        csv_name = f"exp7_{planner}_{world}_{config_id}_{robot}.csv"
+        output_csv = os.path.join(output_dir, csv_name)
+
+        nodes.append(Node(
+            package="explo_planner",
+            # EIG-only NBV planner. The `planner` arg is kept only as a CSV
+            # filename label (this node is hard-wired to EIG); multi-robot
+            # MinPos deconfliction is toggled by coordination_enabled below.
+            executable="explo_planner_node",
+            namespace=robot,
+            name="explo_planner",
+            output="screen",
+            parameters=[
+                shared_params,
+                params_file,
+                {
+                    "use_sim_time": use_sim_time,
+                    "robot_name": robot,
+                    "max_steps": int(max_steps),
+                    "output_csv": output_csv,
+                    # dscovox_topic / planning_map_topic intentionally left
+                    # at their defaults so each planner reads its own
+                    # robot's per-robot fused view.
+                    # Multi-robot coordination on. The MinPos branch in the
+                    # planner's doPlan walks claim_matching against peer
+                    # intents on /exploration/intents.
+                    "coordination_enabled":
+                        coordination_enabled.lower() in ("true", "1", "yes", "on"),
+                    # Rendezvous at the mission start point: on exhausting
+                    # its goals a robot returns to where it started exploring
+                    # and waits there until the whole team is back in comms
+                    # (start poses share one comms bubble). expected_peers is
+                    # the team size minus this robot.
+                    "rendezvous_enabled":
+                        rendezvous_enabled.lower() in ("true", "1", "yes", "on"),
+                    "rendezvous_expected_peers": expected_peers,
+                    "rendezvous_max_wait_sec": float(rendezvous_max_wait_sec),
+                    # Coordinated proximity stop: yield (cancel the nav goal,
+                    # hold) when a lex-smaller teammate is moving nearby. In
+                    # sim the guard runs off the 1 Hz intent heartbeats; on
+                    # hardware add the peers' localiser topics via
+                    # proximity_peer_pose_topics in the yaml.
+                    "proximity_stop_enabled":
+                        proximity_stop_enabled.lower() in ("true", "1", "yes", "on"),
+                },
+            ],
+        ))
+
+    return nodes
+
+
+def generate_launch_description():
+    return LaunchDescription([
+        DeclareLaunchArgument("robots", default_value="atlas,rama",
+                              description="Comma-separated robot team list"),
+        # Defaults false (hardware). The planner's 10 Hz tick runs off the node
+        # clock, so use_sim_time:=true with no /clock publisher leaves the timer
+        # dead and every planner silently idle. Gazebo/bag runs must pass true.
+        DeclareLaunchArgument("use_sim_time", default_value="false",
+                              description="Use /clock (sim/bag runs only)"),
+        DeclareLaunchArgument("params_file", default_value="",
+                              description="Extra param file layered over "
+                                          "shared_params.yaml (e.g. "
+                                          "config/exploration_real_robot.yaml)"),
+        DeclareLaunchArgument("planner", default_value="eig",
+                              description="Planner type: eig, entropy, frontier, random"),
+        DeclareLaunchArgument("output_dir", default_value="~/explo-output",
+                              description="Directory for per-robot CSVs"),
+        DeclareLaunchArgument("config_id", default_value="c1",
+                              description="Start configuration id (for CSV filename)"),
+        DeclareLaunchArgument("world", default_value="flatforest",
+                              description="World name (for CSV filename)"),
+        DeclareLaunchArgument("max_steps", default_value="100",
+                              description="Per-robot step budget"),
+        DeclareLaunchArgument("coordination_enabled", default_value="true",
+                              description="Enable MinPos peer-claim deconfliction"),
+        DeclareLaunchArgument("rendezvous_enabled", default_value="true",
+                              description="Return to the mission start point and "
+                                          "wait for the whole team when exploration "
+                                          "goals are exhausted (default on; set "
+                                          "false for independent finish-and-stop)"),
+        # NOTE: this dict entry layers AFTER shared_params.yaml, so THIS default
+        # governs launch-driven runs — keep it in sync with the yaml (600).
+        DeclareLaunchArgument("rendezvous_max_wait_sec", default_value="600.0",
+                              description="Barrier give-up seconds (0 = wait "
+                                          "forever; bounded by default so a dead "
+                                          "teammate can't park the robot)"),
+        DeclareLaunchArgument("proximity_stop_enabled", default_value="true",
+                              description="Coordinated proximity stop: the "
+                                          "lex-larger robot of a close pair "
+                                          "cancels its nav goal and holds "
+                                          "until the peer clears or parks"),
+        OpaqueFunction(function=launch_setup),
+    ])
