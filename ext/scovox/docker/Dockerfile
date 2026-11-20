@@ -22,7 +22,7 @@
 #
 # Or just run docker/build_and_test.sh, which wraps both steps.
 # ---------------------------------------------------------------------------
-FROM osrf/ros:jazzy-desktop
+FROM ros:jazzy-ros-base
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -46,6 +46,8 @@ RUN apt-get update \
     && rosdep update --rosdistro jazzy \
     && rosdep install --from-paths /tmp/deps/src --ignore-src -y --rosdistro jazzy \
     && rm -rf /tmp/deps /var/lib/apt/lists/*
+
+RUN apt update && apt-get install -y ros-jazzy-rmw-cyclonedds-cpp ros-jazzy-nav2-msgs
 
 # Auto-source ROS + the workspace overlay for every interactive shell.
 RUN echo 'source /opt/ros/jazzy/setup.bash' >> /root/.bashrc && \

@@ -1,4 +1,4 @@
-FROM osrf/ros:jazzy-desktop
+FROM ros:jazzy-ros-base
 
 ENV DEBIAN_FRONTEND=noninteractive
 
