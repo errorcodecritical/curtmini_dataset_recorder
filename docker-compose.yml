@@ -137,7 +137,7 @@ services:
         ros2 run scovox_mapping scovox_mapping_node --ros-args \
           -r __node:=scovox_node \
           -p use_sim_time:=false \
-          --params-file /scovox/config/scovox_lidar_raw_deskew.yaml &
+          --params-file /scovox/src/scovox_mapping/config/curt_config.yaml &
         ros2 run scovox_mapping dscovox_mapping_node --ros-args \
           -r __node:=dscovox_node \
           -p use_sim_time:=false \

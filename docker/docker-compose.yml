@@ -10,7 +10,6 @@ services:
     user: "0:0"
     network_mode: none
     ipc: host
-    shm_size: '13gb'
     restart: unless-stopped
     volumes:
       - /dev/shm:/dev/shm

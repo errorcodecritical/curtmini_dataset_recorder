@@ -4,9 +4,9 @@
 
     # Frames and topics
     map_frame: map
-    base_frame: base_link
-    lidar_frame: hesai_lidar
-    input_cloud_topic: /hesai/points
+    base_frame: base_link_curt
+    lidar_frame: os_lidar
+    input_cloud_topic: /ouster/points
     filtered_cloud_topic: /filtered_pointcloud
     occupancy_topic: /occupancy_map_local
     elevation_topic: /occupancy_map_local_height
@@ -31,7 +31,7 @@
     use_cloud_ring: true
     sensor_minimum_range: 0.5
     use_height_cut: true
-    height_cut_above_sensor: 1.5
+    height_cut_above_sensor: 0.5
     max_ring_index: 64
 
     # Map geometry

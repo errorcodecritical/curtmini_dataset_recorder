@@ -68,6 +68,34 @@ topics:
     remap: /prm_goal
     from_domain: 133
     to_domain: 0
+
+  # NAV2 + TM
+  
+  /occupancy_map_local:
+    type: nav_msgs/msg/OccupancyGrid
+    remap: /curt/occupancy_map_local
+
+  /global_costmap/costmap:
+    type: nav_msgs/msg/OccupancyGrid
+    remap: /curt/global_costmap/costmap
+  
+  /optimal_trajectory:
+    type: nav_msgs/msg/Path
+    remap: /curt/optimal_trajectory
+
+  # SCOVOX
+
+  /dscovox_node/pointcloud:
+    type: sensor_msgs/msg/PointCloud2
+    remap: /curt/dscovox_node/pointcloud
+
+  /scovox_node/pointcloud:
+    type: sensor_msgs/msg/PointCloud2
+    remap: /curt/scovox_node/pointcloud
+
+  /explo_planner/candidates:
+    type: visualization_msgs/msg/MarkerArray
+    remap: /curt/explo_planner/candidates
   
 
   # Reverse direction: Allow external /robot_1/cmd_vel -> internal /cmd_vel
