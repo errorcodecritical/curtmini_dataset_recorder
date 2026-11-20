@@ -1,0 +1,140 @@
+#include <gtest/gtest.h>
+
+#include <cmath>
+#include <vector>
+
+#include <Eigen/Core>
+
+#include "explo_planner/failed_goal_blacklist.hpp"
+
+using namespace explo_planner;
+
+namespace {
+Eigen::Vector3f p(float x, float y, float z = 0.0f) {
+  return Eigen::Vector3f(x, y, z);
+}
+}  // namespace
+
+TEST(FailedGoalBlacklist, EmptyByDefault) {
+  FailedGoalBlacklist bl;
+  EXPECT_TRUE(bl.empty());
+  EXPECT_EQ(bl.size(), 0u);
+  EXPECT_FALSE(bl.isNear(p(0, 0), 5.0));
+}
+
+// isNear is a radius query in XY; Z is ignored.
+TEST(FailedGoalBlacklist, IsNearRadiusXYOnly) {
+  FailedGoalBlacklist bl;
+  bl.add(p(10.0f, 10.0f, 3.0f), /*now_sec=*/0.0);
+  EXPECT_EQ(bl.size(), 1u);
+
+  // Inside the radius (1.0 m away < 2.0 m), even with a large Z difference.
+  EXPECT_TRUE(bl.isNear(p(11.0f, 10.0f, -50.0f), 2.0));
+  // Outside the radius (3.0 m away > 2.0 m).
+  EXPECT_FALSE(bl.isNear(p(13.0f, 10.0f), 2.0));
+  // Exactly on the boundary fails (strict <).
+  EXPECT_FALSE(bl.isNear(p(12.0f, 10.0f), 2.0));
+}
+
+// prune drops entries strictly older than the TTL relative to now.
+TEST(FailedGoalBlacklist, PruneByTtl) {
+  FailedGoalBlacklist bl;
+  bl.add(p(0, 0), 100.0);
+  bl.add(p(5, 5), 105.0);
+
+  // At t=110 with ttl=8: first entry age 10 (>8) expires, second age 5 stays.
+  bl.prune(110.0, 8.0);
+  EXPECT_EQ(bl.size(), 1u);
+  EXPECT_FALSE(bl.isNear(p(0, 0), 1.0));  // expired entry gone
+  EXPECT_TRUE(bl.isNear(p(5, 5), 1.0));   // fresh entry remains
+
+  // Advancing far enough expires everything.
+  bl.prune(200.0, 8.0);
+  EXPECT_TRUE(bl.empty());
+}
+
+// Entry exactly at the TTL age is kept (age > ttl is strict).
+TEST(FailedGoalBlacklist, PruneBoundaryKeepsExactAge) {
+  FailedGoalBlacklist bl;
+  bl.add(p(1, 1), 0.0);
+  bl.prune(10.0, 10.0);  // age == ttl, not > ttl
+  EXPECT_EQ(bl.size(), 1u);
+}
+
+// Multiple live entries are all queryable.
+TEST(FailedGoalBlacklist, MultipleEntries) {
+  FailedGoalBlacklist bl;
+  bl.add(p(0, 0), 0.0);
+  bl.add(p(20, 0), 0.0);
+  bl.add(p(0, 20), 0.0);
+  EXPECT_EQ(bl.size(), 3u);
+  EXPECT_TRUE(bl.isNear(p(0.5f, 0.0f), 1.0));
+  EXPECT_TRUE(bl.isNear(p(20.0f, 0.5f), 1.0));
+  EXPECT_TRUE(bl.isNear(p(0.0f, 19.5f), 1.0));
+  EXPECT_FALSE(bl.isNear(p(10.0f, 10.0f), 1.0));
+}
+
+// prune() must not assume insertion order implies age order. Under sim time a
+// bag restart or a /clock step backwards stamps a fresh entry with an OLDER
+// timestamp than the one already queued behind it; the old pop-front-until-
+// fresh loop hit the newer entry first, broke, and left the expired one
+// blacklisting its goal forever.
+TEST(FailedGoalBlacklist, PrunesExpiredEntriesOutOfTimestampOrder) {
+  FailedGoalBlacklist bl;
+  bl.add(p(0, 0), /*now_sec=*/1000.0);  // recent, must survive
+  bl.add(p(50, 0), /*now_sec=*/10.0);   // clock jumped back: stamped far older
+
+  bl.prune(/*now_sec=*/1005.0, /*ttl_sec=*/60.0);
+
+  EXPECT_EQ(bl.size(), 1u);
+  EXPECT_TRUE(bl.isNear(p(0, 0), 1.0));    // 5 s old
+  EXPECT_FALSE(bl.isNear(p(50, 0), 1.0));  // 995 s old
+}
+
+// An entry stamped in the future (age < 0, e.g. a peer-driven clock step
+// forward between add and prune) counts as fresh, not as expired.
+TEST(FailedGoalBlacklist, FutureStampedEntryIsNotPruned) {
+  FailedGoalBlacklist bl;
+  bl.add(p(3, 3), /*now_sec=*/500.0);
+  bl.prune(/*now_sec=*/100.0, /*ttl_sec=*/60.0);
+  EXPECT_EQ(bl.size(), 1u);
+  EXPECT_TRUE(bl.isNear(p(3, 3), 1.0));
+}
+
+// newestTimeNear: the newest entry inside the radius (XY), -inf when none.
+TEST(FailedGoalBlacklist, NewestTimeNear) {
+  FailedGoalBlacklist bl;
+  EXPECT_TRUE(std::isinf(bl.newestTimeNear(p(0, 0), 5.0)));
+  bl.add(p(0, 0), 10.0);
+  bl.add(p(1, 0), 30.0);
+  bl.add(p(20, 0), 50.0);
+  EXPECT_DOUBLE_EQ(bl.newestTimeNear(p(0.5f, 0), 2.0), 30.0);
+  EXPECT_DOUBLE_EQ(bl.newestTimeNear(p(-1.5f, 0), 2.0), 10.0);  // only (0,0)
+  EXPECT_DOUBLE_EQ(bl.newestTimeNear(p(20, 1, 9), 2.0), 50.0);  // z ignored
+  const double none = bl.newestTimeNear(p(10, 0), 2.0);
+  EXPECT_TRUE(std::isinf(none) && none < 0.0);
+}
+
+// The visited-goal fallback order: a never-visited area first, then the one
+// left longest ago; ties keep the input (utility) order.
+TEST(FailedGoalBlacklist, LeastRecentFirst) {
+  FailedGoalBlacklist bl;
+  bl.add(p(0, 0), 100.0);   // where the robot is now
+  bl.add(p(10, 0), 40.0);   // left 60 s ago
+  bl.add(p(0, 10), 70.0);   // left 30 s ago
+  const std::vector<Eigen::Vector3f> pos = {
+      p(1, 0),         // 0: next to the robot (100)
+      p(0, 11),        // 1: 70
+      p(10, 1),        // 2: 40
+      p(0.5f, 0.5f),   // 3: 100, ties with 0
+      p(30, 30),       // 4: never visited
+  };
+  const auto order = leastRecentFirst(bl, pos, 6.0);
+  ASSERT_EQ(order.size(), 5u);
+  EXPECT_EQ(order[0], 4u);
+  EXPECT_EQ(order[1], 2u);
+  EXPECT_EQ(order[2], 1u);
+  EXPECT_EQ(order[3], 0u);
+  EXPECT_EQ(order[4], 3u);
+  EXPECT_TRUE(leastRecentFirst(bl, {}, 6.0).empty());
+}

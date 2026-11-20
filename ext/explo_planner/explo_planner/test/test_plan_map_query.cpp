@@ -1,0 +1,238 @@
+#include <gtest/gtest.h>
+
+#include <Eigen/Core>
+#include <nav_msgs/msg/occupancy_grid.hpp>
+
+#include "explo_planner/plan_map_query.hpp"
+
+using namespace explo_planner;
+
+namespace {
+
+// Build a planning_map at a given resolution and origin. Every cell defaults
+// to free (value 0); set individual cells via the returned grid's data[].
+nav_msgs::msg::OccupancyGrid makeGrid(int width, int height, float resolution,
+                                      float origin_x = 0.0f,
+                                      float origin_y = 0.0f) {
+  nav_msgs::msg::OccupancyGrid g;
+  g.info.width = width;
+  g.info.height = height;
+  g.info.resolution = resolution;
+  g.info.origin.position.x = origin_x;
+  g.info.origin.position.y = origin_y;
+  g.data.assign(static_cast<size_t>(width) * height, 0);
+  return g;
+}
+
+void setCell(nav_msgs::msg::OccupancyGrid& g, int gx, int gy, int8_t v) {
+  g.data[gy * g.info.width + gx] = v;
+}
+
+Eigen::Vector3f cellCenter(const nav_msgs::msg::OccupancyGrid& g,
+                           int gx, int gy) {
+  return Eigen::Vector3f(
+      static_cast<float>(g.info.origin.position.x +
+                         (gx + 0.5f) * g.info.resolution),
+      static_cast<float>(g.info.origin.position.y +
+                         (gy + 0.5f) * g.info.resolution),
+      0.0f);
+}
+
+}  // namespace
+
+// planMapCellAt returns the raw value in bounds, kCellNoData out of bounds.
+TEST(PlanMapQuery, CellAtInBoundsAndOut) {
+  auto g = makeGrid(10, 10, 1.0f, -5.0f, -5.0f);  // origin offset exercised
+  setCell(g, 3, 4, 42);
+  EXPECT_EQ(planMapCellAt(g, cellCenter(g, 3, 4)), 42);
+  EXPECT_EQ(planMapCellAt(g, cellCenter(g, 0, 0)), 0);
+  // Far outside the grid extents -> sentinel, not a garbage index.
+  EXPECT_EQ(planMapCellAt(g, Eigen::Vector3f(1000.0f, 0.0f, 0.0f)),
+            kCellNoData);
+  EXPECT_EQ(planMapCellAt(g, Eigen::Vector3f(0.0f, -1000.0f, 0.0f)),
+            kCellNoData);
+}
+
+// A degenerate grid (no cells / zero resolution) never indexes data[].
+TEST(PlanMapQuery, DegenerateGridIsNoData) {
+  auto empty = makeGrid(0, 0, 1.0f);
+  EXPECT_EQ(planMapCellAt(empty, Eigen::Vector3f::Zero()), kCellNoData);
+
+  auto zero_res = makeGrid(5, 5, 0.0f);
+  EXPECT_EQ(planMapCellAt(zero_res, Eigen::Vector3f::Zero()), kCellNoData);
+  EXPECT_FALSE(isCellFree(zero_res, Eigen::Vector3f::Zero()));
+  EXPECT_TRUE(isCellOccupied(zero_res, Eigen::Vector3f::Zero()));
+}
+
+// A grid whose data[] doesn't match width*height (truncated message) is
+// treated as degenerate: sentinel out, never an out-of-range index.
+TEST(PlanMapQuery, TruncatedDataIsNoData) {
+  auto g = makeGrid(10, 10, 1.0f);
+  g.data.resize(10);       // claims 100 cells, carries 10
+  g.data.shrink_to_fit();  // so a pre-fix read is truly out-of-allocation
+  EXPECT_EQ(planMapCellAt(g, cellCenter(g, 5, 5)), kCellNoData);
+  EXPECT_FALSE(isCellFree(g, cellCenter(g, 5, 5)));
+  EXPECT_TRUE(isCellOccupied(g, cellCenter(g, 5, 5)));
+  EXPECT_EQ(unknownFractionInRoi(g, {0.0f, 10.0f, 0.0f, 10.0f}), -1.0);
+}
+
+// isCellFree: only known-free (0..49) passes; unknown/occupied/OOB fail.
+TEST(PlanMapQuery, IsCellFreeClassification) {
+  auto g = makeGrid(5, 5, 1.0f);
+  setCell(g, 1, 1, 0);    // free
+  setCell(g, 2, 2, 49);   // free (just under threshold)
+  setCell(g, 3, 3, 50);   // occupied (threshold)
+  setCell(g, 4, 4, 100);  // occupied
+  setCell(g, 0, 0, -1);   // unknown
+
+  EXPECT_TRUE(isCellFree(g, cellCenter(g, 1, 1)));
+  EXPECT_TRUE(isCellFree(g, cellCenter(g, 2, 2)));
+  EXPECT_FALSE(isCellFree(g, cellCenter(g, 3, 3)));
+  EXPECT_FALSE(isCellFree(g, cellCenter(g, 4, 4)));
+  EXPECT_FALSE(isCellFree(g, cellCenter(g, 0, 0)));
+  EXPECT_FALSE(isCellFree(g, Eigen::Vector3f(1000.0f, 0.0f, 0.0f)));
+}
+
+// isCellOccupied: only >=50 occupied; unknown is NOT occupied (frontiers pass
+// through), but OOB / no-data IS occupied (conservative).
+TEST(PlanMapQuery, IsCellOccupiedClassification) {
+  auto g = makeGrid(5, 5, 1.0f);
+  setCell(g, 3, 3, 50);
+  setCell(g, 4, 4, 100);
+  setCell(g, 0, 0, -1);   // unknown
+  setCell(g, 1, 1, 0);    // free
+
+  EXPECT_TRUE(isCellOccupied(g, cellCenter(g, 3, 3)));
+  EXPECT_TRUE(isCellOccupied(g, cellCenter(g, 4, 4)));
+  EXPECT_FALSE(isCellOccupied(g, cellCenter(g, 0, 0)));  // unknown passes
+  EXPECT_FALSE(isCellOccupied(g, cellCenter(g, 1, 1)));
+  EXPECT_TRUE(isCellOccupied(g, Eigen::Vector3f(1000.0f, 0.0f, 0.0f)));
+}
+
+// All-free / all-unknown grids give the bounding fractions.
+TEST(PlanMapQuery, UnknownFractionExtremes) {
+  auto g = makeGrid(10, 10, 1.0f);
+  Roi2D roi{0.0f, 10.0f, 0.0f, 10.0f};  // whole grid
+  EXPECT_NEAR(unknownFractionInRoi(g, roi), 0.0, 1e-9);
+
+  for (auto& v : g.data) v = -1;
+  EXPECT_NEAR(unknownFractionInRoi(g, roi), 1.0, 1e-9);
+}
+
+// A known unknown sub-block yields the expected fraction over the ROI.
+TEST(PlanMapQuery, UnknownFractionPartial) {
+  auto g = makeGrid(10, 10, 1.0f);
+  // 5x5 = 25 unknown cells out of 100.
+  for (int gy = 0; gy < 5; ++gy)
+    for (int gx = 0; gx < 5; ++gx)
+      setCell(g, gx, gy, -1);
+
+  EXPECT_NEAR(unknownFractionInRoi(g, {0.0f, 10.0f, 0.0f, 10.0f}), 0.25, 1e-9);
+  // ROI fully inside the unknown block (cells 1..3 in x and y) -> all unknown.
+  // (The ROI->index mapping is inclusive of the max edge, so we stay clear of
+  // the block boundary at cell 4 rather than asserting over it.)
+  EXPECT_NEAR(unknownFractionInRoi(g, {1.0f, 3.0f, 1.0f, 3.0f}), 1.0, 1e-9);
+}
+
+// occupiedWithin: a known cell >= threshold whose centre is within the radius.
+// Unknown, sub-threshold and out-of-bounds cells never count.
+TEST(PlanMapQuery, OccupiedWithinRadiusAndThreshold) {
+  auto g = makeGrid(20, 20, 0.1f, -1.0f, -1.0f);
+  const Eigen::Vector3f goal = cellCenter(g, 10, 10);
+  const Eigen::Vector3f far(100.0f, 100.0f, 0.0f);  // ignore disc elsewhere
+  EXPECT_FALSE(occupiedWithin(g, goal, 0.6f, 50, far, 0.0f));
+
+  setCell(g, 15, 10, 100);  // 0.5 m east of the goal
+  EXPECT_TRUE(occupiedWithin(g, goal, 0.6f, 50, far, 0.0f));
+  EXPECT_FALSE(occupiedWithin(g, goal, 0.45f, 50, far, 0.0f));
+  EXPECT_FALSE(occupiedWithin(g, goal, 0.6f, 101, far, 0.0f));
+  EXPECT_FALSE(occupiedWithin(g, goal, 0.0f, 50, far, 0.0f));
+
+  setCell(g, 15, 10, 49);
+  EXPECT_FALSE(occupiedWithin(g, goal, 0.6f, 50, far, 0.0f));
+  setCell(g, 15, 10, -1);
+  EXPECT_FALSE(occupiedWithin(g, goal, 0.6f, 50, far, 0.0f));
+
+  // Diagonal: (4, 4) cells is 0.566 m, inside 0.6; (5, 4) is 0.640 m.
+  setCell(g, 15, 14, 100);
+  EXPECT_FALSE(occupiedWithin(g, goal, 0.6f, 50, far, 0.0f));
+  setCell(g, 14, 14, 100);
+  EXPECT_TRUE(occupiedWithin(g, goal, 0.6f, 50, far, 0.0f));
+
+  // A disc hanging off the grid edge is clipped, not mis-indexed.
+  auto edge = makeGrid(5, 5, 0.1f);
+  setCell(edge, 0, 0, 100);
+  EXPECT_TRUE(occupiedWithin(edge, Eigen::Vector3f(-0.2f, -0.2f, 0.0f), 0.4f,
+                             50, far, 0.0f));
+  EXPECT_FALSE(occupiedWithin(edge, Eigen::Vector3f(-5.0f, -5.0f, 0.0f), 0.4f,
+                              50, far, 0.0f));
+
+  auto empty = makeGrid(0, 0, 0.1f);
+  EXPECT_FALSE(occupiedWithin(empty, Eigen::Vector3f::Zero(), 1.0f, 50, far,
+                              0.0f));
+}
+
+// Cells within ignore_radius_m of ignore_center (the robot's body ring) are
+// skipped; the rest of the disc around the goal still counts.
+TEST(PlanMapQuery, OccupiedWithinIgnoresRobotDisc) {
+  auto g = makeGrid(30, 10, 0.1f);
+  const Eigen::Vector3f goal = cellCenter(g, 10, 5);
+  const Eigen::Vector3f robot = cellCenter(g, 4, 5);  // 0.6 m west of goal
+  setCell(g, 6, 5, 100);  // 0.2 m from the robot, 0.4 m from the goal
+  EXPECT_TRUE(occupiedWithin(g, goal, 0.6f, 50, robot, 0.0f));
+  EXPECT_FALSE(occupiedWithin(g, goal, 0.6f, 50, robot, 0.3f));
+
+  setCell(g, 14, 5, 100);  // 0.4 m east of the goal, 1.0 m from the robot
+  EXPECT_TRUE(occupiedWithin(g, goal, 0.6f, 50, robot, 0.3f));
+}
+
+// ROI is clipped to the grid; a non-overlapping ROI returns -1.0.
+TEST(PlanMapQuery, UnknownFractionRoiClippingAndMiss) {
+  auto g = makeGrid(10, 10, 1.0f);
+  // ROI extends past the grid on the high side -> still valid, clipped.
+  EXPECT_NEAR(unknownFractionInRoi(g, {0.0f, 100.0f, 0.0f, 100.0f}), 0.0, 1e-9);
+  // ROI entirely outside the grid -> no overlap.
+  EXPECT_EQ(unknownFractionInRoi(g, {-50.0f, -40.0f, 0.0f, 10.0f}), -1.0);
+
+  auto empty = makeGrid(0, 0, 1.0f);
+  EXPECT_EQ(unknownFractionInRoi(empty, {0.0f, 1.0f, 0.0f, 1.0f}), -1.0);
+}
+
+// Each cell lands in one count, at the threshold it is passed; a miss is all 0.
+TEST(PlanMapQuery, RoiCellCountsByKind) {
+  auto g = makeGrid(10, 10, 1.0f);
+  setCell(g, 0, 0, -1);
+  setCell(g, 1, 0, -1);
+  setCell(g, 2, 0, 50);
+  setCell(g, 3, 0, 100);
+  setCell(g, 4, 0, 49);
+  const Roi2D whole{0.0f, 10.0f, 0.0f, 10.0f};
+  const auto c = roiCellCounts(g, whole);
+  EXPECT_EQ(c.total, 100);
+  EXPECT_EQ(c.unknown, 2);
+  EXPECT_EQ(c.obstacle, 2);
+  EXPECT_EQ(roiCellCounts(g, whole, 40).obstacle, 3);
+
+  const auto miss = roiCellCounts(g, {-50.0f, -40.0f, 0.0f, 10.0f});
+  EXPECT_EQ(miss.total, 0);
+  EXPECT_EQ(miss.unknown, 0);
+  EXPECT_EQ(miss.obstacle, 0);
+}
+
+// A rotated ROI counts only the cells whose centre is inside it. The diamond
+// (yaw 45 deg, side 4 m, corner at (5, 1)) sits inside a 10x10 grid; marking
+// every cell OUTSIDE it unknown must leave the ROI fraction at 0.
+TEST(PlanMapQuery, UnknownFractionRotatedRoi) {
+  auto g = makeGrid(10, 10, 1.0f);
+  const Roi2D roi{0.0f, 4.0f, 0.0f, 4.0f, static_cast<float>(M_PI / 4.0),
+                  5.0f, 1.0f};
+  for (int gy = 0; gy < 10; ++gy)
+    for (int gx = 0; gx < 10; ++gx) {
+      const auto c = cellCenter(g, gx, gy);
+      if (!roi.contains(c.x(), c.y())) setCell(g, gx, gy, -1);
+    }
+  EXPECT_NEAR(unknownFractionInRoi(g, roi), 0.0, 1e-9);
+
+  for (auto& v : g.data) v = -1;
+  EXPECT_NEAR(unknownFractionInRoi(g, roi), 1.0, 1e-9);
+}
