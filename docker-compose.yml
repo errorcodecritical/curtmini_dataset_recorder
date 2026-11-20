@@ -74,6 +74,7 @@ services:
       - ./ext/explo_planner/explo_planner:/scovox/src/explo_planner # we are parasitizing the scovox workspace so we don't have to make a separate one
       - ./ext/explo_planner/explo_planner_msgs:/scovox/src/explo_planner_msgs
       - ./config/explo_planner/config:/config
+      - ./rosbags/explo_data:/explo_data/
     environment:
       - ROS_DOMAIN_ID=0
       - IOX_DOMAIN_ID=0
@@ -116,6 +117,7 @@ services:
       - /tmp:/tmp
       - ./config/scovox/config:/scovox/config
       - ./config/cyclonedds/cyclonedds-bridge.xml:/cyclonedds-config.xml
+      - ./config/scovox/config/curt_config.yaml:/scovox/src/scovox_mapping/config/curt_config.yaml
       # compose.yaml's bag mount points outside this repo (HMR_Explo layout).
       - ./rosbags:/scovox/bags
     environment:

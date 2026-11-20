@@ -40,6 +40,8 @@ RUN git clone https://github.com/koide3/small_gicp.git /tmp/small_gicp \
 # rosdep is pre-initialized in osrf images; just refresh the cache.
 RUN rosdep update --rosdistro jazzy || true
 
+RUN apt update && apt-get install -y ros-jazzy-rmw-cyclonedds-cpp ros-jazzy-nav2-msgs
+
 # Auto-source ROS + the workspace overlay for every interactive shell.
 RUN echo 'source /opt/ros/jazzy/setup.bash' >> /root/.bashrc && \
     echo '[ -f /ws/install/setup.bash ] && source /ws/install/setup.bash' >> /root/.bashrc
