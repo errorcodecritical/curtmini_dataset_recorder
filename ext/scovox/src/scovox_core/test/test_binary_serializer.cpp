@@ -1,0 +1,636 @@
+/// @file
+/// @brief Wire format (revision 8: block-run coords + u8 sqrt-companded
+/// quantization + packed class ids) round-trip, quantization edge semantics,
+/// and header/structure validation.
+
+#include <gtest/gtest.h>
+
+#include <algorithm>
+#include <bonxai/bonxai.hpp>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
+#include <stdexcept>
+#include <string>
+
+#include "scovox/binary_serializer.hpp"
+
+namespace {
+
+// Default-cap rev-8 companding scale: evidence_saturation(1000) / 255².
+constexpr float kStep = 1000.f / 65025.f;
+
+// Expected rev-8 reconstruction: the same sqrt-companding round trip the
+// serializer performs (quantize8 → dequantize8), for exact expectations.
+float q8(float a, float prior) {
+  const float e = a - prior;
+  if (!(e > 0.f)) return prior;
+  const long q = std::clamp(
+      std::lround(std::sqrt(static_cast<double>(e) / kStep)), 0L, 255L);
+  const float qf = static_cast<float>(q);
+  return prior + qf * qf * kStep;
+}
+
+scovox::BinarySerializer::Frame makeFrame() {
+  scovox::BinarySerializer::Frame f;
+  f.resolution  = 0.05f;
+  f.num_classes = 14;
+  f.alpha_0     = scovox::kDefaultDirichletPrior;
+  // quant_step left at the 0.0 default → f32 payloads, lossless round-trip.
+
+  f.tsdf_deltas.push_back({Bonxai::CoordT{1, 2, 3}, scovox::TsdfVoxel{0.04f, 1.5f}});
+  f.tsdf_deltas.push_back({Bonxai::CoordT{4, 5, 6}, scovox::TsdfVoxel{-0.02f, 2.0f}});
+
+  f.beta_deltas.push_back({Bonxai::CoordT{1, 2, 3}, scovox::BetaVoxel{1.14f, 0.5f}});
+  f.beta_deltas.push_back({Bonxai::CoordT{4, 5, 6}, scovox::BetaVoxel{2.0f, 0.01f}});
+
+  scovox::DirVoxel a = scovox::defaultDirVoxel(14, scovox::kDefaultDirichletPrior);
+  a.cls[0] = 5; a.cnt[0] = 1.20f;
+  a.cls[1] = 9; a.cnt[1] = 0.80f;
+  a.set_other(0.30f);      // 0.12 prior + 0.18 evidence; after the slots
+  f.dir_deltas.push_back({Bonxai::CoordT{1, 2, 3}, a});
+
+  scovox::DirVoxel b = scovox::defaultDirVoxel(14, scovox::kDefaultDirichletPrior);
+  b.cls[0] = 7; b.cnt[0] = 0.50f;
+  // slot 1 left at the empty-sentinel default.
+  b.set_other(0.12f);      // prior only
+  f.dir_deltas.push_back({Bonxai::CoordT{4, 5, 6}, b});
+
+  return f;
+}
+
+// Sort both frames' streams by coord before comparing: the serializer emits
+// records in (block, bit) order, which is a permutation of the input order.
+template <typename DeltaT>
+void sortByCoord(std::vector<DeltaT>& v) {
+  std::sort(v.begin(), v.end(), [](const DeltaT& a, const DeltaT& b) {
+    if (a.coord.x != b.coord.x) return a.coord.x < b.coord.x;
+    if (a.coord.y != b.coord.y) return a.coord.y < b.coord.y;
+    return a.coord.z < b.coord.z;
+  });
+}
+
+void expectFrameEq(scovox::BinarySerializer::Frame a,
+                   scovox::BinarySerializer::Frame b,
+                   bool expect_tsdf) {
+  EXPECT_FLOAT_EQ(a.resolution, b.resolution);
+  EXPECT_EQ(a.num_classes,      b.num_classes);
+  EXPECT_FLOAT_EQ(a.alpha_0,    b.alpha_0);
+  EXPECT_FLOAT_EQ(a.quant_step, b.quant_step);
+
+  if (expect_tsdf) {
+    ASSERT_EQ(a.tsdf_deltas.size(), b.tsdf_deltas.size());
+    for (std::size_t i = 0; i < a.tsdf_deltas.size(); ++i) {
+      EXPECT_EQ(a.tsdf_deltas[i].coord.x, b.tsdf_deltas[i].coord.x);
+      EXPECT_EQ(a.tsdf_deltas[i].coord.y, b.tsdf_deltas[i].coord.y);
+      EXPECT_EQ(a.tsdf_deltas[i].coord.z, b.tsdf_deltas[i].coord.z);
+      EXPECT_FLOAT_EQ(a.tsdf_deltas[i].data.distance, b.tsdf_deltas[i].data.distance);
+      EXPECT_FLOAT_EQ(a.tsdf_deltas[i].data.weight,   b.tsdf_deltas[i].data.weight);
+    }
+  } else {
+    EXPECT_EQ(b.tsdf_deltas.size(), 0u) << "share_tsdf=false must drop TSDF section";
+  }
+
+  sortByCoord(a.beta_deltas);
+  sortByCoord(b.beta_deltas);
+  ASSERT_EQ(a.beta_deltas.size(), b.beta_deltas.size());
+  for (std::size_t i = 0; i < a.beta_deltas.size(); ++i) {
+    EXPECT_EQ(a.beta_deltas[i].coord.x, b.beta_deltas[i].coord.x);
+    EXPECT_EQ(a.beta_deltas[i].coord.y, b.beta_deltas[i].coord.y);
+    EXPECT_EQ(a.beta_deltas[i].coord.z, b.beta_deltas[i].coord.z);
+    EXPECT_FLOAT_EQ(a.beta_deltas[i].data.a_occ,  b.beta_deltas[i].data.a_occ);
+    EXPECT_FLOAT_EQ(a.beta_deltas[i].data.a_free, b.beta_deltas[i].data.a_free);
+  }
+
+  sortByCoord(a.dir_deltas);
+  sortByCoord(b.dir_deltas);
+  ASSERT_EQ(a.dir_deltas.size(), b.dir_deltas.size());
+  for (std::size_t i = 0; i < a.dir_deltas.size(); ++i) {
+    EXPECT_EQ(a.dir_deltas[i].coord.x, b.dir_deltas[i].coord.x);
+    EXPECT_EQ(a.dir_deltas[i].coord.y, b.dir_deltas[i].coord.y);
+    EXPECT_EQ(a.dir_deltas[i].coord.z, b.dir_deltas[i].coord.z);
+    EXPECT_FLOAT_EQ(a.dir_deltas[i].data.other(), b.dir_deltas[i].data.other());
+    for (int j = 0; j < scovox::K_TOP; ++j) {
+      EXPECT_FLOAT_EQ(a.dir_deltas[i].data.cnt[j], b.dir_deltas[i].data.cnt[j]);
+      EXPECT_EQ(a.dir_deltas[i].data.cls[j],       b.dir_deltas[i].data.cls[j]);
+    }
+  }
+}
+
+}  // namespace
+
+TEST(BinarySerializer, TripleStreamRoundTripWithShareTsdf) {
+  auto f = makeFrame();
+  auto blob = scovox::BinarySerializer::serialize(
+      f, scovox::BinarySerializer::Options{/*share_tsdf=*/true});
+  auto g = scovox::BinarySerializer::deserialize(blob);
+  expectFrameEq(f, g, /*expect_tsdf=*/true);
+}
+
+TEST(BinarySerializer, BetaDirOnlyDefaultElidesTsdfSection) {
+  auto f = makeFrame();
+  auto blob = scovox::BinarySerializer::serialize(f);  // default: share_tsdf=false
+  auto g = scovox::BinarySerializer::deserialize(blob);
+  expectFrameEq(f, g, /*expect_tsdf=*/false);
+}
+
+TEST(BinarySerializer, BadMagicThrows) {
+  std::string blob("garbage payload here");
+  EXPECT_THROW(scovox::BinarySerializer::deserialize(blob), std::runtime_error);
+}
+
+TEST(BinarySerializer, BadVersionThrows) {
+  auto f = makeFrame();
+  auto blob = scovox::BinarySerializer::serialize(f);
+  blob[4] = static_cast<char>(5);  // a revision-5 blob must be rejected loud
+  EXPECT_THROW(scovox::BinarySerializer::deserialize(blob), std::runtime_error);
+}
+
+TEST(BinarySerializer, TruncatedFrameThrows) {
+  auto f = makeFrame();
+  auto blob = scovox::BinarySerializer::serialize(
+      f, scovox::BinarySerializer::Options{/*share_tsdf=*/true});
+  blob.resize(blob.size() - 5);  // chop the tail of the last Dir payload
+  EXPECT_THROW(scovox::BinarySerializer::deserialize(blob), std::runtime_error);
+}
+
+// Regression for the forged-record-count DoS (review finding 38 / 8): a frame
+// with a valid MAGIC/VERSION/header but a record count (tsdf/beta/dir) far
+// larger than the bytes actually present must be REJECTED, not silently
+// accepted nor allowed to drive an unbounded reserve(). We forge each of the
+// three counts in turn (with an otherwise-empty body) and assert deserialize
+// throws so the receiver can drop the frame instead of integrating garbage.
+// All three stream guards validate the count against the remaining byte budget
+// BEFORE the reserve, so the forged count surfaces as the documented
+// runtime_error; std::exception is asserted as the (looser) contract.
+TEST(BinarySerializer, ForgedRecordCountIsRejected) {
+  // Build a minimal, otherwise-valid header so the forged count is the only
+  // anomaly. Layout (little-endian, 21 B): MAGIC u32, VERSION u8, resolution
+  // f32, num_classes u16, K_TOP u8, alpha_0 f32, quant_step f32,
+  // fine_ratio_log2 u8 (rev 7) — then the stream counts.
+  auto makeHeader = []() {
+    std::string h;
+    const uint32_t magic   = scovox::BinarySerializer::MAGIC;
+    const uint8_t  version = scovox::BinarySerializer::FORMAT_VERSION;
+    const float    res     = 0.05f;
+    const uint16_t nclass  = 14;
+    const uint8_t  k_top   = static_cast<uint8_t>(scovox::K_TOP);
+    const float    alpha0  = scovox::kDefaultDirichletPrior;
+    const float    step    = 0.0f;   // f32 payloads
+    const uint8_t  fine_k  = 0;      // no fine grid
+    auto app = [&h](const void* p, std::size_t n) {
+      h.append(reinterpret_cast<const char*>(p), n);
+    };
+    app(&magic, sizeof(magic));
+    app(&version, sizeof(version));
+    app(&res, sizeof(res));
+    app(&nclass, sizeof(nclass));
+    app(&k_top, sizeof(k_top));
+    app(&alpha0, sizeof(alpha0));
+    app(&step, sizeof(step));
+    app(&fine_k, sizeof(fine_k));
+    return h;
+  };
+  auto appendU32 = [](std::string& s, uint32_t v) {
+    s.append(reinterpret_cast<const char*>(&v), sizeof(v));
+  };
+
+  const uint32_t kForged = 0xFFFFFFFFu;  // ~4 G records, ~120 GB of payload
+
+  // (a) Forged TSDF count, no payload following it.
+  {
+    std::string blob = makeHeader();
+    appendU32(blob, kForged);  // tsdf_count = huge, then nothing
+    EXPECT_THROW(scovox::BinarySerializer::deserialize(blob), std::exception);
+  }
+  // (b) Valid empty TSDF stream, forged Beta count, no payload.
+  {
+    std::string blob = makeHeader();
+    appendU32(blob, 0u);       // tsdf_count = 0
+    appendU32(blob, kForged);  // beta_count = huge, then nothing
+    EXPECT_THROW(scovox::BinarySerializer::deserialize(blob), std::exception);
+  }
+  // (c) Valid empty TSDF + Beta streams, forged Dir count, no payload.
+  {
+    std::string blob = makeHeader();
+    appendU32(blob, 0u);       // tsdf_count = 0
+    appendU32(blob, 0u);       // beta_count = 0
+    appendU32(blob, kForged);  // dir_count = huge, then nothing
+    EXPECT_THROW(scovox::BinarySerializer::deserialize(blob), std::exception);
+  }
+  // (d) Valid empty TSDF/Beta/Dir streams, forged FINE count (rev 7), no
+  // payload. Same byte-budget guard as the coarse TSDF stream.
+  {
+    std::string blob = makeHeader();
+    appendU32(blob, 0u);       // tsdf_count = 0
+    appendU32(blob, 0u);       // beta_count = 0
+    appendU32(blob, 0u);       // dir_count  = 0
+    appendU32(blob, kForged);  // fine_tsdf_count = huge, then nothing
+    EXPECT_THROW(scovox::BinarySerializer::deserialize(blob), std::exception);
+  }
+}
+
+// Companion check: a modestly-forged count whose payload is short but whose
+// reserve() would succeed must still throw the documented std::runtime_error.
+// With the byte-budget guard the 1000-record claim against a ~100 B body is
+// caught before any block run is read.
+TEST(BinarySerializer, ModestForgedCountTruncationThrowsRuntimeError) {
+  auto f = makeFrame();
+  // Serialize a real frame (share_tsdf=false): header(20) + tsdf_count(4,=0)
+  // + beta_count(4) + beta block runs + dir_count(4) + dir block runs.
+  auto blob = scovox::BinarySerializer::serialize(f);
+  const std::size_t beta_count_off = 20 + 4;
+  const uint32_t modest = 1000u;
+  std::memcpy(&blob[beta_count_off], &modest, sizeof(modest));
+  EXPECT_THROW(scovox::BinarySerializer::deserialize(blob), std::runtime_error);
+}
+
+TEST(BinarySerializer, EmitSizeMatchesSpec) {
+  auto f = makeFrame();
+  // Both Beta records — coords (1,2,3), (4,5,6) — share block (0,0,0), bits
+  // 83 < 302, n=2 → mode 1 index list. Same for the Dir records.
+  // Header: 4 + 1 + 4 + 2 + 1 + 4 + 4 + 1 = 21 B     (rev 7: +fine_ratio_log2)
+  // TSDF:   4 (count) + 2 × 20 = 44 B                        (flat records)
+  // Block:  12 (coord) + 1 (mode) + 2 (n) + 2·2 (idx) = 19 B
+  // Beta:   4 (count) + 19 + 2 × 8  = 39 B                   (f32 payloads)
+  // Dir:    4 (count) + 19 + 2 × 14 = 51 B                   (f32: other +
+  //                              cnt 4·K + cls 1·K, K=2; rev 8 u8 class ids)
+  // Fine:   4 (count, empty here) = 4 B                      (rev 7 tail)
+  //
+  // Every byte count above is derived for K_TOP == 2.  Wrapping the body in
+  // `if (K_TOP == 2)` meant a K-sweep build reported this test GREEN having
+  // asserted nothing at all -- the failure mode a size-contract test exists to
+  // prevent.  GTEST_SKIP says "not run" where the reader can see it.
+  if (scovox::K_TOP != 2) {
+    GTEST_SKIP() << "emit sizes are derived for K_TOP == 2; built with K_TOP = "
+                 << scovox::K_TOP;
+  }
+  {
+    auto full = scovox::BinarySerializer::serialize(
+        f, scovox::BinarySerializer::Options{/*share_tsdf=*/true});
+    EXPECT_EQ(full.size(), 21u + 44u + 39u + 51u + 4u) << "share_tsdf=true emit size";  // 159
+
+    auto no_tsdf = scovox::BinarySerializer::serialize(f);
+    EXPECT_EQ(no_tsdf.size(), 21u + 4u + 39u + 51u + 4u) << "share_tsdf=false emit size";  // 119
+
+    // Rev 8 quantized payloads: Beta 2 B (q_occ, q_free u8), Dir 5 B
+    // (q_other u8, q_cnt u8·K, cls u8·K).
+    f.quant_step = kStep;
+    auto quant = scovox::BinarySerializer::serialize(f);
+    EXPECT_EQ(quant.size(), 21u + 4u + (4u + 19u + 4u) + (4u + 19u + 10u) + 4u)
+        << "quantized emit size";  // 89
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Revision 8: u8 sqrt-companded quantization semantics.
+// ---------------------------------------------------------------------------
+
+// Above-prior evidence must round-trip to exactly the companded grid value
+// (q8 mirrors quantize8→dequantize8); class ids and the empty-slot α₀
+// placeholder must be exact.
+TEST(BinarySerializer, QuantizedRoundTripOnCompandedGrid) {
+  scovox::BinarySerializer::Frame f;
+  f.resolution  = 0.05f;
+  f.num_classes = 14;
+  f.alpha_0     = scovox::kDefaultDirichletPrior;
+  f.quant_step  = kStep;
+
+  f.beta_deltas.push_back(
+      {Bonxai::CoordT{1, 2, 3}, scovox::BetaVoxel{1.f + 0.14f, 1.f + 12.3f}});
+  f.beta_deltas.push_back(
+      {Bonxai::CoordT{4, 5, 6}, scovox::BetaVoxel{1.f + 500.25f, 1.f + 999.9f}});
+
+  scovox::DirVoxel a = scovox::defaultDirVoxel(14, f.alpha_0);
+  a.cls[0] = 5; a.cnt[0] = f.alpha_0 + 1.19f;
+  // slot 1 stays empty: cls=0xFFFF, cnt=α₀ placeholder.
+  a.set_other(0.12f + 0.18f);
+  f.dir_deltas.push_back({Bonxai::CoordT{1, 2, 3}, a});
+
+  auto g = scovox::BinarySerializer::deserialize(
+      scovox::BinarySerializer::serialize(f));
+  const float other_prior = (14.f - scovox::K_TOP) * f.alpha_0;
+
+  ASSERT_EQ(g.beta_deltas.size(), 2u);
+  for (std::size_t i = 0; i < 2; ++i) {
+    const auto& in  = f.beta_deltas[i].data;
+    const auto& out = g.beta_deltas[i].data;
+    // The wire is float32 in both storage builds; what differs is the voxel
+    // the value lands in. Under SCOVOX_BETA_U16 the dequantized value is
+    // re-rounded onto the storage lattice, so allow exactly that half-count.
+    constexpr float kStoreTol =
+        SCOVOX_BETA_U16 ? (0.5f / SCOVOX_BETA_U16_SCALE) : 0.0f;
+    EXPECT_NEAR(out.a_occ,  q8(in.a_occ,  scovox::kBetaOccPrior),  kStoreTol);
+    EXPECT_NEAR(out.a_free, q8(in.a_free, scovox::kBetaFreePrior), kStoreTol);
+    // The companded error stays below the local step 2·√(step·e) + step.
+    const float e_occ = in.a_occ - scovox::kBetaOccPrior;
+    EXPECT_NEAR(out.a_occ, in.a_occ,
+                2.f * std::sqrt(kStep * std::max(e_occ, 0.f)) + kStep);
+  }
+  ASSERT_EQ(g.dir_deltas.size(), 1u);
+  const auto& d = g.dir_deltas[0].data;
+  EXPECT_FLOAT_EQ(d.other(),  q8(a.other(),  other_prior));
+  EXPECT_FLOAT_EQ(d.cnt[0], q8(a.cnt[0], f.alpha_0));
+  EXPECT_EQ(d.cls[0], 5);
+  // Empty slot: q=0 reconstructs the α₀ placeholder bit-exactly.
+  EXPECT_EQ(d.cls[1], 0xFFFF);
+  EXPECT_FLOAT_EQ(d.cnt[1], f.alpha_0);
+}
+
+// At-prior values quantize to q=0 and reconstruct BIT-EXACTLY — the receiver's
+// isPrior*/refold gates (dscovox_consensus.hpp) depend on this.
+TEST(BinarySerializer, QuantizedAtPriorReconstructsExactly) {
+  scovox::BinarySerializer::Frame f;
+  f.resolution  = 0.05f;
+  f.num_classes = 14;
+  f.alpha_0     = scovox::kDefaultDirichletPrior;
+  f.quant_step  = kStep;
+
+  f.beta_deltas.push_back({Bonxai::CoordT{7, 7, 7},
+      scovox::BetaVoxel{scovox::kBetaOccPrior, scovox::kBetaFreePrior}});
+  f.dir_deltas.push_back({Bonxai::CoordT{7, 7, 7},
+      scovox::defaultDirVoxel(14, f.alpha_0)});
+
+  auto g = scovox::BinarySerializer::deserialize(
+      scovox::BinarySerializer::serialize(f));
+  ASSERT_EQ(g.beta_deltas.size(), 1u);
+  EXPECT_FLOAT_EQ(g.beta_deltas[0].data.a_occ,  scovox::kBetaOccPrior);
+  EXPECT_FLOAT_EQ(g.beta_deltas[0].data.a_free, scovox::kBetaFreePrior);
+  ASSERT_EQ(g.dir_deltas.size(), 1u);
+  const auto def = scovox::defaultDirVoxel(14, f.alpha_0);
+  EXPECT_FLOAT_EQ(g.dir_deltas[0].data.other(), def.other());
+  for (int j = 0; j < scovox::K_TOP; ++j) {
+    EXPECT_FLOAT_EQ(g.dir_deltas[0].data.cnt[j], def.cnt[j]);
+    EXPECT_EQ(g.dir_deltas[0].data.cls[j], def.cls[j]);
+  }
+}
+
+// Below-prior inputs (normal on saturated lopsided voxels — the total-cap
+// rescale erodes the minority bucket) clamp to the prior, which is exactly the
+// floor mergeBeta applies on the receiver anyway. Above-cap inputs clamp to
+// prior + 255²·step (= evidence_saturation).
+TEST(BinarySerializer, QuantizedClampsBelowPriorAndAboveCap) {
+  scovox::BinarySerializer::Frame f;
+  f.resolution  = 0.05f;
+  f.num_classes = 14;
+  f.alpha_0     = scovox::kDefaultDirichletPrior;
+  f.quant_step  = kStep;
+
+  // The below-prior input is written as a FRACTION of the prior, not as a
+  // literal: a literal chosen under one prior silently stops being below the
+  // next one, and the clamp then goes untested while the test still passes.
+  const float below_prior = 0.62f * scovox::kBetaFreePrior;
+  f.beta_deltas.push_back(
+      {Bonxai::CoordT{0, 0, 0}, scovox::BetaVoxel{999.5f, below_prior}});
+  f.beta_deltas.push_back(
+      {Bonxai::CoordT{0, 0, 1},
+       scovox::BetaVoxel{scovox::kBetaOccPrior + 2000.f, scovox::kBetaFreePrior}});
+
+  auto g = scovox::BinarySerializer::deserialize(
+      scovox::BinarySerializer::serialize(f));
+  ASSERT_EQ(g.beta_deltas.size(), 2u);
+  EXPECT_FLOAT_EQ(g.beta_deltas[0].data.a_free, scovox::kBetaFreePrior);
+  // 999.5 sits in the top companding cell (q=255) → the cap, which is
+  // `prior + 255²·step`; the input lands within the ~7.9 local step there.
+  const float cap = scovox::kBetaOccPrior + 1000.f;
+  EXPECT_FLOAT_EQ(g.beta_deltas[0].data.a_occ, cap);
+  EXPECT_FLOAT_EQ(g.beta_deltas[1].data.a_occ, cap);
+}
+
+// Rev 8 class-id packing: num_classes > 255 keeps u16 ids on the wire (the
+// width is implied by the header), and a real id that cannot fit the packed
+// u8 width is rejected at serialize time.
+TEST(BinarySerializer, ClassIdWidthFollowsNumClasses) {
+  scovox::BinarySerializer::Frame f;
+  f.resolution  = 0.05f;
+  f.num_classes = 300;   // > 255 → u16 class ids
+  f.alpha_0     = scovox::kDefaultDirichletPrior;
+  f.quant_step  = kStep;
+
+  scovox::DirVoxel a = scovox::defaultDirVoxel(300, f.alpha_0);
+  a.cls[0] = 299; a.cnt[0] = f.alpha_0 + 3.f;
+  a.set_other(298.f * f.alpha_0);   // derived other(): restate it after cnt[]
+  f.dir_deltas.push_back({Bonxai::CoordT{1, 2, 3}, a});
+
+  auto g = scovox::BinarySerializer::deserialize(
+      scovox::BinarySerializer::serialize(f));
+  ASSERT_EQ(g.dir_deltas.size(), 1u);
+  EXPECT_EQ(g.dir_deltas[0].data.cls[0], 299);
+  EXPECT_EQ(g.dir_deltas[0].data.cls[1], 0xFFFF);
+
+  // num_classes ≤ 255 packs ids to u8; an id ≥ 0xFF (other than the sentinel)
+  // violates the ids-<-num_classes invariant and must throw.
+  scovox::BinarySerializer::Frame bad;
+  bad.resolution  = 0.05f;
+  bad.num_classes = 14;
+  bad.alpha_0     = scovox::kDefaultDirichletPrior;
+  scovox::DirVoxel v = scovox::defaultDirVoxel(14, bad.alpha_0);
+  v.cls[0] = 300; v.cnt[0] = bad.alpha_0 + 1.f;
+  v.set_other(12.f * bad.alpha_0);
+  bad.dir_deltas.push_back({Bonxai::CoordT{1, 2, 3}, v});
+  EXPECT_THROW(scovox::BinarySerializer::serialize(bad), std::runtime_error);
+}
+
+// ---------------------------------------------------------------------------
+// Revision 6: block-run coordinate coding.
+// ---------------------------------------------------------------------------
+
+// Negative coords exercise the sign-correct block/local decomposition
+// (lx = x & 7 ∈ [0,7]; bx = (x − lx)/8), including block-boundary values.
+TEST(BinarySerializer, NegativeCoordsRoundTrip) {
+  scovox::BinarySerializer::Frame f;
+  f.resolution  = 0.05f;
+  f.num_classes = 14;
+  f.alpha_0     = scovox::kDefaultDirichletPrior;
+
+  const Bonxai::CoordT coords[] = {
+      {-1, -8, -9}, {-17, 5, -1000}, {-8, -8, -8}, {7, -7, 0}, {123, -456, 789}};
+  for (const auto& c : coords)
+    f.beta_deltas.push_back({c, scovox::BetaVoxel{2.f, 1.f}});
+
+  auto g = scovox::BinarySerializer::deserialize(
+      scovox::BinarySerializer::serialize(f));
+  ASSERT_EQ(g.beta_deltas.size(), 5u);
+  sortByCoord(f.beta_deltas);
+  sortByCoord(g.beta_deltas);
+  for (std::size_t i = 0; i < 5; ++i) {
+    EXPECT_EQ(g.beta_deltas[i].coord.x, f.beta_deltas[i].coord.x);
+    EXPECT_EQ(g.beta_deltas[i].coord.y, f.beta_deltas[i].coord.y);
+    EXPECT_EQ(g.beta_deltas[i].coord.z, f.beta_deltas[i].coord.z);
+  }
+}
+
+// A dense block (n ≥ 32) must switch to the 64 B bitmask (mode 0) — the size
+// assertion proves the mode choice, the round trip proves the bit numbering.
+TEST(BinarySerializer, DenseBlockUsesBitmaskMode) {
+  scovox::BinarySerializer::Frame f;
+  f.resolution  = 0.05f;
+  f.num_classes = 14;
+  f.alpha_0     = scovox::kDefaultDirichletPrior;
+
+  // 40 voxels in block (0,0,0): the index list would cost 2 + 80 B, the mask 64 B.
+  for (int y = 0; y < 8; ++y)
+    for (int z = 0; z < 5; ++z)
+      f.beta_deltas.push_back({Bonxai::CoordT{0, y, z},
+                               scovox::BetaVoxel{2.f + y, 1.f + z}});
+
+  auto blob = scovox::BinarySerializer::serialize(f);
+  // header 21 (rev 7) + tsdf_count 4 + beta: 4 + (12 + 1 + 64) + 40·8
+  // + dir_count 4 + fine_count 4.
+  EXPECT_EQ(blob.size(), 21u + 4u + 4u + 77u + 320u + 4u + 4u);
+
+  auto g = scovox::BinarySerializer::deserialize(blob);
+  ASSERT_EQ(g.beta_deltas.size(), 40u);
+  auto e = f;
+  expectFrameEq(e, g, /*expect_tsdf=*/false);
+}
+
+// Duplicate coords in one stream dedup last-wins — the receiver's ingest is
+// replace-per-(source, coord), so only the latest value is meaningful.
+TEST(BinarySerializer, DuplicateCoordKeepsLastValue) {
+  scovox::BinarySerializer::Frame f;
+  f.resolution  = 0.05f;
+  f.num_classes = 14;
+  f.alpha_0     = scovox::kDefaultDirichletPrior;
+  f.beta_deltas.push_back({Bonxai::CoordT{3, 3, 3}, scovox::BetaVoxel{2.f, 1.f}});
+  f.beta_deltas.push_back({Bonxai::CoordT{3, 3, 3}, scovox::BetaVoxel{5.f, 1.f}});
+
+  auto g = scovox::BinarySerializer::deserialize(
+      scovox::BinarySerializer::serialize(f));
+  ASSERT_EQ(g.beta_deltas.size(), 1u);
+  EXPECT_FLOAT_EQ(g.beta_deltas[0].data.a_occ, 5.f);
+}
+
+// Structural violations in a block run must throw (frame dropped whole), never
+// misparse. Offsets (rev 7 header = 21 B): tsdf_count 4, beta_count 4 → block
+// coord at 29, mode byte at 41, mode-1 n:u16 at 42, idx[0] at 44, idx[1] at 46.
+TEST(BinarySerializer, MalformedBlockRunsThrow) {
+  scovox::BinarySerializer::Frame f;
+  f.resolution  = 0.05f;
+  f.num_classes = 14;
+  f.alpha_0     = scovox::kDefaultDirichletPrior;
+  f.beta_deltas.push_back({Bonxai::CoordT{1, 2, 3}, scovox::BetaVoxel{2.f, 1.f}});
+  f.beta_deltas.push_back({Bonxai::CoordT{4, 5, 6}, scovox::BetaVoxel{2.f, 1.f}});
+  const auto blob = scovox::BinarySerializer::serialize(f);
+
+  {  // Unknown mode byte.
+    auto bad = blob;
+    bad[41] = static_cast<char>(7);
+    EXPECT_THROW(scovox::BinarySerializer::deserialize(bad), std::runtime_error);
+  }
+  {  // Mode-1 indices must be strictly ascending: swap them.
+    auto bad = blob;
+    std::swap(bad[44], bad[46]);
+    std::swap(bad[45], bad[47]);
+    EXPECT_THROW(scovox::BinarySerializer::deserialize(bad), std::runtime_error);
+  }
+  {  // A block whose n overshoots the stream's record count.
+    auto bad = blob;
+    const uint32_t one = 1;
+    std::memcpy(&bad[25], &one, sizeof(one));  // beta_count 2 → 1
+    EXPECT_THROW(scovox::BinarySerializer::deserialize(bad), std::runtime_error);
+  }
+}
+
+// ===========================================================================
+// Revision 9 — the exact integer payload
+// ===========================================================================
+//
+// Revision 9 ships the deposit COUNTS rather than a companded parameter, so
+// its contract is stronger than rev 8's: a count map round-trips bit for bit,
+// and a map carrying any fractional deposit is refused rather than rounded.
+// Both halves are tested here because the alternative — a silent rounding —
+// would look exactly like a lossless wire until someone diffed two maps.
+namespace {
+
+/// A frame whose every value sits on its lattice: Beta counts are whole
+/// eighths, Dir slots are `α₀ + whole deposits`, which is what fixed-increment
+/// accumulation produces.
+scovox::BinarySerializer::Frame makeExactFrame() {
+  scovox::BinarySerializer::Frame f;
+  f.resolution  = 0.05f;
+  f.num_classes = 14;
+  f.alpha_0     = scovox::kDefaultDirichletPrior;
+  f.exact       = true;
+
+  // prior + w·n with w = 1.5 (twelve eighths) and w = 3.0.
+  f.beta_deltas.push_back({Bonxai::CoordT{1, 2, 3},
+                           scovox::BetaVoxel{scovox::kBetaOccPrior + 1.5f * 4.f,
+                                             scovox::kBetaFreePrior}});
+  f.beta_deltas.push_back({Bonxai::CoordT{4, 5, 6},
+                           scovox::BetaVoxel{scovox::kBetaOccPrior + 3.0f * 7.f,
+                                             scovox::kBetaFreePrior + 1.5f * 2.f}});
+
+  const float other_prior =
+      static_cast<float>(14 - scovox::K_TOP) * scovox::kDefaultDirichletPrior;
+  scovox::DirVoxel a = scovox::defaultDirVoxel(14, scovox::kDefaultDirichletPrior);
+  a.cls[0] = 5; a.cnt[0] = scovox::kDefaultDirichletPrior + 6.f;   // six looks
+  a.cls[1] = 9; a.cnt[1] = scovox::kDefaultDirichletPrior + 2.f;
+  a.set_other(other_prior + 3.f);
+  f.dir_deltas.push_back({Bonxai::CoordT{1, 2, 3}, a});
+
+  scovox::DirVoxel b = scovox::defaultDirVoxel(14, scovox::kDefaultDirichletPrior);
+  b.cls[0] = 7; b.cnt[0] = scovox::kDefaultDirichletPrior + 1.f;
+  b.set_other(other_prior);                                        // prior only
+  f.dir_deltas.push_back({Bonxai::CoordT{4, 5, 6}, b});
+  return f;
+}
+
+}  // namespace
+
+TEST(BinarySerializerExact, CountsRoundTripBitForBit) {
+  const auto f = makeExactFrame();
+  scovox::BinarySerializer::Options opts;
+  const std::string blob = scovox::BinarySerializer::serialize(f, opts);
+
+  // The VERSION byte, not a flag on the side, is what tells a receiver which
+  // layout it is holding.
+  ASSERT_GE(blob.size(), 5u);
+  EXPECT_EQ(static_cast<uint8_t>(blob[4]),
+            scovox::BinarySerializer::FORMAT_VERSION_EXACT);
+
+  const auto g = scovox::BinarySerializer::deserialize(blob);
+  EXPECT_TRUE(g.exact) << "the receiver did not report the exact layout";
+  ASSERT_EQ(g.beta_deltas.size(), f.beta_deltas.size());
+  ASSERT_EQ(g.dir_deltas.size(), f.dir_deltas.size());
+
+  for (std::size_t i = 0; i < f.beta_deltas.size(); ++i) {
+    EXPECT_EQ(g.beta_deltas[i].data.a_occ,  f.beta_deltas[i].data.a_occ);
+    EXPECT_EQ(g.beta_deltas[i].data.a_free, f.beta_deltas[i].data.a_free);
+  }
+  for (std::size_t i = 0; i < f.dir_deltas.size(); ++i) {
+    const auto& want = f.dir_deltas[i].data;
+    const auto& got  = g.dir_deltas[i].data;
+    EXPECT_EQ(got.s_total, want.s_total);
+    for (int k = 0; k < scovox::K_TOP; ++k) {
+      EXPECT_EQ(got.cnt[k], want.cnt[k]) << "slot " << k << " of record " << i;
+      EXPECT_EQ(got.cls[k], want.cls[k]) << "slot " << k << " of record " << i;
+    }
+  }
+}
+
+TEST(BinarySerializerExact, FractionalDepositIsRefused) {
+  auto f = makeExactFrame();
+  // A soft deposit: 0.35 of a look is not a whole number of them, so this map
+  // has no exact representation. Refusing is the invariant; rounding it would
+  // make a soft map masquerade as a count map on the wire.
+  f.dir_deltas[0].data.cnt[0] += 0.35f;
+  scovox::BinarySerializer::Options opts;
+  EXPECT_THROW(scovox::BinarySerializer::serialize(f, opts), std::runtime_error);
+}
+
+TEST(BinarySerializerExact, Revision8IsUntouched) {
+  // The rev-8 path must not have moved: same frame, exact off, still a rev-8
+  // blob that round-trips as before.
+  auto f = makeExactFrame();
+  f.exact = false;
+  scovox::BinarySerializer::Options opts;
+  const std::string blob = scovox::BinarySerializer::serialize(f, opts);
+  ASSERT_GE(blob.size(), 5u);
+  EXPECT_EQ(static_cast<uint8_t>(blob[4]),
+            scovox::BinarySerializer::FORMAT_VERSION);
+  const auto g = scovox::BinarySerializer::deserialize(blob);
+  EXPECT_FALSE(g.exact);
+  ASSERT_EQ(g.dir_deltas.size(), f.dir_deltas.size());
+}

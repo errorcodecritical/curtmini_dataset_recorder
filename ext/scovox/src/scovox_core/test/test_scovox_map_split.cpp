@@ -1,0 +1,1449 @@
+/// @file
+/// @brief Step-5 gate: ScovoxMapSplit composer end-to-end smoke + parity.
+
+#include <gtest/gtest.h>
+#include <Eigen/Core>
+#include <algorithm>
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
+#include <limits>
+#include <memory>
+#include <utility>
+#include <vector>
+
+#include "scovox/beta_voxel.hpp"
+#include "scovox/dir_voxel.hpp"
+#include "scovox/scovox_map_split.hpp"
+#include "scovox/tsdf_voxel.hpp"
+
+namespace {
+
+scovox::ScovoxMapSplit makeMap() {
+  scovox::ScovoxMapSplit::Params p;
+  p.resolution        = 0.05;
+  p.tsdf.sdf_trunc    = 0.15f;
+  p.semsplit.kappa0    = 1.0f;
+  p.semsplit.dirichlet_min_p_occ = 0.5f;
+  return scovox::ScovoxMapSplit(p);
+}
+
+}  // namespace
+
+TEST(ScovoxMapSplit, IntegrateHitTouchesBothGrids) {
+  auto m = makeMap();
+  std::vector<float> probs{0.f, 1.f, 0.f, 0.f};
+
+  m.integrateHit(Eigen::Vector3f(0, 0, 0),
+                 Eigen::Vector3f(0.50f, 0, 0),
+                 &probs);
+
+  EXPECT_GT(m.tsdfVoxelCount(),    0u);
+  EXPECT_GT(m.semdirVoxelCount(), 0u);
+}
+
+TEST(ScovoxMapSplit, IntegrateMissCarvesOccupancyOnly) {
+  auto m = makeMap();
+  m.integrateMiss(Eigen::Vector3f(0, 0, 0),
+                  Eigen::Vector3f(0.50f, 0, 0));
+
+  EXPECT_EQ(m.tsdfVoxelCount(),  0u) << "miss must NOT allocate TSDF voxels";
+  // SPLIT substrate: a no-return ray carves the full-ray Beta (occupancy)
+  // grid but commits no class, so the hit-sparse Dir (semantics) grid stays
+  // empty. (Under the old unified SemDir grid both lived in one voxel.)
+  EXPECT_GT(m.betaVoxelCount(), 0u) << "miss must carve occupancy (Beta grid)";
+  EXPECT_EQ(m.dirVoxelCount(),  0u) << "miss commits no semantics (Dir grid empty)";
+}
+
+TEST(ScovoxMapSplit, ExtractMeshHasConsistentLabelArray) {
+  // Marching cubes needs a 3D volume of TSDF voxels to extract surface;
+  // a single linear ray doesn't suffice. Fan rays from origin to a small
+  // cube of endpoints around (0.50, 0, 0) to fill the surface band's
+  // 3D neighborhood.
+  auto m = makeMap();
+  std::vector<float> probs{0.f, 0.f, 1.f, 0.f};  // class 2
+  for (int dx = -1; dx <= 1; ++dx)
+  for (int dy = -1; dy <= 1; ++dy)
+  for (int dz = -1; dz <= 1; ++dz) {
+    Eigen::Vector3f ep(0.50f + 0.05f * dx, 0.05f * dy, 0.05f * dz);
+    m.integrateHit(Eigen::Vector3f(0, 0, 0), ep, &probs);
+  }
+  // Geometry may or may not produce triangles depending on band coverage,
+  // but the mesh must always be self-consistent: |tri_labels| == |triangles|.
+  auto mesh = m.extractMesh(/*min_weight=*/0.5f);
+  EXPECT_EQ(mesh.tri_labels.size(), mesh.triangles.size());
+}
+
+TEST(ScovoxMapSplit, ExtractPointCloudUsesCentre) {
+  auto m = makeMap();
+  for (int i = 0; i < 3; ++i) {
+    m.integrateHit(Eigen::Vector3f(0, 0, 0),
+                   Eigen::Vector3f(0.50f, 0, 0),
+                   nullptr);
+  }
+  auto [positions, labels] = m.extractPointCloud(/*min_weight=*/1.0f);
+  EXPECT_GT(positions.size(), 0u);
+  EXPECT_EQ(positions.size(), labels.size());
+}
+
+TEST(ScovoxMapSplit, MemoryAccountingSplitsCleanly) {
+  auto m = makeMap();
+  m.integrateHit(Eigen::Vector3f(0, 0, 0),
+                 Eigen::Vector3f(0.50f, 0, 0),
+                 nullptr);
+  // The full-ray occupancy (Beta) grid should always have at least as many
+  // voxels as the band-only TSDF grid (full-ray carve vs band).
+  EXPECT_GE(m.betaVoxelCount(), m.tsdfVoxelCount());
+  // Memory matches struct sizes (modulo Bonxai overhead).
+  EXPECT_GT(m.tsdfGridBytes(),   m.tsdfVoxelCount()   * sizeof(scovox::TsdfVoxel)   - 1);
+  // Split grid is Beta∥Dir: semdirGridBytes() == Beta bytes + Dir bytes, so it
+  // must exceed the raw Dir-cell footprint (and the raw Beta footprint too).
+  EXPECT_GT(m.semdirGridBytes(), m.dirVoxelCount()  * sizeof(scovox::DirVoxel)  - 1);
+  EXPECT_GT(m.semdirGridBytes(), m.betaVoxelCount() * sizeof(scovox::BetaVoxel) - 1);
+}
+
+TEST(ScovoxMapSplit, DrainTouchedSplitsByGrid) {
+  auto m = makeMap();
+  m.integrateHit(Eigen::Vector3f(0, 0, 0),
+                 Eigen::Vector3f(0.50f, 0, 0),
+                 nullptr);
+  auto t = m.drainTouchedTsdf();
+  auto sb = m.drainTouchedBeta();
+  auto sd = m.drainTouchedDir();
+  EXPECT_GT(t.size(),  0u);
+  EXPECT_GT(sb.size(), 0u);
+  EXPECT_GT(sd.size(), 0u);
+  // Second drain should be empty (buffers cleared).
+  EXPECT_EQ(m.drainTouchedTsdf().size(), 0u);
+  EXPECT_EQ(m.drainTouchedBeta().size(), 0u);
+  EXPECT_EQ(m.drainTouchedDir().size(),  0u);
+}
+
+// ===========================================================================
+// Step 12.10 (2026-05-09): fused ray walker — parity vs split path
+// ===========================================================================
+//
+// The fused walker (`Params::fused_walker = true`, default) runs one
+// exact DDA over the TSDF band [Hp - sdf_trunc·û, Hp + sdf_trunc·û]
+// and dispatches per-voxel into both grids. The split walker runs two
+// independent DDAs. For axis-aligned rays the DDA reduces to unit
+// stepping along the major axis and both walkers must produce
+// bit-identical TsdfMap state. SemBeta state must also match exactly:
+// the carve subset is `0 < sdf <= carve_band, c != k_hit`, which selects
+// the same voxels along an axis-aligned ray as the legacy
+// `SemBetaMap::carveRay [co, Hp)` walk.
+
+namespace {
+
+scovox::ScovoxMapSplit::Params splitParams() {
+  scovox::ScovoxMapSplit::Params p;
+  p.resolution        = 0.05;
+  p.tsdf.sdf_trunc    = 0.15f;
+  p.semsplit.kappa0    = 1.0f;
+  p.semsplit.dirichlet_min_p_occ = 0.5f;
+  return p;
+}
+
+// Apply the carve_band truncation that scovox_node performs upstream
+// (Hp − carve_band·û → co). The fused walker reads (Hp − co).norm() as
+// the SemBeta carve range; the split walker carves the same [co, Hp).
+Eigen::Vector3f truncateOrigin(const Eigen::Vector3f& O,
+                               const Eigen::Vector3f& Hp,
+                               float carve_band) {
+  const float rng = (Hp - O).norm();
+  if (carve_band <= 0.f || rng <= carve_band) return O;
+  return O + (Hp - O).normalized() * (rng - carve_band);
+}
+
+}  // namespace
+
+TEST(ScovoxMapSplitFusedWalker, AxisAlignedParityWithSplitWalker) {
+  // Axis-aligned ray: the DDA picks deterministic voxels — fused and
+  // split must produce identical TsdfMap voxel sets and identical
+  // SemBeta {a_occ, a_free, sem_cnt} state for the same ray.
+  auto p_fused = splitParams(); p_fused.fused_walker = true;
+  auto p_split = splitParams(); p_split.fused_walker = false;
+  scovox::ScovoxMapSplit m_fused(p_fused);
+  scovox::ScovoxMapSplit m_split(p_split);
+
+  std::vector<float> probs{0.f, 1.f, 0.f, 0.f};  // class 1
+  const Eigen::Vector3f O(0.f, 0.f, 0.f);
+  const Eigen::Vector3f Hp(0.50f, 0.f, 0.f);
+  const float carve_band = 0.10f;
+  const Eigen::Vector3f co = truncateOrigin(O, Hp, carve_band);
+
+  m_fused.integrateHit(co, Hp, &probs);
+  m_split.integrateHit(co, Hp, &probs);
+
+  // TsdfMap voxel counts and total grid bytes match — the fused walker
+  // walks the same band and runs the same Curless–Levoy update.
+  EXPECT_EQ(m_fused.tsdfVoxelCount(),  m_split.tsdfVoxelCount());
+  EXPECT_EQ(m_fused.tsdfGridBytes(),   m_split.tsdfGridBytes());
+
+  // SemBeta voxel counts match for an axis-aligned ray — the carve
+  // subset {0 < sdf <= carve_band} selects exactly the voxels the DDA
+  // would pick walking [co, Hp).
+  EXPECT_EQ(m_fused.semdirVoxelCount(), m_split.semdirVoxelCount());
+
+  // Hit voxel — split Beta occupancy state must match exactly.
+  auto b_f = m_fused.semsplit().getBetaVoxel(Hp);
+  auto b_s = m_split.semsplit().getBetaVoxel(Hp);
+  ASSERT_TRUE(b_f.has_value());
+  ASSERT_TRUE(b_s.has_value());
+  EXPECT_FLOAT_EQ(b_f->a_occ,  b_s->a_occ);
+  EXPECT_FLOAT_EQ(b_f->a_free, b_s->a_free);
+  EXPECT_FLOAT_EQ(b_f->p_occ(), b_s->p_occ());
+
+  // Hit voxel — split Dir class evidence must match exactly.
+  auto d_f = m_fused.semsplit().getDirVoxel(Hp);
+  auto d_s = m_split.semsplit().getDirVoxel(Hp);
+  ASSERT_TRUE(d_f.has_value());
+  ASSERT_TRUE(d_s.has_value());
+  EXPECT_FLOAT_EQ(d_f->other(), d_s->other());
+  for (int i = 0; i < scovox::K_TOP; ++i) {
+    EXPECT_FLOAT_EQ(d_f->cnt[i], d_s->cnt[i]);
+    EXPECT_EQ(d_f->cls[i],       d_s->cls[i]);
+  }
+}
+
+TEST(ScovoxMapSplitFusedWalker, MissPathUnchanged) {
+  // The fused-walker flag only affects integrateHit. Misses must produce
+  // identical SemBeta state on both paths and zero TsdfMap voxels.
+  auto p_fused = splitParams(); p_fused.fused_walker = true;
+  auto p_split = splitParams(); p_split.fused_walker = false;
+  scovox::ScovoxMapSplit m_fused(p_fused);
+  scovox::ScovoxMapSplit m_split(p_split);
+
+  m_fused.integrateMiss(Eigen::Vector3f(0, 0, 0),
+                        Eigen::Vector3f(0.50f, 0, 0));
+  m_split.integrateMiss(Eigen::Vector3f(0, 0, 0),
+                        Eigen::Vector3f(0.50f, 0, 0));
+
+  EXPECT_EQ(m_fused.tsdfVoxelCount(),    0u);
+  EXPECT_EQ(m_split.tsdfVoxelCount(),    0u);
+  EXPECT_EQ(m_fused.semdirVoxelCount(), m_split.semdirVoxelCount());
+}
+
+TEST(ScovoxMapSplitFusedWalker, MultiRayBandIdentity) {
+  // 27-ray fan around an axis-aligned hit endpoint. Even with the small
+  // off-axis offsets, every ray in this set is close enough to one major
+  // axis that the DDA walks the same voxel sequence under both walkers.
+  // After integrating all 27 rays the TsdfMap state must be bit-identical.
+  auto p_fused = splitParams(); p_fused.fused_walker = true;
+  auto p_split = splitParams(); p_split.fused_walker = false;
+  scovox::ScovoxMapSplit m_fused(p_fused);
+  scovox::ScovoxMapSplit m_split(p_split);
+
+  std::vector<float> probs{0.f, 0.f, 1.f, 0.f};  // class 2
+  const float carve_band = 0.10f;
+  for (int dx = -1; dx <= 1; ++dx)
+  for (int dy = -1; dy <= 1; ++dy)
+  for (int dz = -1; dz <= 1; ++dz) {
+    Eigen::Vector3f Hp(0.50f + 0.05f * dx, 0.05f * dy, 0.05f * dz);
+    Eigen::Vector3f co = truncateOrigin(Eigen::Vector3f::Zero(), Hp, carve_band);
+    m_fused.integrateHit(co, Hp, &probs);
+    m_split.integrateHit(co, Hp, &probs);
+  }
+
+  // For axis-aligned-ish rays the TSDF voxel sets are exactly equal.
+  EXPECT_EQ(m_fused.tsdfVoxelCount(), m_split.tsdfVoxelCount());
+  EXPECT_EQ(m_fused.tsdfGridBytes(),  m_split.tsdfGridBytes());
+
+  // SemDir carve sets agree up to per-ray boundary jitter: the fused
+  // walker starts its DDA at `Hp − walk_back·û` while the split walker
+  // starts at `Hp − carve_band·û`, so the two walks enter the shared span
+  // with different `t_max` phases. Where an oblique ray passes near a
+  // voxel corner the two orderings break the tie differently and pick
+  // different voxels at sub-voxel boundaries.
+  // For axis-aligned rays the sets are bit-identical (see the test
+  // above); for the 27-ray off-axis fan with 0.05 m offsets we accept
+  // up to 20 % asymmetric difference, dominated by ±1 voxel/ray jitter
+  // accumulating over ~27 rays in a SemDir set of ~45 voxels.
+  const auto a = m_fused.semdirVoxelCount();
+  const auto b = m_split.semdirVoxelCount();
+  const auto diff = a > b ? a - b : b - a;
+  const auto larger = a > b ? a : b;
+  EXPECT_LE(diff * 100u, larger * 20u)
+      << "fused=" << a << " split=" << b
+      << " — boundary jitter > 20 %";
+}
+
+TEST(ScovoxMapSplitFusedWalker, FusedIsDefault) {
+  scovox::ScovoxMapSplit::Params p;
+  EXPECT_TRUE(p.fused_walker);
+}
+
+// ===========================================================================
+// SPLIT substrate (SemSplitMap: BetaVoxel ∥ DirVoxel) behind the flag
+// ===========================================================================
+
+namespace {
+
+scovox::ScovoxMapSplit makeSplitMap(bool fused = true) {
+  scovox::ScovoxMapSplit::Params p;
+  p.resolution                 = 0.05;
+  p.tsdf.sdf_trunc             = 0.15f;
+  p.semsplit.kappa0              = 1.0f;
+  p.semsplit.dirichlet_min_p_occ = 0.5f;
+  p.semsplit.num_classes         = 14;
+  p.semsplit.alpha_0             = scovox::kDefaultDirichletPrior;
+  p.fused_walker               = fused;
+  return scovox::ScovoxMapSplit(p);
+}
+
+}  // namespace
+
+TEST(ScovoxMapSplitSubstrate, IntegrateHitTouchesAllThreeGrids) {
+  auto m = makeSplitMap();
+  std::vector<float> probs{0.f, 1.f, 0.f, 0.f};  // class 1
+  m.integrateHit(Eigen::Vector3f(0, 0, 0),
+                 Eigen::Vector3f(0.50f, 0, 0),
+                 &probs);
+
+  EXPECT_GT(m.tsdfVoxelCount(), 0u);
+  EXPECT_GT(m.betaVoxelCount(), 0u);
+  EXPECT_GT(m.dirVoxelCount(),  0u);
+  // Beta is full-ray; Dir is hit-only → far fewer Dir voxels.
+  EXPECT_GT(m.betaVoxelCount(), m.dirVoxelCount());
+}
+
+TEST(ScovoxMapSplitSubstrate, MissAllocatesBetaButNoDir) {
+  auto m = makeSplitMap();
+  m.integrateMiss(Eigen::Vector3f(0, 0, 0),
+                  Eigen::Vector3f(0.50f, 0, 0));
+  EXPECT_EQ(m.tsdfVoxelCount(), 0u) << "miss must NOT allocate TSDF voxels";
+  EXPECT_GT(m.betaVoxelCount(), 0u);
+  EXPECT_EQ(m.dirVoxelCount(),  0u) << "miss must NOT allocate Dir voxels";
+}
+
+TEST(ScovoxMapSplitSubstrate, MeshAndPointCloudLabelArraysConsistent) {
+  auto m = makeSplitMap();
+  std::vector<float> probs{0.f, 0.f, 1.f, 0.f};  // class 2
+  for (int dx = -1; dx <= 1; ++dx)
+  for (int dy = -1; dy <= 1; ++dy)
+  for (int dz = -1; dz <= 1; ++dz) {
+    Eigen::Vector3f ep(0.50f + 0.05f * dx, 0.05f * dy, 0.05f * dz);
+    m.integrateHit(Eigen::Vector3f(0, 0, 0), ep, &probs);
+  }
+  auto mesh = m.extractMesh(/*min_weight=*/0.5f);
+  EXPECT_EQ(mesh.tri_labels.size(), mesh.triangles.size());
+
+  auto [positions, labels] = m.extractPointCloud(/*min_weight=*/0.5f);
+  EXPECT_EQ(positions.size(), labels.size());
+}
+
+TEST(ScovoxMapSplitSubstrate, DrainTouchedPerGrid) {
+  auto m = makeSplitMap();
+  std::vector<float> probs{0.f, 1.f, 0.f, 0.f};
+  m.integrateHit(Eigen::Vector3f(0, 0, 0),
+                 Eigen::Vector3f(0.50f, 0, 0),
+                 &probs);
+  auto tb = m.drainTouchedBeta();
+  auto td = m.drainTouchedDir();
+  EXPECT_GT(tb.size(), td.size()) << "Beta full-ray vs Dir hit-only";
+  EXPECT_EQ(td.size(), 1u);
+  // Buffers cleared.
+  EXPECT_EQ(m.drainTouchedBeta().size(), 0u);
+  EXPECT_EQ(m.drainTouchedDir().size(),  0u);
+}
+
+// ===========================================================================
+// Dynamic-class routing (transient substrate) — both walkers
+// ===========================================================================
+
+// A dynamic hit must: (a) write NO persistent TSDF geometry (no ghost surface),
+// (b) commit NO persistent semantics, (c) still carve persistent free space in
+// front, (d) deposit occupancy + semantics into the transient grids.
+static void checkDynamicHitRouting(bool fused) {
+  auto m = makeSplitMap(fused);
+  std::vector<float> probs(14, 0.f); probs[3] = 1.0f;  // class 3
+  const Eigen::Vector3f Hp(0.50f, 0, 0);
+
+  m.integrateHit(Eigen::Vector3f(0, 0, 0), Hp, &probs,
+                 /*is_dynamic=*/true);
+
+  EXPECT_EQ(m.tsdfVoxelCount(), 0u) << "dynamic hit must leave NO persistent TSDF";
+  EXPECT_EQ(m.dirVoxelCount(),  0u) << "dynamic hit commits no persistent class";
+  EXPECT_GT(m.betaVoxelCount(), 0u) << "free-space carve stays persistent";
+  // Transient grids carry the endpoint.
+  EXPECT_GT(m.semsplit().transientBetaVoxelCount(), 0u);
+  EXPECT_EQ(m.semsplit().transientDirVoxelCount(),  1u);
+  EXPECT_EQ(m.semsplit().transientDominantClassAt(Hp), 3u);
+  EXPECT_EQ(m.semsplit().dominantClassAt(Hp), 0xFFFFu);  // persistent: none
+}
+
+TEST(ScovoxMapSplitDynamic, FusedHitRoutesToTransient)  { checkDynamicHitRouting(true);  }
+TEST(ScovoxMapSplitDynamic, SplitHitRoutesToTransient)  { checkDynamicHitRouting(false); }
+
+TEST(ScovoxMapSplitDynamic, NonDynamicDefaultUnchanged) {
+  // is_dynamic defaults false → identical to the legacy 4-arg path: all three
+  // persistent grids populate, transient stays empty.
+  auto m = makeSplitMap();
+  std::vector<float> probs(14, 0.f); probs[3] = 1.0f;
+  m.integrateHit(Eigen::Vector3f(0, 0, 0), Eigen::Vector3f(0.50f, 0, 0),
+                 &probs);  // no is_dynamic arg
+
+  EXPECT_GT(m.tsdfVoxelCount(), 0u);
+  EXPECT_GT(m.dirVoxelCount(),  0u);
+  EXPECT_EQ(m.semsplit().transientBetaVoxelCount(), 0u);
+  EXPECT_EQ(m.semsplit().transientDirVoxelCount(),  0u);
+}
+
+TEST(ScovoxMapSplitDynamic, DecayTransientPassthrough) {
+  auto m = makeSplitMap();
+  std::vector<float> probs(14, 0.f); probs[3] = 1.0f;
+  m.integrateHit(Eigen::Vector3f(0, 0, 0), Eigen::Vector3f(0.50f, 0, 0),
+                 &probs, /*is_dynamic=*/true);
+  ASSERT_GT(m.semsplit().transientBetaVoxelCount(), 0u);
+
+  m.decayTransient(0.0f);  // collapse to prior → prune via the composer
+  EXPECT_EQ(m.semsplit().transientBetaVoxelCount(), 0u);
+  EXPECT_EQ(m.semsplit().transientDirVoxelCount(),  0u);
+}
+
+// ===========================================================================
+// Far-voxel skip — bit-identity vs the full walk
+// ===========================================================================
+//
+// When a carve frame is open and batch_free_carve=false, applyCarveUpdate is a
+// guaranteed no-op, so integrateHitFused's far-voxel skip may early-return any
+// voxel whose Chebyshev coord distance to the hit exceeds the band threshold.
+// The claim is BIT identity, not approximate parity: a full-walk map
+// (far_voxel_fast_paths=false) and a skipping map fed identical rays must
+// agree byte-for-byte on the TSDF/Beta/Dir grids and produce the same
+// touched-lists, every scan.
+
+namespace {
+
+/// Same config with both far-voxel shortcuts declined, so every voxel runs the
+/// exact float body — the reference the shortcuts claim bit identity with.
+scovox::ScovoxMapSplit::Params fullWalk(scovox::ScovoxMapSplit::Params p) {
+  p.far_voxel_fast_paths = false;
+  return p;
+}
+
+void appendBytes(std::vector<uint8_t>& out, const void* p, std::size_t n) {
+  const auto* b = static_cast<const uint8_t*>(p);
+  out.insert(out.end(), b, b + n);
+}
+
+// Field-wise raw-byte serialisers (bit-level compare without touching struct
+// padding; float == would pass -0.0 vs 0.0 and fail NaN vs NaN).
+void serialiseCell(std::vector<uint8_t>& out, const scovox::TsdfVoxel& v) {
+  appendBytes(out, &v.distance, sizeof v.distance);
+  appendBytes(out, &v.weight,   sizeof v.weight);
+}
+void serialiseCell(std::vector<uint8_t>& out, const scovox::BetaVoxel& v) {
+  appendBytes(out, &v.a_occ,  sizeof v.a_occ);
+  appendBytes(out, &v.a_free, sizeof v.a_free);
+}
+void serialiseCell(std::vector<uint8_t>& out, const scovox::DirVoxel& v) {
+  // The STORED word, not the derived `other()`. Hashing `other()` would let
+  // two voxels with different `s_total` compare equal whenever the difference
+  // is below the ulp of the subtraction, which is exactly the divergence these
+  // bit-identity tests exist to catch.
+  appendBytes(out, &v.s_total, sizeof v.s_total);
+  for (int i = 0; i < scovox::K_TOP; ++i) {
+    appendBytes(out, &v.cnt[i], sizeof v.cnt[i]);
+    appendBytes(out, &v.cls[i], sizeof v.cls[i]);
+  }
+}
+
+struct CellDump {
+  Bonxai::CoordT       c;
+  std::vector<uint8_t> bytes;
+  bool operator==(const CellDump& o) const { return c == o.c && bytes == o.bytes; }
+};
+
+/// Every active cell of a Bonxai grid, coord-sorted, values as raw bytes.
+template <typename GridT>
+std::vector<CellDump> dumpGrid(const GridT& g) {
+  std::vector<CellDump> out;
+  g.forEachCell([&](const auto& v, const Bonxai::CoordT& c) {
+    CellDump d;
+    d.c = c;
+    serialiseCell(d.bytes, v);
+    out.push_back(std::move(d));
+  });
+  std::sort(out.begin(), out.end(), [](const CellDump& a, const CellDump& b) {
+    if (a.c.x != b.c.x) return a.c.x < b.c.x;
+    if (a.c.y != b.c.y) return a.c.y < b.c.y;
+    return a.c.z < b.c.z;
+  });
+  return out;
+}
+
+void expectCoordListsEqual(const std::vector<Bonxai::CoordT>& a,
+                           const std::vector<Bonxai::CoordT>& b,
+                           const char* which, int scan) {
+  ASSERT_EQ(a.size(), b.size()) << which << " touched-list size, scan " << scan;
+  for (std::size_t i = 0; i < a.size(); ++i) {
+    EXPECT_TRUE(a[i] == b[i])
+        << which << " touched[" << i << "] differs, scan " << scan;
+  }
+}
+
+scovox::ScovoxMapSplit::Params farSkipParams(float band) {
+  scovox::ScovoxMapSplit::Params p;
+  p.resolution                    = 0.05;
+  p.tsdf.sdf_trunc                = 0.15f;
+  p.semsplit.kappa0               = 1.0f;
+  p.semsplit.dirichlet_min_p_occ  = 0.5f;
+  p.semsplit.num_classes          = 14;
+  // Arms the skip's precondition: with a carve frame open, this flag makes
+  // every applyCarveUpdate a guaranteed no-op (it does NOT fall back to the
+  // immediate write path — the documented batch_free_carve trap).
+  p.semsplit.batch_free_carve     = false;
+  p.semsplit.semantic_band_length = band;
+  return p;
+}
+
+// Fires one scan of rays into `fire`. Shared by the identity and the inertness
+// tests so both exercise exactly the same geometry. `s` is the caller's LCG
+// state (Numerical Recipes constants): identical ray sets on every run and
+// platform, no <random> distribution drift.
+//
+// Every coordinate is drawn into a NAMED LOCAL before the Eigen constructor.
+// Function-argument evaluation order is unspecified in C++, so three uf() calls
+// passed directly would make the ray set compiler-defined — both arms would
+// still see the same rays, but a mutation verdict recorded on one compiler
+// would not describe another, and these rays carry exactly that evidence.
+template <typename FireFn>
+void fireScanRays(FireFn&& fire, int scan, uint32_t& s) {
+  auto lcg = [&]() { s = s * 1664525u + 1013904223u; return s; };
+  auto uf  = [&](float lo, float hi) {
+    return lo + (hi - lo) * static_cast<float>(lcg() >> 8) / 16777216.0f;
+  };
+
+  // Random fan: long rays (up to 3 m at trunc 0.15) so the overwhelming
+  // majority of visited voxels are far in front of the band — the voxels the
+  // skip removes.
+  for (int r = 0; r < 60; ++r) {
+    const float ox = uf(-0.1f, 0.1f);
+    const float oy = uf(-0.1f, 0.1f);
+    const float oz = uf(-0.1f, 0.1f);
+    const Eigen::Vector3f O(ox, oy, oz);
+    const float dx = uf(-1.f, 1.f);
+    const float dy = uf(-1.f, 1.f);
+    const float dz = uf(-1.f, 1.f);
+    Eigen::Vector3f dir(dx, dy, dz);
+    if (dir.norm() < 1e-3f) dir = Eigen::Vector3f::UnitX();
+    dir.normalize();
+    const Eigen::Vector3f Hp = O + dir * uf(0.4f, 3.0f);
+    std::vector<float> probs(14, 0.f);
+    probs[lcg() % 14] = 1.f;
+    fire(O, Hp, &probs, /*dyn=*/(r % 7) == 3);
+  }
+
+  // Exact gate-boundary geometry: axis-aligned rays whose endpoints step in
+  // h/2 = 0.0125 m increments across voxel centres and boundaries, so
+  // band-edge voxels land exactly on the trunc/sem_band gate comparisons the
+  // +1 guard ring protects (endpoint-on-centre also exercises the proj≈0
+  // early return at the hit voxel).
+  if (scan == 0) {
+    std::vector<float> probs(14, 0.f);
+    probs[2] = 1.f;
+    for (int i = 0; i < 12; ++i) {
+      const float x = 0.500f + 0.0125f * static_cast<float>(i);
+      fire(Eigen::Vector3f(-1.5f, 0.025f, 0.025f),
+           Eigen::Vector3f(x, 0.025f, 0.025f), &probs, false);
+    }
+    // Degenerate ray: the early-return path, no state on either side.
+    fire(Eigen::Vector3f(0.2f, 0.2f, 0.2f),
+         Eigen::Vector3f(0.2f, 0.2f, 0.2f), &probs, false);
+  }
+}
+
+void runFarSkipIdentity(float band) {
+  const auto p = farSkipParams(band);
+  auto full = std::make_unique<scovox::ScovoxMapSplit>(fullWalk(p));
+  auto skip = std::make_unique<scovox::ScovoxMapSplit>(p);
+
+  // Canary: the flag must have SPLIT the two instances. A lost member init, or
+  // the flag dropped from far_skip's conjunction, would otherwise turn the
+  // comparison below into skip-vs-skip and stay silently green.
+  ASSERT_FALSE(full->farVoxelFastPaths());
+  ASSERT_TRUE(skip->farVoxelFastPaths());
+
+  uint32_t s = 0xC0FFEEu;
+  auto fire = [&](const Eigen::Vector3f& O, const Eigen::Vector3f& Hp,
+                  const std::vector<float>* probs, bool dyn) {
+    full->integrateHit(O, Hp, probs, dyn);
+    skip->integrateHit(O, Hp, probs, dyn);
+  };
+
+  for (int scan = 0; scan < 5; ++scan) {
+    full->beginCarveFrame();
+    skip->beginCarveFrame();
+
+    fireScanRays(fire, scan, s);
+
+    EXPECT_EQ(full->flushCarveFrame(), skip->flushCarveFrame())
+        << "flush write count, scan " << scan;
+
+    expectCoordListsEqual(full->drainTouchedTsdf(), skip->drainTouchedTsdf(),
+                          "tsdf", scan);
+    expectCoordListsEqual(full->drainTouchedBeta(), skip->drainTouchedBeta(),
+                          "beta", scan);
+    expectCoordListsEqual(full->drainTouchedDir(), skip->drainTouchedDir(),
+                          "dir", scan);
+
+    EXPECT_TRUE(dumpGrid(full->tsdf().grid()) == dumpGrid(skip->tsdf().grid()))
+        << "TSDF grid diverged, scan " << scan << ", band " << band;
+    EXPECT_TRUE(dumpGrid(full->semsplit().betaGrid()) ==
+                dumpGrid(skip->semsplit().betaGrid()))
+        << "Beta grid diverged, scan " << scan << ", band " << band;
+    EXPECT_TRUE(dumpGrid(full->semsplit().dirGrid()) ==
+                dumpGrid(skip->semsplit().dirGrid()))
+        << "Dir grid diverged, scan " << scan << ", band " << band;
+  }
+
+  // Guard against a vacuous pass: the ray set must actually have written all
+  // three grids.
+  EXPECT_GT(full->tsdfVoxelCount(), 0u);
+  EXPECT_GT(full->betaVoxelCount(), 0u);
+  EXPECT_GT(full->dirVoxelCount(),  0u);
+
+  // Execution proof. See the matching note in runFarCarveIdentity: identity is
+  // the absence of a difference and would stay green on a skip that never
+  // armed, so assert that it removed voxels and that the reference did not.
+  EXPECT_GT(skip->farSkippedVoxels(), 0u)
+      << "far skip never armed — the identity above proves nothing, band " << band;
+  EXPECT_EQ(full->farSkippedVoxels(), 0u) << "reference arm took the far skip";
+  EXPECT_EQ(skip->farCarvedVoxels(),  0u) << "fast carve armed on an unbatched config";
+}
+
+// The skip must be INERT unless ALL THREE of its preconditions hold. Each
+// config below satisfies two and breaks the third, and each is chosen so that
+// arming the skip anyway would be OBSERVABLE in a grid:
+//
+//   production    batch_free_carve=true — the SHIPPED configuration. Carve
+//                 really stages, so skipped far voxels never reach the flush.
+//                 This is the dangerous mutant: arming the skip here silently
+//                 discards the bulk of the free-space carve.
+//   spacecarving  space_carving=true — the TSDF upper gate is dropped for the
+//                 carve front (see gate (1) in integrateHitFused), so far
+//                 voxels DO take a band write and losing them shows in tsdf.
+//   noframe       no carve frame open — applyCarveUpdate takes the immediate
+//                 write path instead of returning early, so carve is real.
+//
+// These are TAUTOLOGICAL on correct code — far_skip is false in both arms, so
+// both run the identical path — and that is the point: their entire value is
+// that deleting any one conjunct from `far_skip` fails one of them, where
+// FarSkipBitIdenticalToFullWalk on its own would still pass green.
+void runFarSkipInert(const char* label,
+                     bool space_carving,
+                     bool batch_free_carve,
+                     bool open_frame) {
+  auto p = farSkipParams(/*band=*/0.0f);
+  p.tsdf.space_carving        = space_carving;
+  p.semsplit.batch_free_carve = batch_free_carve;
+
+  auto full = std::make_unique<scovox::ScovoxMapSplit>(fullWalk(p));
+  auto skip = std::make_unique<scovox::ScovoxMapSplit>(p);
+
+  const std::string l_tsdf = std::string(label) + " tsdf";
+  const std::string l_beta = std::string(label) + " beta";
+  const std::string l_dir  = std::string(label) + " dir";
+
+  uint32_t s = 0xC0FFEEu;
+  auto fire = [&](const Eigen::Vector3f& O, const Eigen::Vector3f& Hp,
+                  const std::vector<float>* probs, bool dyn) {
+    full->integrateHit(O, Hp, probs, dyn);
+    skip->integrateHit(O, Hp, probs, dyn);
+  };
+
+  for (int scan = 0; scan < 3; ++scan) {
+    if (open_frame) {
+      full->beginCarveFrame();
+      skip->beginCarveFrame();
+    }
+
+    fireScanRays(fire, scan, s);
+
+    if (open_frame) {
+      EXPECT_EQ(full->flushCarveFrame(), skip->flushCarveFrame())
+          << label << ": flush write count, scan " << scan;
+    }
+
+    expectCoordListsEqual(full->drainTouchedTsdf(), skip->drainTouchedTsdf(),
+                          l_tsdf.c_str(), scan);
+    expectCoordListsEqual(full->drainTouchedBeta(), skip->drainTouchedBeta(),
+                          l_beta.c_str(), scan);
+    expectCoordListsEqual(full->drainTouchedDir(), skip->drainTouchedDir(),
+                          l_dir.c_str(), scan);
+
+    EXPECT_TRUE(dumpGrid(full->tsdf().grid()) == dumpGrid(skip->tsdf().grid()))
+        << label << ": TSDF grid diverged, scan " << scan;
+    EXPECT_TRUE(dumpGrid(full->semsplit().betaGrid()) ==
+                dumpGrid(skip->semsplit().betaGrid()))
+        << label << ": Beta grid diverged, scan " << scan;
+    EXPECT_TRUE(dumpGrid(full->semsplit().dirGrid()) ==
+                dumpGrid(skip->semsplit().dirGrid()))
+        << label << ": Dir grid diverged, scan " << scan;
+  }
+
+  // Non-vacuity: the carve must actually have written Beta voxels in this
+  // config, else "inert" would be indistinguishable from "nothing happened"
+  // and the mutant would have nothing to break.
+  EXPECT_GT(full->betaVoxelCount(), 0u) << label << ": no carve happened";
+  EXPECT_GT(full->tsdfVoxelCount(), 0u) << label << ": no TSDF written";
+
+  // Execution proof of the inertness: the skip must not merely be harmless
+  // here, it must never have fired. Only far_skip is asserted — on the
+  // "production" arm the mutually-exclusive fast CARVE legitimately arms, and
+  // FarCarveBitIdenticalToFullWalk is where that path is under test.
+  EXPECT_EQ(skip->farSkippedVoxels(), 0u) << label << ": far skip armed";
+}
+
+// ===========================================================================
+// Far-voxel fast carve — bit-identity vs the full walk
+// ===========================================================================
+//
+// The batch_free_carve=true counterpart of the skip above: on the SHIPPED
+// batched config, a voxel beyond far_thr can only take the carve branch — the
+// TSDF and semantic-band gates provably fail out there — so integrateHitFused
+// carves it directly with integer-only tests and skips the float body. The
+// claim is the same BIT identity: a full-walk map (far_voxel_fast_paths=false)
+// and a fast-carving map fed identical rays must agree byte-for-byte on all
+// three grids, the touched-lists, and the flush count.
+//
+// Identity on its own is exactly the absence of a difference, which a fast
+// path that never armed produces just as reliably as one that armed and was
+// correct. farCarvedVoxels()/farSkippedVoxels() close that: the arming is now
+// proven IN-PROCESS, not deferred to an out-of-tree perf harness.
+
+void runFarCarveIdentity(float band) {
+  auto p = farSkipParams(band);
+  // The fast carve arms on the SHIPPED batched configuration — the exact flag
+  // value that keeps the far-voxel SKIP disarmed (mutually exclusive by
+  // construction, so exactly one fast path is under test here).
+  p.semsplit.batch_free_carve = true;
+
+  auto full = std::make_unique<scovox::ScovoxMapSplit>(fullWalk(p));
+  auto fast = std::make_unique<scovox::ScovoxMapSplit>(p);
+
+  // Canary: the flag must have SPLIT the two instances. A lost member init, or
+  // the flag dropped from far_carve's conjunction, would otherwise turn the
+  // comparison below into fast-vs-fast and stay silently green.
+  ASSERT_FALSE(full->farVoxelFastPaths());
+  ASSERT_TRUE(fast->farVoxelFastPaths());
+
+  uint32_t s = 0xC0FFEEu;
+  auto fire = [&](const Eigen::Vector3f& O, const Eigen::Vector3f& Hp,
+                  const std::vector<float>* probs, bool dyn) {
+    full->integrateHit(O, Hp, probs, dyn);
+    fast->integrateHit(O, Hp, probs, dyn);
+  };
+
+  for (int scan = 0; scan < 5; ++scan) {
+    full->beginCarveFrame();
+    fast->beginCarveFrame();
+
+    fireScanRays(fire, scan, s);
+
+    // Short rays straddling depth == trunc (0.15): below it the walk starts
+    // BEHIND the origin (walk_back = trunc > depth) and the fast carve must
+    // stay disarmed — behind-origin voxels carve nothing in the exact body.
+    // Brackets the `depth >= trunc` arming boundary from both sides.
+    {
+      auto lcg = [&]() { s = s * 1664525u + 1013904223u; return s; };
+      auto uf  = [&](float lo, float hi) {
+        return lo + (hi - lo) * static_cast<float>(lcg() >> 8) / 16777216.0f;
+      };
+      std::vector<float> probs(14, 0.f);
+      probs[3] = 1.f;
+      for (int r = 0; r < 10; ++r) {
+        const float ox = uf(-0.2f, 0.2f);
+        const float oy = uf(-0.2f, 0.2f);
+        const float oz = uf(-0.2f, 0.2f);
+        const Eigen::Vector3f O(ox, oy, oz);
+        const float dx = uf(-1.f, 1.f);
+        const float dy = uf(-1.f, 1.f);
+        const float dz = uf(-1.f, 1.f);
+        Eigen::Vector3f dir(dx, dy, dz);
+        if (dir.norm() < 1e-3f) dir = Eigen::Vector3f::UnitZ();
+        dir.normalize();
+        const float len = uf(0.05f, 0.25f);
+        const Eigen::Vector3f Hp = O + dir * len;
+        fire(O, Hp, &probs, /*dyn=*/false);
+      }
+    }
+
+    EXPECT_EQ(full->flushCarveFrame(), fast->flushCarveFrame())
+        << "flush write count, scan " << scan << ", band " << band;
+
+    expectCoordListsEqual(full->drainTouchedTsdf(), fast->drainTouchedTsdf(),
+                          "tsdf", scan);
+    expectCoordListsEqual(full->drainTouchedBeta(), fast->drainTouchedBeta(),
+                          "beta", scan);
+    expectCoordListsEqual(full->drainTouchedDir(), fast->drainTouchedDir(),
+                          "dir", scan);
+
+    EXPECT_TRUE(dumpGrid(full->tsdf().grid()) == dumpGrid(fast->tsdf().grid()))
+        << "TSDF grid diverged, scan " << scan << ", band " << band;
+    EXPECT_TRUE(dumpGrid(full->semsplit().betaGrid()) ==
+                dumpGrid(fast->semsplit().betaGrid()))
+        << "Beta grid diverged, scan " << scan << ", band " << band;
+    EXPECT_TRUE(dumpGrid(full->semsplit().dirGrid()) ==
+                dumpGrid(fast->semsplit().dirGrid()))
+        << "Dir grid diverged, scan " << scan << ", band " << band;
+  }
+
+  // Non-vacuity: on this config the carve genuinely stages and flushes, and
+  // the ray fan writes all three grids.
+  EXPECT_GT(full->tsdfVoxelCount(), 0u);
+  EXPECT_GT(full->betaVoxelCount(), 0u);
+  EXPECT_GT(full->dirVoxelCount(),  0u);
+
+  // Execution proof. Bit identity is the ABSENCE of a difference, so it passes
+  // exactly as green when far_thr is mis-sized and no voxel ever qualifies —
+  // the fast path would then be dead code with a full suite behind it. These
+  // say it actually replaced the float body, that the reference arm never did,
+  // and that the mutually-exclusive SKIP stayed off on this batched config.
+  EXPECT_GT(fast->farCarvedVoxels(), 0u)
+      << "fast carve never armed — the identity above proves nothing, band " << band;
+  EXPECT_EQ(full->farCarvedVoxels(),  0u) << "reference arm took the fast carve";
+  EXPECT_EQ(fast->farSkippedVoxels(), 0u) << "far skip armed on a batched config";
+}
+
+// The fast carve must be INERT when space_carving=true — the ONE arming
+// conjunct whose deletion is observable: space carving drops the TSDF upper
+// gate, far front voxels DO take a band write, and a fast path that returns
+// right after carving loses those writes from the TSDF grid.
+//
+// The remaining conjuncts are conservative scoping, not correctness
+// load-bearing, so no inert config can kill their deletion mutants — recorded
+// here so nobody hunts for the missing tests: with batch_free_carve=false the
+// far SKIP fires first and staged/immediate carving is a no-op either way;
+// with no frame open the immediate-path carve is exactly what the exact body
+// would do beyond far_thr (latch semantics kept verbatim); with depth < trunc
+// no walk voxel can exceed far_thr at all (walk span < far_thr·res each way).
+void runFarCarveInertWhenSpaceCarving() {
+  auto p = farSkipParams(/*band=*/0.0f);
+  p.semsplit.batch_free_carve = true;
+  p.tsdf.space_carving        = true;
+
+  auto full = std::make_unique<scovox::ScovoxMapSplit>(fullWalk(p));
+  auto fast = std::make_unique<scovox::ScovoxMapSplit>(p);
+
+  uint32_t s = 0xC0FFEEu;
+  auto fire = [&](const Eigen::Vector3f& O, const Eigen::Vector3f& Hp,
+                  const std::vector<float>* probs, bool dyn) {
+    full->integrateHit(O, Hp, probs, dyn);
+    fast->integrateHit(O, Hp, probs, dyn);
+  };
+
+  for (int scan = 0; scan < 3; ++scan) {
+    full->beginCarveFrame();
+    fast->beginCarveFrame();
+
+    fireScanRays(fire, scan, s);
+
+    EXPECT_EQ(full->flushCarveFrame(), fast->flushCarveFrame())
+        << "spacecarving: flush write count, scan " << scan;
+
+    expectCoordListsEqual(full->drainTouchedTsdf(), fast->drainTouchedTsdf(),
+                          "spacecarving tsdf", scan);
+    expectCoordListsEqual(full->drainTouchedBeta(), fast->drainTouchedBeta(),
+                          "spacecarving beta", scan);
+    expectCoordListsEqual(full->drainTouchedDir(), fast->drainTouchedDir(),
+                          "spacecarving dir", scan);
+
+    EXPECT_TRUE(dumpGrid(full->tsdf().grid()) == dumpGrid(fast->tsdf().grid()))
+        << "spacecarving: TSDF grid diverged, scan " << scan;
+    EXPECT_TRUE(dumpGrid(full->semsplit().betaGrid()) ==
+                dumpGrid(fast->semsplit().betaGrid()))
+        << "spacecarving: Beta grid diverged, scan " << scan;
+    EXPECT_TRUE(dumpGrid(full->semsplit().dirGrid()) ==
+                dumpGrid(fast->semsplit().dirGrid()))
+        << "spacecarving: Dir grid diverged, scan " << scan;
+  }
+
+  EXPECT_GT(full->tsdfVoxelCount(), 0u) << "spacecarving: no TSDF written";
+  EXPECT_GT(full->betaVoxelCount(), 0u) << "spacecarving: no carve happened";
+
+  // Execution proof of the inertness itself. Grid agreement alone cannot tell
+  // "the fast path stayed off" from "the fast path armed and happened to write
+  // the same bytes"; these counters can, and they are what makes this test
+  // non-tautological.
+  EXPECT_EQ(fast->farCarvedVoxels(),  0u) << "spacecarving: fast carve armed";
+  EXPECT_EQ(fast->farSkippedVoxels(), 0u) << "spacecarving: far skip armed";
+}
+
+}  // namespace
+
+TEST(ScovoxMapSplitFarSkip, FarSkipBitIdenticalToFullWalk) {
+  runFarSkipIdentity(/*band=*/0.0f);   // endpoint-only semantics (shipped)
+  runFarSkipIdentity(/*band=*/0.30f);  // band > trunc: exercises the max() arm
+}
+
+TEST(ScovoxMapSplitFarSkip, InertUnlessEveryPreconditionHolds) {
+  //                 label           space_carving  batch_free_carve  frame
+  runFarSkipInert("production",      false,         true,             true);
+  runFarSkipInert("spacecarving",    true,          false,            true);
+  runFarSkipInert("noframe",         false,         false,            false);
+}
+
+TEST(ScovoxMapSplitFarCarve, FarCarveBitIdenticalToFullWalk) {
+  runFarCarveIdentity(/*band=*/0.0f);   // endpoint-only semantics (shipped)
+  runFarCarveIdentity(/*band=*/0.30f);  // band > trunc: exercises the max() arm
+}
+
+TEST(ScovoxMapSplitFarCarve, InertWhenSpaceCarving) {
+  runFarCarveInertWhenSpaceCarving();
+}
+
+// ===========================================================================
+// Inlined voxel centre — bit-identity against the coordToPos reference
+// ===========================================================================
+//
+// `integrateHitFused` computes the voxel centre inline as
+// `(float)((double)c.x * res) + h` instead of calling `grid.coordToPos(c)`.
+// The split walker (`TsdfMap::visit`) still calls coordToPos, so it is the
+// REFERENCE implementation of that expression and the two must agree bitwise.
+//
+// This needs to compare TSDF *values*, not the voxel counts and grid bytes
+// AxisAlignedParityWithSplitWalker settles for: the narrowing order is worth a
+// single ulp of the centre, which moves `sdf` and therefore the stored
+// `distance` without necessarily allocating or freeing a single voxel. Counts
+// cannot see it; bytes can.
+//
+// The affected coords follow NO simple pattern — they are wherever rounding
+// c·res to float and then adding h lands on a different float from rounding
+// the whole (c·res + h) once. At res=0.05 that is 244 of the 801 coords in
+// [-400, 400]; in 0..80 it is exactly
+//   {3,4,6,13,14,18,19,21,26,31,36,43,44,48,49,53,54,58,59,63,64,68,69,73,74,78,79}
+// which is why the ray below has to be aimed at specific coords rather than
+// anywhere convenient.
+//
+// Axis-aligned rays only — off-axis, the fused walker's longer walk-back gives
+// the DDA a different start (and so a different `t_max` phase), and the two may
+// legitimately pick different voxels at sub-voxel boundaries (see
+// MultiRayBandIdentity's 20% tolerance).
+
+TEST(ScovoxMapSplitFusedWalker, AxisAlignedTsdfValuesBitIdenticalToSplitWalker) {
+  auto p_fused = splitParams(); p_fused.fused_walker = true;
+  auto p_split = splitParams(); p_split.fused_walker = false;
+  scovox::ScovoxMapSplit m_fused(p_fused);
+  scovox::ScovoxMapSplit m_split(p_split);
+
+  std::vector<float> probs{0.f, 1.f, 0.f, 0.f};
+  // EXACTLY the ray AxisAlignedParityWithSplitWalker establishes voxel-set
+  // parity on — including its carve_band origin truncation, which is what makes
+  // the parity hold. With the truncated origin the ray is SHORTER than sdf_trunc,
+  // so the fused walker's `walk_back = max(depth, trunc)` collapses to `trunc`
+  // and both walkers span exactly [hit − trunc, hit + trunc]. Fired from the raw
+  // origin instead, the fused walker walks the whole 0.5 m ray and admits
+  // `sdf ≤ trunc + h` while the split walker starts at `hit − trunc`, and the two
+  // write different voxel SETS (measured: 6 vs 7 on this ray, 24 vs 27 over a
+  // 24-ray multi-axis fan) — a walk-range difference that would swamp the ulp
+  // this test is here to see.
+  // TWO further constraints, both load-bearing — get either wrong and the test
+  // passes vacuously (verified by mutating the walker back to the all-double
+  // form, which this ray catches and the obvious ones do not):
+  //
+  //  1. The band must COVER a coord where the two narrowing orders actually
+  //     disagree. At res=0.05 those are x ∈ {3,4,6,13,14,18,19,21,26,...} —
+  //     NOT every coord. Endpoint 0.325 walks [0.175, 0.475] = coords 3..9,
+  //     covering 3, 4 and 6; endpoint 0.50 walks coords 7..12 and covers NONE.
+  //  2. The ray must run through voxel CENTRES in y and z. Off-centre, every
+  //     voxel picks up 0.025 m offsets in y and z whose squares dominate the
+  //     ulp in x, and the difference vanishes in the norm.
+  //
+  // HOW the mutant actually loses voxels (6 written → 4), measured rather than
+  // assumed: it is the proj≈0 degeneracy guard, NOT the `sdf ≤ trunc + h` band
+  // gate. Under the all-double order the centres land on
+  //   coord 4 → 0.22499999403953552 == the truncated origin co.x, bit for bit
+  //   coord 6 → 0.32499998807907104 == the endpoint Hp.x, bit for bit
+  // (and y/z already sit exactly on h), so v_voxel_origin and v_point_voxel
+  // become exactly the zero vector, proj is exactly 0, and both voxels take the
+  // `fabs(proj) < 1e-12` early return before any band update. The current order
+  // puts each centre one ulp off, both survive, and the band writes 6.
+  const Eigen::Vector3f O(0.000f, 0.025f, 0.025f);
+  const Eigen::Vector3f Hp(0.325f, 0.025f, 0.025f);
+  const Eigen::Vector3f co = truncateOrigin(O, Hp, /*carve_band=*/0.10f);
+  m_fused.integrateHit(co, Hp, &probs);
+  m_split.integrateHit(co, Hp, &probs);
+
+  const auto df = dumpGrid(m_fused.tsdf().grid());
+  const auto ds = dumpGrid(m_split.tsdf().grid());
+  ASSERT_GT(df.size(), 0u) << "vacuous: no TSDF voxels written";
+  EXPECT_TRUE(df == ds)
+      << "fused TSDF state diverged from the coordToPos reference "
+      << "(fused=" << df.size() << " split=" << ds.size() << " voxels)";
+}
+
+// ===========================================================================
+// tsdf_enabled=false — the flag means the same thing on both walkers, and
+// turning it off does not move the semantic/occupancy map
+// ===========================================================================
+//
+// Two separate properties, one per test below.
+//
+// (1) The flag is honoured on BOTH walkers. The split path used to call
+//     `tsdf_.integrateRay` unconditionally, so `--tsdf-enabled 0` silently
+//     meant "off on the fused walker, on on the split walker" and any
+//     fused-vs-split comparison taken at that flag was measuring two
+//     different amounts of work.
+//
+// (2) When the TSDF cannot write, the walker stops the DDA at
+//     `semantic_band_length` past the hit instead of running to
+//     `max(sdf_trunc, semantic_band_length)`. The voxels between the two are
+//     read by nothing: the band gate is `sdf > -sem_band`, and the carve gate
+//     is `sdf > 0`. So the trim must leave the SemBeta and Dir grids
+//     byte-identical while emptying the TSDF grid.
+
+TEST(ScovoxMapSplitTsdfDisabled, GridStaysEmptyOnBothWalkers) {
+  // Band off, so the split walker's fused_walker precondition is satisfied.
+  auto p_fused = splitParams(); p_fused.fused_walker = true;
+  auto p_split = splitParams(); p_split.fused_walker = false;
+  p_fused.tsdf_enabled = false;
+  p_split.tsdf_enabled = false;
+  scovox::ScovoxMapSplit m_fused(p_fused);
+  scovox::ScovoxMapSplit m_split(p_split);
+
+  std::vector<float> probs{0.f, 1.f, 0.f, 0.f};  // class 1
+  const Eigen::Vector3f O(0.f, 0.025f, 0.025f);
+  const Eigen::Vector3f Hp(0.325f, 0.025f, 0.025f);
+  const Eigen::Vector3f co = truncateOrigin(O, Hp, /*carve_band=*/0.10f);
+
+  m_fused.integrateHit(co, Hp, &probs);
+  m_split.integrateHit(co, Hp, &probs);
+  m_fused.integrateMiss(O, Eigen::Vector3f(0.f, 0.5f, 0.025f));
+  m_split.integrateMiss(O, Eigen::Vector3f(0.f, 0.5f, 0.025f));
+
+  EXPECT_EQ(m_fused.tsdfVoxelCount(), 0u) << "fused walker wrote TSDF with the flag off";
+  EXPECT_EQ(m_split.tsdfVoxelCount(), 0u) << "split walker wrote TSDF with the flag off";
+
+  // Non-vacuity: the ray did land, it just landed nowhere near the TSDF.
+  ASSERT_GT(m_fused.semdirVoxelCount(), 0u) << "vacuous: no SemBeta voxels written";
+
+  EXPECT_TRUE(dumpGrid(m_fused.semsplit().betaGrid()) ==
+              dumpGrid(m_split.semsplit().betaGrid()));
+  EXPECT_TRUE(dumpGrid(m_fused.semsplit().dirGrid()) ==
+              dumpGrid(m_split.semsplit().dirGrid()));
+}
+
+TEST(ScovoxMapSplitTsdfDisabled, TrimmedTailIsDeadForSemBeta) {
+  // The shipped geometry: trunc 0.15, band 0.10, res 0.05. Along +x from a
+  // hit at coord 6 (centre 0.325 exactly), the behind-surface voxels are
+  //   coord 7  sdf -0.05  band writes it   (-0.05 > -0.10)
+  //   coord 8  sdf -0.10  band does NOT    (-0.10 > -0.10 is false)
+  //   coord 9  sdf -0.15  band does NOT
+  // so coords 8 and 9 exist in the walk only to feed the TSDF. With the TSDF
+  // off the walk ends at coord 8 and those two are never visited.
+  auto p_on  = splitParams();
+  p_on.fused_walker                       = true;
+  p_on.semsplit.semantic_band_length      = 0.10f;
+  p_on.tsdf_enabled                       = true;
+  auto p_off = p_on;
+  p_off.tsdf_enabled                      = false;
+
+  scovox::ScovoxMapSplit m_on(p_on);
+  scovox::ScovoxMapSplit m_off(p_off);
+
+  std::vector<float> probs{0.f, 1.f, 0.f, 0.f};
+  const Eigen::Vector3f O(0.f, 0.025f, 0.025f);
+  const Eigen::Vector3f Hp(0.325f, 0.025f, 0.025f);
+  const Eigen::Vector3f co = truncateOrigin(O, Hp, /*carve_band=*/0.10f);
+  m_on.integrateHit(co, Hp, &probs);
+  m_off.integrateHit(co, Hp, &probs);
+
+  // Non-vacuity, three ways. The band must have survived `sanitise()` (it
+  // zeroes `semantic_band_length` whenever `semantic_spread_radius` is set),
+  // the band must have written something, and the full walk must actually
+  // have reached past the band -- without all three the byte comparison
+  // below passes for a walker that never went anywhere.
+  ASSERT_FLOAT_EQ(m_on.semsplit().params().semantic_band_length, 0.10f);
+  ASSERT_GT(m_on.semdirVoxelCount(), 0u) << "vacuous: no SemBeta voxels written";
+  int max_x = std::numeric_limits<int>::min();
+  for (const auto& d : dumpGrid(m_on.tsdf().grid())) max_x = std::max(max_x, d.c.x);
+  ASSERT_GE(max_x, 8) << "vacuous: the full walk never reached the trimmed tail";
+
+  EXPECT_EQ(m_off.tsdfVoxelCount(), 0u);
+
+  // The trim removed traversal and nothing else.
+  EXPECT_TRUE(dumpGrid(m_on.semsplit().betaGrid()) ==
+              dumpGrid(m_off.semsplit().betaGrid()))
+      << "trimming the dead tail moved Beta state";
+  EXPECT_TRUE(dumpGrid(m_on.semsplit().dirGrid()) ==
+              dumpGrid(m_off.semsplit().dirGrid()))
+      << "trimming the dead tail moved Dir state";
+}
+
+// ===========================================================================
+// Carve reach — the window bounds the carve, it does not shorten the ray
+// ===========================================================================
+//
+// `integrateHit(..., carve_reach)` carves only the last `carve_reach` metres
+// before the hit. The node used to get the same window by handing the walker
+// a ray that STARTED at the window's near edge (`truncateOrigin` above). The
+// two are not byte-identical, and the difference is the point:
+//
+//   - The hit deposit never reads the origin. It is admitted on the voxel's
+//     Beta occupancy (dirichlet_min_p_occ), though, so with the gate on the
+//     Dir grid follows the carve: with the gate off it is identical, with
+//     the gate on the new cell set is contained in the old one.
+//   - The old form signed `sdf` against the moved origin. For a voxel centre
+//     just past that origin and off the ray axis, `(vc − co)·(Hp − vc)` is
+//     `a·(band − a) − |p|²` with `a` the along-ray offset and `p` the
+//     perpendicular one: the perpendicular term wins, the voxel reads as
+//     behind the surface, and it is neither carved nor written — although it
+//     lies between the sensor and the surface, inside the carve sphere. With
+//     the true origin the along-ray term is the whole ray length and the sign
+//     is unambiguous. So the old carve set is a SUBSET of the new one, and the
+//     voxels added are exactly those near the window's far edge.
+//   - In the strip between the window's edge and the truncation distance the
+//     old form wrote a negative TSDF for a voxel in front of the surface. The
+//     true origin makes it positive, so a stored distance can only rise, and
+//     a voxel whose |sdf| lies in (trunc, trunc + h] — dropped by the lower
+//     band gate when negative — is now written, so the TSDF voxel set can
+//     only grow.
+//
+// The assertions below are those three containments, plus the requirement
+// that each one is exercised (something must actually differ), so a walker
+// that quietly kept the moved origin would fail here rather than pass.
+
+namespace {
+
+scovox::ScovoxMapSplit::Params carveReachParams(float band, bool tsdf_on) {
+  scovox::ScovoxMapSplit::Params p;
+  p.resolution                    = 0.05;
+  p.tsdf.sdf_trunc                = 0.15f;
+  p.tsdf_enabled                  = tsdf_on;
+  p.semsplit.kappa0               = 1.0f;
+  // Gate off, so a Dir comparison sees the deposit itself; the one test
+  // about the gate turns it back on.
+  p.semsplit.dirichlet_min_p_occ  = 0.0f;
+  p.semsplit.num_classes          = 14;
+  p.semsplit.semantic_band_length = band;
+  return p;
+}
+
+// Field types follow the voxel structs: under SCOVOX_BETA_U16 the Beta
+// counts are 16-bit integers, and serialiseCell wrote exactly those bytes.
+struct BetaRec {
+  decltype(scovox::BetaVoxel::a_occ)  a_occ;
+  decltype(scovox::BetaVoxel::a_free) a_free;
+};
+struct TsdfRec { float distance, weight; };
+
+// Both records are two equal-width fields, so they carry no padding and the
+// serialised bytes are the struct's bytes.
+template <typename Rec>
+Rec unpack(const std::vector<uint8_t>& bytes) {
+  Rec r{};
+  EXPECT_EQ(bytes.size(), sizeof r) << "serialiseCell layout drifted";
+  std::memcpy(&r, bytes.data(), std::min(bytes.size(), sizeof r));
+  return r;
+}
+
+void runCarveReachContainment(float band, bool tsdf_on) {
+  const auto p = carveReachParams(band, tsdf_on);
+  auto legacy = std::make_unique<scovox::ScovoxMapSplit>(p);
+  auto reach  = std::make_unique<scovox::ScovoxMapSplit>(p);
+  const float window = 0.10f;   // the KITTI launch's carve_band, < trunc
+
+  uint32_t s = 0xBEEF01u;
+  auto fire = [&](const Eigen::Vector3f& O, const Eigen::Vector3f& Hp,
+                  const std::vector<float>* probs, bool dyn) {
+    legacy->integrateHit(truncateOrigin(O, Hp, window), Hp, probs, dyn);
+    reach->integrateHit(O, Hp, probs, dyn, nullptr, window);
+  };
+
+  std::size_t extra_carves = 0;
+  for (int scan = 0; scan < 5; ++scan) {
+    legacy->beginCarveFrame();
+    reach->beginCarveFrame();
+    fireScanRays(fire, scan, s);
+    const std::size_t n_old = legacy->flushCarveFrame();
+    const std::size_t n_new = reach->flushCarveFrame();
+    EXPECT_GE(n_new, n_old) << "reach carved fewer voxels, scan " << scan;
+    extra_carves += n_new - n_old;
+    // The hit deposit is origin-blind (gate off): Dir identical, scan by scan.
+    expectCoordListsEqual(legacy->drainTouchedDir(), reach->drainTouchedDir(),
+                          "dir", scan);
+    EXPECT_TRUE(dumpGrid(legacy->semsplit().dirGrid()) ==
+                dumpGrid(reach->semsplit().dirGrid()))
+        << "Dir grid diverged, scan " << scan << ", band " << band;
+    legacy->drainTouchedBeta(); reach->drainTouchedBeta();
+    legacy->drainTouchedTsdf(); reach->drainTouchedTsdf();
+  }
+  EXPECT_GT(extra_carves, 0u) << "no voxel gained a carve: window edge not exercised";
+
+  // Beta: every voxel the old form wrote is written by the new one, with the
+  // same occupied count and no fewer free counts.
+  {
+    const auto a = dumpGrid(legacy->semsplit().betaGrid());
+    const auto b = dumpGrid(reach->semsplit().betaGrid());
+    EXPECT_GE(b.size(), a.size());
+    std::size_t j = 0, raised = 0;
+    for (const auto& va : a) {
+      while (j < b.size() && !(b[j].c == va.c)) ++j;
+      ASSERT_LT(j, b.size()) << "Beta voxel carved by the moved origin only";
+      const auto ra = unpack<BetaRec>(va.bytes);
+      const auto rb = unpack<BetaRec>(b[j].bytes);
+      EXPECT_EQ(ra.a_occ, rb.a_occ) << "a_occ moved: the hit path read the origin";
+      EXPECT_GE(rb.a_free, ra.a_free) << "a_free fell under the true origin";
+      if (rb.a_free != ra.a_free) ++raised;
+    }
+    EXPECT_GT(raised + (b.size() - a.size()), 0u);
+  }
+
+  // TSDF: same containment; on a shared voxel the weight cannot fall and the
+  // distance cannot fall.
+  const auto a = dumpGrid(legacy->tsdf().grid());
+  const auto b = dumpGrid(reach->tsdf().grid());
+  if (!tsdf_on) {
+    EXPECT_EQ(a.size(), 0u) << "TSDF written with the TSDF off";
+    EXPECT_EQ(b.size(), 0u) << "TSDF written with the TSDF off";
+    return;
+  }
+  EXPECT_GE(b.size(), a.size());
+  std::size_t j = 0, raised = 0, lowered = 0;
+  for (const auto& va : a) {
+    while (j < b.size() && !(b[j].c == va.c)) ++j;
+    ASSERT_LT(j, b.size()) << "TSDF voxel written by the moved origin only";
+    const auto ra = unpack<TsdfRec>(va.bytes);
+    const auto rb = unpack<TsdfRec>(b[j].bytes);
+    EXPECT_GE(rb.weight, ra.weight);
+    if (rb.weight == ra.weight) {
+      if (rb.distance > ra.distance) ++raised;
+      if (rb.distance < ra.distance) ++lowered;
+    }
+  }
+  EXPECT_EQ(lowered, 0u) << "a TSDF distance fell: a sign went the wrong way";
+  EXPECT_GT(raised, 0u) << "no strip voxel changed sign: window not walked";
+}
+
+}  // namespace
+
+TEST(ScovoxMapSplitCarveReach, ContainsTheMovedOriginResult) {
+  runCarveReachContainment(/*band=*/0.0f,  /*tsdf_on=*/true);
+  runCarveReachContainment(/*band=*/0.10f, /*tsdf_on=*/true);
+  runCarveReachContainment(/*band=*/0.10f, /*tsdf_on=*/false);
+}
+
+TEST(ScovoxMapSplitCarveReach, DirFollowsTheCarveThroughTheGate) {
+  // With the deposit gate on, a voxel the reach carves and the moved origin
+  // does not can refuse a later hit under the reach only, so the reach's Dir
+  // cell set is contained in the old one. Four scans of one ray set carve
+  // the window's far-edge voxels four times under the reach and never under
+  // the moved origin; a fifth scan of the same rays with the surface 0.075 m
+  // nearer then hits exactly those voxels.
+  auto p = carveReachParams(0.0f, true);
+  p.semsplit.dirichlet_min_p_occ = 0.5f;
+  auto legacy = std::make_unique<scovox::ScovoxMapSplit>(p);
+  auto reach  = std::make_unique<scovox::ScovoxMapSplit>(p);
+  const float    window = 0.10f;
+  const uint32_t seed   = 0xD15C0u;
+  auto fire = [&](const Eigen::Vector3f& O, const Eigen::Vector3f& Hp,
+                  const std::vector<float>* probs, bool dyn) {
+    legacy->integrateHit(truncateOrigin(O, Hp, window), Hp, probs, dyn);
+    reach->integrateHit(O, Hp, probs, dyn, nullptr, window);
+  };
+  for (int k = 0; k < 4; ++k) {
+    uint32_t s = seed;
+    legacy->beginCarveFrame();
+    reach->beginCarveFrame();
+    fireScanRays(fire, 0, s);
+    legacy->flushCarveFrame();
+    reach->flushCarveFrame();
+  }
+  {
+    uint32_t s = seed;
+    auto pulled = [&](const Eigen::Vector3f& O, const Eigen::Vector3f& Hp,
+                      const std::vector<float>* probs, bool dyn) {
+      const Eigen::Vector3f d = Hp - O;
+      const float n = d.norm();
+      if (n <= 0.2f) return;
+      fire(O, Hp - d * (0.075f / n), probs, dyn);
+    };
+    legacy->beginCarveFrame();
+    reach->beginCarveFrame();
+    fireScanRays(pulled, 0, s);
+    legacy->flushCarveFrame();
+    reach->flushCarveFrame();
+  }
+  const auto a = dumpGrid(legacy->semsplit().dirGrid());
+  const auto b = dumpGrid(reach->semsplit().dirGrid());
+  std::size_t j = 0;
+  for (const auto& vb : b) {
+    while (j < a.size() && !(a[j].c == vb.c)) ++j;
+    ASSERT_LT(j, a.size()) << "Dir cell admitted under the reach only";
+  }
+  EXPECT_LT(b.size(), a.size()) << "no deposit was refused: gate not exercised";
+}
+
+TEST(ScovoxMapSplitCarveReach, FullRayIsInert) {
+  // A reach of 0, and one longer than every ray, are both the full-ray walk
+  // — byte for byte, on all three grids.
+  const auto p = carveReachParams(0.10f, true);
+  auto zero = std::make_unique<scovox::ScovoxMapSplit>(p);
+  auto huge = std::make_unique<scovox::ScovoxMapSplit>(p);
+  uint32_t s = 0x5EED5u;
+  auto fire = [&](const Eigen::Vector3f& O, const Eigen::Vector3f& Hp,
+                  const std::vector<float>* probs, bool dyn) {
+    zero->integrateHit(O, Hp, probs, dyn);
+    huge->integrateHit(O, Hp, probs, dyn, nullptr, 100.f);
+  };
+  for (int scan = 0; scan < 3; ++scan) {
+    zero->beginCarveFrame();
+    huge->beginCarveFrame();
+    fireScanRays(fire, scan, s);
+    EXPECT_EQ(zero->flushCarveFrame(), huge->flushCarveFrame());
+  }
+  EXPECT_TRUE(dumpGrid(zero->tsdf().grid()) == dumpGrid(huge->tsdf().grid()));
+  EXPECT_TRUE(dumpGrid(zero->semsplit().betaGrid()) ==
+              dumpGrid(huge->semsplit().betaGrid()));
+  EXPECT_TRUE(dumpGrid(zero->semsplit().dirGrid()) ==
+              dumpGrid(huge->semsplit().dirGrid()));
+  EXPECT_GT(zero->farCarvedVoxels(), 0u) << "full-ray walk must keep far_carve";
+  EXPECT_EQ(zero->farCarvedVoxels(), huge->farCarvedVoxels());
+}
+
+TEST(ScovoxMapSplitCarveReach, WindowDisarmsFarCarve) {
+  // A windowed walk starts short of the sensor, which is the precondition
+  // far_carve's reduction needs; it must stand down rather than fast-carve.
+  const auto p = carveReachParams(0.0f, true);
+  auto m = std::make_unique<scovox::ScovoxMapSplit>(p);
+  uint32_t s = 0x1234567u;
+  auto fire = [&](const Eigen::Vector3f& O, const Eigen::Vector3f& Hp,
+                  const std::vector<float>* probs, bool dyn) {
+    m->integrateHit(O, Hp, probs, dyn, nullptr, 0.10f);
+  };
+  m->beginCarveFrame();
+  fireScanRays(fire, 0, s);
+  m->flushCarveFrame();
+  EXPECT_EQ(m->farCarvedVoxels(), 0u);
+  EXPECT_GT(m->exactBodyVoxels(), 0u);
+  EXPECT_GT(m->betaVoxelCount(), 0u);
+}
+
+TEST(ScovoxMapSplitCarveReach, SplitWalkerCarvesTheSameWindow) {
+  // On the non-fused path the reach is a carve start point on the same DDA
+  // the moved origin used, so the Beta and Dir grids match it exactly.
+  auto p = carveReachParams(0.0f, true);
+  p.fused_walker = false;
+  auto legacy = std::make_unique<scovox::ScovoxMapSplit>(p);
+  auto reach  = std::make_unique<scovox::ScovoxMapSplit>(p);
+  const float window = 0.10f;
+  uint32_t s = 0xA5A5A5u;
+  auto fire = [&](const Eigen::Vector3f& O, const Eigen::Vector3f& Hp,
+                  const std::vector<float>* probs, bool dyn) {
+    legacy->integrateHit(truncateOrigin(O, Hp, window), Hp, probs, dyn);
+    reach->integrateHit(O, Hp, probs, dyn, nullptr, window);
+  };
+  for (int scan = 0; scan < 3; ++scan) {
+    legacy->beginCarveFrame();
+    reach->beginCarveFrame();
+    fireScanRays(fire, scan, s);
+    EXPECT_EQ(legacy->flushCarveFrame(), reach->flushCarveFrame());
+  }
+  EXPECT_TRUE(dumpGrid(legacy->semsplit().betaGrid()) ==
+              dumpGrid(reach->semsplit().betaGrid()));
+  EXPECT_TRUE(dumpGrid(legacy->semsplit().dirGrid()) ==
+              dumpGrid(reach->semsplit().dirGrid()));
+  EXPECT_GT(legacy->betaVoxelCount(), 0u);
+}
+
+// ===========================================================================
+// SemSplitParams::batch_band — one band deposit per voxel per scan
+// ===========================================================================
+//
+// The immediate band writes once per ray that passes a voxel, so a voxel's
+// class evidence tracks pixel density. Staged, the scan's most confident look
+// holds the voxel and flushCarveFrame() writes it once. These two tests fix
+// both halves of that: the staged band must be inert on a one-ray scan, and
+// it must not grow with ray count on a many-ray one.
+namespace {
+
+scovox::ScovoxMapSplit::Params bandParams(bool batched) {
+  scovox::ScovoxMapSplit::Params p;
+  p.resolution                       = 0.05;
+  p.tsdf_enabled                     = false;
+  p.semsplit.kappa0                  = 1.0f;
+  p.semsplit.dirichlet_min_p_occ     = 0.5f;
+  p.semsplit.num_classes             = 14;
+  p.semsplit.semantic_band_length    = 0.10f;
+  p.semsplit.semantic_band_require_occ = false;  // flat kappa0, no Beta read
+  p.semsplit.batch_band              = batched;
+  return p;
+}
+
+/// Total stored Dir mass, which is what a repeated band deposit inflates.
+float dirMass(const scovox::ScovoxMapSplit& m) {
+  float s = 0.f;
+  m.semsplit().dirGrid().forEachCell(
+      [&](const scovox::DirVoxel& v, const Bonxai::CoordT&) { s += v.s_total; });
+  return s;
+}
+
+}  // namespace
+
+TEST(ScovoxMapSplitBatchBand, OneRayScanIsBitIdentical) {
+  scovox::ScovoxMapSplit off(bandParams(/*batched=*/false));
+  scovox::ScovoxMapSplit on(bandParams(/*batched=*/true));
+
+  std::vector<float> probs{0.f, 1.f, 0.f, 0.f};
+  const Eigen::Vector3f O(0.f, 0.025f, 0.025f);
+  const Eigen::Vector3f Hp(0.325f, 0.025f, 0.025f);
+
+  for (auto* m : {&off, &on}) {
+    m->beginCarveFrame();
+    m->integrateHit(O, Hp, &probs);
+    m->flushCarveFrame();
+  }
+
+  ASSERT_GT(on.semdirVoxelCount(), 1u) << "vacuous: the band wrote nothing";
+  EXPECT_TRUE(dumpGrid(off.semsplit().dirGrid()) ==
+              dumpGrid(on.semsplit().dirGrid()))
+      << "staging changed a scan that has one look per voxel anyway";
+  EXPECT_TRUE(dumpGrid(off.semsplit().betaGrid()) ==
+              dumpGrid(on.semsplit().betaGrid()))
+      << "the staged band moved occupancy, which it never writes";
+}
+
+TEST(ScovoxMapSplitBatchBand, ManyRayScanDepositsOnce) {
+  scovox::ScovoxMapSplit off(bandParams(/*batched=*/false));
+  scovox::ScovoxMapSplit on(bandParams(/*batched=*/true));
+
+  // Eight rays a quarter-voxel apart in y: neighbours in the same band, so
+  // the band voxels between them are visited by several rays each.
+  std::vector<float> probs{0.f, 1.f, 0.f, 0.f};
+  const Eigen::Vector3f O(0.f, 0.025f, 0.025f);
+  for (auto* m : {&off, &on}) {
+    m->beginCarveFrame();
+    for (int i = 0; i < 8; ++i) {
+      const float y = 0.025f + 0.0125f * static_cast<float>(i);
+      m->integrateHit(O, Eigen::Vector3f(0.325f, y, 0.025f), &probs);
+    }
+    m->flushCarveFrame();
+  }
+
+  ASSERT_GT(on.semdirVoxelCount(), 1u) << "vacuous: the band wrote nothing";
+  EXPECT_LT(dirMass(on), dirMass(off))
+      << "the staged band deposited as often as the immediate one";
+
+  // Staging changes how much a voxel takes, not which voxels the band
+  // reaches: the same scan touches the same cells either way.
+  const auto cells_off = dumpGrid(off.semsplit().dirGrid());
+  const auto cells_on  = dumpGrid(on.semsplit().dirGrid());
+  ASSERT_EQ(cells_off.size(), cells_on.size()) << "the staged band changed the band's extent";
+  for (std::size_t i = 0; i < cells_off.size(); ++i)
+    EXPECT_TRUE(cells_off[i].c == cells_on[i].c) << "band coord " << i << " differs";
+
+  // And the heaviest voxel is lighter for it — the immediate band let one
+  // voxel take a look from every ray that passed through it.
+  auto maxCell = [](const scovox::ScovoxMapSplit& m) {
+    float mx = 0.f;
+    m.semsplit().dirGrid().forEachCell(
+        [&](const scovox::DirVoxel& v, const Bonxai::CoordT&) {
+          mx = std::max(mx, v.s_total);
+        });
+    return mx;
+  };
+  EXPECT_LT(maxCell(on), maxCell(off))
+      << "the busiest band voxel took as much staged as it did immediate";
+}
