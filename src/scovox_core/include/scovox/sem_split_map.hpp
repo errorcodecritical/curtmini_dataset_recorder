@@ -1,0 +1,922 @@
+#pragma once
+
+/// @file sem_split_map.hpp
+/// @brief Split Beta/Dirichlet SCovox-contribution map — the de-unified
+/// alternative to `SemDirMap`.
+///
+/// Owns **two** Bonxai grids instead of `SemDirMap`'s one:
+///   - `Bonxai::VoxelGrid<BetaVoxel>` (8 B) — occupancy, full-ray (carved on
+///     every traversed voxel).
+///   - `Bonxai::VoxelGrid<DirVoxel>`  (16 B) — occupied-class semantics,
+///     hit-only and gated (allocated only where a class is committed).
+///
+/// API mirrors `SemDirMap` (`integrateHit/Miss`, `applyCarveUpdate/HitUpdate`,
+/// `drainTouched*`, `getVoxel`, `forEach*`, memory accounting) so the
+/// `ScovoxMapSplit` composer can select it behind a runtime flag.
+///
+/// Update model — the SemBeta two-stream calibration, with SemDir-matched
+/// priors (see `beta_voxel.hpp` / `dir_voxel.hpp`):
+///   carve:  Beta `a_free += w_free`  (full ray, wall-guarded)
+///   hit:    Stream A  Beta `a_occ += w_occ`   (always)
+///           read `p_occ_post` from the Beta grid
+///           Stream B  (gated on `p_occ_post`) commit `kappa0·p_occ_post`
+///                     of class mass into the Dir grid via the
+///                     mass-conserving `sparse_add_class`.
+///
+/// Difference vs. unified `SemDirVoxel`: class evidence (Stream B) does **not**
+/// feed back into the occupancy marginal — occupancy is driven solely by
+/// occupancy evidence. This is the intended decoupling of the split; it costs
+/// the unified single-vector formalism but keeps strict *per-grid* mass
+/// conservation (Beta: `a_occ + a_free`; Dir: `s_total`, of which `other` is
+/// the derived unattributed part — see dir_voxel.hpp).
+
+#include <Eigen/Core>
+#include <bonxai/bonxai.hpp>
+#include <cstddef>
+#include <cstdint>
+#include <optional>
+#include <unordered_set>
+#include <vector>
+
+#include "scovox/beta_voxel.hpp"
+#include "scovox/ray_iterator.hpp"
+#include "scovox/block_record_stage.hpp"
+#include "scovox/carve_stage.hpp"
+#include "scovox/dir_voxel.hpp"
+#include "scovox/sem_obs.hpp"
+#include "scovox/semantics.hpp"  // SemanticMode
+
+namespace scovox {
+
+// ---------------------------------------------------------------------------
+// Deposit trace (diagnostic only, compiled out unless SCOVOX_DEPOSIT_TRACE=1).
+//
+// The finished map records what SURVIVED. Designing an eviction comparator
+// needs the opposite view: every arrival, with the probability it carried and
+// the state of the slot it was weighed against, including the arrivals that
+// were dropped or that displaced something. That stream exists only while the
+// map is being built, so it has to be tapped here or not at all.
+//
+// The sink is a plain function pointer rather than std::function to keep the
+// hot path free of an indirect allocation, and null by default so an
+// instrumented build with no sink installed behaves exactly like a normal one.
+// ---------------------------------------------------------------------------
+#ifndef SCOVOX_DEPOSIT_TRACE
+#define SCOVOX_DEPOSIT_TRACE 0
+#endif
+
+#if SCOVOX_DEPOSIT_TRACE
+/// One deposit offered to one voxel.
+/// @param x,y,z    voxel coordinate (grid index, not metric)
+/// @param cls      class id being deposited
+/// @param p        the class's own normalized probability in [0,1] -- the
+///                 segmentation confidence, independent of geometry
+/// @param inc      the mass actually offered (`class_share * p`)
+/// @param outcome  which `sparse_add_class` branch consumed it (see
+///                 dir_voxel.hpp: 0 sentinel, 1 match, 2 fill, 3 evict, 4 drop)
+/// @param slot     slot index touched, or 0xFF when the deposit went to OTHER
+/// @param cnt_before  the slot's accumulated evidence before this deposit
+///                    (for a drop: the weakest slot's, i.e. what it lost to)
+/// @param nhit_before the slot's deposit tally before this deposit
+using DepositTraceFn = void (*)(int32_t x, int32_t y, int32_t z,
+                                uint16_t cls, float p, float inc,
+                                uint8_t outcome, uint8_t slot,
+                                float cnt_before, uint16_t nhit_before);
+/// Installed by the driver; null means "no trace".
+extern DepositTraceFn g_deposit_trace;
+#endif
+
+/// Per-ray source weight profile for multi-sensor fusion. A non-null
+/// `HitWeights*` threaded into an integration call overrides the map's global
+/// `params_` weights for THAT ray only — letting two sensors (e.g. LiDAR and
+/// RGB-D) write the SAME SemSplitMap with their own inverse-sensor-model
+/// weights (LiDAR w_occ=8/w_free=4.67 high-evidence ToF; RGB-D w_occ=0/w_free=0
+/// semantics-only "pure LiDAR authority"). A NULL pointer — the default on every
+/// signature below — binds to `params_`, so the whole fusion path is inert and
+/// byte-identical to the single-sensor code until a caller opts in.
+///
+/// `geometry_off` is consumed by `ScovoxMapSplit` to suppress the TSDF band
+/// write for this ray (noisy RGB-D depth must not drive the Curless–Levoy
+/// surface); SemSplitMap itself never reads it. `dirichlet_min_p_occ` lets a
+/// source carry its own Stream-B gate height. `evidence_saturation` and
+/// `alpha_0` stay GLOBAL (per-grid caps / priors, not per-source evidence).
+struct HitWeights {
+  float w_occ = 0.0f;
+  float w_free = 0.0f;
+  float kappa0 = 0.0f;
+  float dirichlet_min_p_occ = 0.0f;
+  bool  geometry_off = false;
+  /// BKI kernel radius `l` (metres) for RGB-D→LiDAR semantic spread. When
+  /// `> 0`, a semantics-only source (e.g. RGB-D) does NOT commit its class at the
+  /// single endpoint voxel; instead it deposits kernel-weighted Dirichlet
+  /// evidence onto EVERY persistent-Beta (LiDAR-occupied, `p_occ >=
+  /// dirichlet_min_p_occ`) voxel within `l` of the endpoint — the S-BKI update
+  /// `α*ᵏ += k(d)·(κ₀·p_occ)` with the Melkumyan–Ramos compact-support kernel
+  /// (exactly 0 at `d >= l`). This decouples the label commit from exact
+  /// voxel coincidence (which the LiDAR downsample makes rare) while keeping pure
+  /// LiDAR authority: only LiDAR-occupied voxels ever receive a label. `0`
+  /// (the zero-init / null-prof default) = classic exact-voxel gate, byte-identical.
+  float kernel_radius = 0.0f;
+};
+
+/// Snap a fusion profile's Beta weights onto the storage lattice, in place.
+///
+/// `SemSplitMap::sanitise` guards the weights that arrive through `Params`.
+/// A `HitWeights` profile is the OTHER way a weight reaches
+/// `applyBetaUpdate`, and it does not pass through that sanitiser at all --
+/// it is built by the caller and handed straight to the integration call.
+/// Without this the count identity `a_occ = prior + w_occ * n_hit` holds for
+/// the single-source path and quietly fails for the fusion path, which is the
+/// worse of the two failure modes: it is invisible in every unit test that
+/// exercises only `Params`. Call it once at profile construction, never per
+/// ray -- the hot path reads the weight raw and must stay that way.
+inline void sanitise(HitWeights& h) noexcept {
+  if (h.w_occ  < 0.0f) h.w_occ  = 0.0f;
+  if (h.w_free < 0.0f) h.w_free = 0.0f;
+  h.w_occ  = beta_lattice_snap(h.w_occ);
+  h.w_free = beta_lattice_snap(h.w_free);
+}
+
+class SemSplitMap {
+ public:
+  using BetaGrid = Bonxai::VoxelGrid<BetaVoxel>;
+  using DirGrid  = Bonxai::VoxelGrid<DirVoxel>;
+  using CoordT   = Bonxai::CoordT;
+
+  /// Knobs mirror `SemDirMap::Params` 1:1 so a launch file porting between the
+  /// two substrates needs no edits. The occupancy prior is the symmetric
+  /// Beta(0.5,0.5) constant (`kBetaOccPrior`), independent of `num_classes` /
+  /// `alpha_0` (which set only the semantic Dirichlet prior).
+  struct Params {
+    double  resolution                 = 0.05;
+    uint8_t inner_bits                 = 2;
+    uint8_t leaf_bits                  = 3;
+    /// Leaf block bits for the **Dir (semantics) grid only**. The two grids do
+    /// NOT need the same block geometry: Beta is full-ray (dense — ~73% of an
+    /// 8³ block is live on SceneNet), while Dir is hit-only and Stream-B gated
+    /// (~12% of the same block), so an 8³ Dir block allocates ~9× more voxel
+    /// slots than it fills. Coordinates are a pure function of `resolution`
+    /// (VoxelGrid::posToCoord), so a per-grid block size changes only the
+    /// container, never a voxel's identity or value — the Beta/Dir coord
+    /// identity that labelMesh / labelPointCloud / the publisher's cross-grid
+    /// joins rely on is preserved.
+    ///
+    /// 2 → 4×4×4 = 64 voxel slots per block. Measured on the 13 E6.6 SceneNet
+    /// snapshots this halves the allocated slots (fill 12% → 25%) and cuts the
+    /// Dir grid ~55%; 1 (2³) saves a further ~20% but makes per-leaf
+    /// bookkeeping ~48% of the grid and is slower to write.
+    /// Clamped into [1, leaf_bits] by sanitise(), so a leaf_bits=1 config is
+    /// byte-identical to before. (The LiDAR configs no longer set 1 — see
+    /// MapParams::leaf_bits.)
+    uint8_t dir_leaf_bits              = 2;
+
+    float   w_occ                      = 1.0f;   ///< Beta a_occ increment per hit (Stream A)
+    float   w_free                     = 0.5f;   ///< Beta a_free increment per carve
+
+    /// Occupancy prior, `Beta(beta_occ_prior, beta_free_prior)`, stamped into
+    /// every voxel at first touch. Defaults to the shipped symmetric Beta(0.5,0.5)
+    /// (`kBetaOccPrior` / `kBetaFreePrior`); `beta_voxel.hpp` owns the choice
+    /// and the reasoning.
+    ///
+    /// These are fields rather than the bare constants so a prior can be swept
+    /// without a rebuild. Two properties bound what a sweep can reach:
+    ///
+    ///   - Any SYMMETRIC prior leaves every `p_occ >= 0.5` decision exactly
+    ///     where it was. `p_occ >= 0.5` iff `a_occ >= a_free` iff
+    ///     `c + w_occ·n_hit >= c + w_free·n_miss`, and `c` cancels. The
+    ///     deposit gate (`dirichlet_min_p_occ`) and the scorer's occupied set
+    ///     are both at exactly 0.5, so the occupied voxel set is invariant and
+    ///     only the `kappa0 · p_occ` deposit WEIGHT moves.
+    ///   - Both are snapped to the storage lattice by `sanitise()` for the
+    ///     same reason `w_occ` is: off-lattice, the count identity
+    ///     `a_occ = prior + w_occ·n_hit` stops holding under `SCOVOX_BETA_U16`.
+    ///     Beta(1,1) and Beta(0.5,0.5) are both whole eighths; the calibrated
+    ///     `Beta(C·α₀, α₀)` ablation is not, and needs a float build.
+    float   beta_occ_prior             = kBetaOccPrior;
+    float   beta_free_prior            = kBetaFreePrior;
+    float   kappa0                     = 1.0f;   ///< class-share multiplier (Stream B)
+    float   dirichlet_min_p_occ        = 0.5f;   ///< gate per-class update on Beta p_occ
+
+    /// What ONE endpoint observation deposits into the class channel, once it
+    /// has passed the `dirichlet_min_p_occ` gate. The gate is unaffected
+    /// either way; only the weight changes.
+    ///
+    ///   false — `kappa0 · p_occ_post`, the voxel's own posterior occupancy
+    ///           (shipped). A first look on a fresh surface deposits ~0.71 and
+    ///           a settled one ~0.94, so the endpoint's mass tracks how well
+    ///           the geometry is established.
+    ///   true  — flat `kappa0`, the same unit the semantic band already
+    ///           deposits under `semantic_band_require_occ = false`. This makes
+    ///           every admitted observation worth exactly one unit everywhere,
+    ///           which is what turns `cnt[]` into a count of looks rather than
+    ///           an accumulation of fractional evidence.
+    ///
+    /// Read only on the DIRICHLET endpoint path. `semantic_spread_radius > 0`
+    /// routes to applyHitUpdateKernel instead, which keeps its own p_occ
+    /// weighting; the two are mutually exclusive by sanitise().
+    bool    hit_flat_share             = false;
+    float   evidence_saturation        = 0.0f;   ///< 0 disables; per-grid cap (see below)
+
+    /// Per-grid cap for the CLASS channel alone.
+    ///
+    /// `evidence_saturation` is one field read by both `applyBetaSaturation`
+    /// and `applyDirSaturation`, so capping the semantic accumulation also
+    /// caps the occupancy accumulation. That coupling is not free: the Beta
+    /// rescale preserves `p_occ` exactly, but it also shrinks the accumulated
+    /// total the next observation is weighed against, so a capped occupancy
+    /// channel becomes recency-dominated and voxels fall back through the
+    /// `p_occ >= 0.5` readout gate, so a low cap costs occupancy IoU far more
+    /// than the semantic cap can buy back.
+    ///
+    /// Negative means "follow `evidence_saturation`", which is the default and
+    /// reproduces the previous behaviour exactly. Set it >= 0 to cap the class
+    /// channel independently -- in particular to 0, to leave the class channel
+    /// uncapped while the occupancy channel is capped, or to a small value
+    /// with `evidence_saturation` at 0, to bound how large a slot's `cnt` can
+    /// grow without touching occupancy at all. The latter is the only way to
+    /// test a live eviction rate against the shipped comparator, whose
+    /// measured evict fraction is 0.0000 precisely because `cnt` reaches the
+    /// thousands while a single `inc` stays under 1.
+    float   class_evidence_saturation  = -1.0f;
+
+    /// Use the incoming class's probability, rather than its accumulated
+    /// evidence, to decide whether it displaces the weakest occupied slot.
+    /// Requires a `-DSCOVOX_TRACK_QMAX=1` build (the per-slot confidence has
+    /// nowhere to live otherwise); ignored, with a warning from the node, on a
+    /// stock build. See `sparse_add_class`.
+    bool    evict_by_confidence        = false;
+
+    /// What a single observation deposits into the class slots.
+    ///   0 SOFT   — spread `class_share` over the whole softmax (shipped).
+    ///   1 HARD   — collapse to the argmax class, which takes `class_share`
+    ///              whole; the other classes deposit nothing.
+    ///   2 THRESH — SOFT, but a class whose own probability falls below
+    ///              `inc_thresh` deposits nothing and its mass goes to OTHER.
+    /// All three conserve `Δ s_total == class_share`, and since 2026-09-04
+    /// they do so STRUCTURALLY rather than by discipline: `dirichletUpdate`
+    /// makes that single add before it branches, and OTHER is derived as
+    /// `s_total − Σcnt`, so no mode can leak. (While `other` was the stored
+    /// word the invariant read `Δ(other + Σcnt) == class_share` and each mode
+    /// had to close its own books; THRESH and SOFT each did so with a residual
+    /// line, which is where SOFT's `covered` rounding leaked.) The modes differ
+    /// only in how the mass is split between slots and OTHER.
+    int     inc_mode                   = 0;
+    float   inc_thresh                 = 0.10f;  ///< only read when inc_mode == 2
+
+    /// Keep only the `sem_top_k` most probable classes of each observation;
+    /// `0` keeps them all.
+    ///
+    /// Defaults to `K_TOP`, the number of classes a voxel can hold. Beyond that
+    /// an observation's classes compete for a slot they cannot all have, so a
+    /// class past the K_TOP-th is inserted, compared against the slots, and in
+    /// most cases evicted — paid for and then discarded. Capping ingest at the
+    /// slot count declines to pay that.
+    ///
+    /// This is NOT free, and the cap is not a pure saving. Deposits go in
+    /// ascending class order, not in probability order, so an unlikely class
+    /// can take an empty slot early and hold it against a likelier one that
+    /// arrives later. Dropping it at ingest therefore changes which class ends
+    /// up in a slot, not only how many are tried — the map moves, and whether
+    /// it moves for the better is a measured question, not a structural one.
+    ///
+    /// The dropped mass is not renormalized onto the survivors — it becomes
+    /// OTHER, so a capped observation reads as "these classes, and I decline to
+    /// guess about the rest". This is TopkProvider's `semantic_topk_trunc` rule,
+    /// applied where it also shortens the per-voxel deposit loop.
+    int     sem_top_k                  = K_TOP;
+
+    /// Semantic spread radius `l` in metres for the SINGLE-SENSOR path. When
+    /// `> 0`, Stream A still commits occupancy at the endpoint voxel alone, but
+    /// Stream B's class evidence is spread over every already-occupied voxel
+    /// within `l` using the same Melkumyan–Ramos kernel as the RGB-D→LiDAR
+    /// fusion path (`HitWeights::kernel_radius`), which this does NOT disturb.
+    /// The two are mutually exclusive per hit: a source carrying its own
+    /// `kernel_radius` keeps the fusion semantics, including its endpoint
+    /// occupancy skip. `0` (default) = classic exact-voxel commit.
+    float   semantic_spread_radius     = 0.0f;
+
+    /// SLIM-VDB-style flat semantic BAND half-width, in metres, for the
+    /// SINGLE-SENSOR fused-walker path. `0` (default) = classic exact-voxel
+    /// commit, byte-identical to before.
+    ///
+    /// This is NOT `semantic_spread_radius` with a different kernel. The two
+    /// differ in the shape of the deposit set and therefore in cost:
+    ///
+    ///   spread `l`  — a 3-D BALL around the endpoint. Scans (2⌊l/res⌋+1)³
+    ///                 voxels per point (~113 at l=0.30, res=0.10), each an
+    ///                 independent Beta lookup the walker never otherwise
+    ///                 touches, weighted by the Melkumyan–Ramos kernel.
+    ///   band `b`    — the 1-D SEGMENT of the ray already being walked, kept
+    ///                 to |sdf| ≤ b about the surface (~2b/res = 6 voxels at
+    ///                 b=0.30, res=0.10), flat-weighted. This mirrors
+    ///                 SLIM-VDB's `Integrate`, whose semantic write is three
+    ///                 lines (`alpha[label] += 1`) inside the DDA iteration
+    ///                 the TSDF update is already paying for.
+    ///
+    /// The fused walker spans [hit − max(depth, sdf_trunc), hit + sdf_trunc],
+    /// a strict SUPERSET of SLIM-VDB's [depth − sdf_trunc, depth + sdf_trunc]
+    /// at equal trunc, so a band with `b ≤ sdf_trunc` adds ZERO traversal —
+    /// only the per-voxel Stream B deposit. `b > sdf_trunc` extends the walk
+    /// behind the surface (see `integrateHitFused`) and does cost extra steps.
+    ///
+    /// Stream A (occupancy) is NOT written along the band: only the endpoint
+    /// asserts a surface. Band voxels take a Stream B deposit only, gated on
+    /// EXISTING persistent Beta occupancy (`dirichlet_min_p_occ`) exactly as
+    /// the BKI kernel is — SLIM-VDB has no occupancy model to gate on, so this
+    /// is a deliberate, documented deviation (see `applyBandSemantic`).
+    ///
+    /// Mutually exclusive with `semantic_spread_radius` and with a source
+    /// profile's `kernel_radius`; `sanitise()` drops the band if either is set.
+    float   semantic_band_length       = 0.0f;
+
+    /// Whether the band deposit requires LiDAR to have already confirmed the
+    /// voxel occupied (`p_occ ≥ dirichlet_min_p_occ`). Only read when
+    /// `semantic_band_length > 0`.
+    ///
+    /// `true` (default) — SCovox's invariant is preserved: a Dir voxel means a
+    /// surface. Beta is read, never allocated; the band lands only where a beam
+    /// has already stopped. Costs coverage relative to SLIM-VDB, because the
+    /// free-space half of the band and the interior of objects both go
+    /// unlabelled.
+    ///
+    /// `false` — the FAITHFUL SLIM-VDB mirror. SLIM-VDB exports every TSDF
+    /// voxel with `weight ≥ min_weight` (kitti_pipeline.cpp), i.e. the entire
+    /// ±sdf_trunc shell including the free-space side and the object interior,
+    /// each carrying its `alpha` histogram — it has no occupancy model and
+    /// applies no surface filter. Setting this false reproduces that: the Beta
+    /// read is skipped entirely and every band voxel takes a FLAT
+    /// `kappa0` deposit, the analogue of `alpha[label] += 1`.
+    ///
+    /// This is the single knob on which "same rule as SLIM-VDB" turns, so it is
+    /// exposed rather than decided here. Note the two settings are not merely
+    /// stricter/looser: `false` also drops the `p_occ` weighting, because a
+    /// voxel with no Beta entry has no `p_occ` to weight by.
+    bool    semantic_band_require_occ  = true;
+
+    /// Three-voxel ray spread (FINDINGS §16): deposit each hit's class
+    /// evidence not only into the surface voxel but into its first distinct
+    /// voxel neighbour(s) along the viewing ray, found by an exact DDA step
+    /// past the next voxel boundary — the same construction as the offline
+    /// stream builder (build_stream_ray3.py), in double precision.
+    ///
+    ///   0 SURFACE  — endpoint voxel only. Shipped default; the spread code
+    ///                is never entered and behaviour is byte-identical.
+    ///   1 BEHIND   — also the first voxel behind the surface (away from the
+    ///                camera; the object's interior).
+    ///   2 FRONT    — also the first voxel in front (toward the camera; the
+    ///                free space the ray traversed).
+    ///   3 ALL3     — both neighbours.
+    ///   4 FALLBACK — §16.7: behind goes into the primary Dir grid as in
+    ///                mode 1; front goes into the SEPARATE fallback Dir grid,
+    ///                consulted at readout only where the primary voxel holds
+    ///                no class evidence at all. No parameter, no weight.
+    ///
+    /// Spread deposits are Stream B ONLY — occupancy is never written at a
+    /// neighbour, so the occupancy channel (and no-return carving results)
+    /// cannot be confounded by this knob. Each neighbour takes the SAME
+    /// `class_share` the surface deposit itself used, and only when the
+    /// surface deposit passed its own `dirichlet_min_p_occ` gate: the pixel's
+    /// evidence is vetted once, at the surface. Deliberately NOT re-gated on
+    /// the neighbour's own p_occ — this very ray just carved its front
+    /// neighbour free, so a target-side gate would make FRONT structurally
+    /// inert and the factor would measure the gate, not the spread.
+    ///
+    /// DIRICHLET mode only; mutually exclusive with the ball
+    /// (`semantic_spread_radius`) and the band (`semantic_band_length`) —
+    /// `sanitise()` forces 0 if either is set. Active on BOTH walkers — the
+    /// split path's `integrateHit` and `ScovoxMapSplit::integrateHitFused`
+    /// both invoke `raySpreadDeposit` after the endpoint commit. Ignored on
+    /// the kernel (`HitWeights::kernel_radius`) path and for dynamic hits.
+    int     ray_spread                 = 0;
+
+    /// Wall-blocking guard for the IMMEDIATE (unbatched) carve path only, and
+    /// `<= 0` disables it (the shipped default). We trust the most recent LiDAR
+    /// scan: if a beam physically reached its return, every voxel it traversed to
+    /// get there is free NOW — including one previously marked occupied (a moved
+    /// or stale obstacle), which is exactly the dynamic-clearing we want. The
+    /// batched carve path (beginCarveFrame/flushCarveFrame — the live pipeline)
+    /// never applies this guard: it stages free-space read-free and writes once
+    /// per scan. A positive value re-enables the guard only for direct
+    /// applyCarveUpdate callers (offline tools / ablations).
+    float   carve_skip_occ_threshold   = 0.0f;   ///< wall-blocking guard (immediate path; <=0 = off)
+    /// Batched free-space carving toggle. When false, beginCarveFrame() still
+    /// allows hit updates, but carve rays stage nothing and flushCarveFrame()
+    /// writes no free-space evidence. Immediate applyCarveUpdate calls remain
+    /// unchanged.
+    bool    batch_free_carve           = true;
+    /// Batched surface hits: one occupancy + class deposit per voxel per scan,
+    /// staged like the free carve and applied by flushCarveFrame().
+    ///
+    /// A depth image lands hundreds of rays in the same surface voxel, and
+    /// un-batched each of them bumps `a_occ` and `cnt[]` again — so both
+    /// counters grow with sensor pixel density rather than with how many times
+    /// the surface was actually seen, and a voxel stared at for a whole
+    /// trajectory accumulates evidence without bound. Batched, the scan's
+    /// strongest ray wins the voxel (the same per-voxel MAX rule `CarveStage`
+    /// applies to `a_free`) and one scan contributes exactly one observation,
+    /// which bounds every counter by the frame count.
+    ///
+    /// Requires an open carve frame AND the persistent path. The BKI kernel
+    /// (`HitWeights::kernel_radius`), `semantic_spread_radius` and `ray_spread`
+    /// all read Beta occupancy mid-scan and so keep the immediate write; a hit
+    /// carrying any of them is applied in place regardless of this flag. The
+    /// transient/dynamic route is never staged either — it has no touched-set
+    /// and never reaches the wire.
+    ///
+    /// Both streams land at flush BEFORE the staged carves, so occupied-wins
+    /// holds exactly as on the immediate path.
+    bool    batch_hits                 = true;
+    /// Batched semantic band: one band deposit per voxel per scan, staged like
+    /// the surface hit and applied by flushCarveFrame() right after the staged
+    /// hits. The band otherwise writes once per depth pixel whose ray passes
+    /// the voxel, so a band voxel's class evidence grows with pixel density
+    /// rather than with the number of scans that saw it. Staged, the scan's
+    /// most confident look (largest argmax probability; the first one on a
+    /// tie) wins the voxel and deposits the same flat `kappa0` the immediate
+    /// band does, so one scan is one look here too and a voxel's class
+    /// evidence is bounded by twice the scan count (its endpoint look and its
+    /// band look). Under `semantic_band_require_occ` the occupancy read moves
+    /// from the ray to the flush, after the scan's hits landed. Off, the band
+    /// path is untouched.
+    bool    batch_band                 = false;
+    float   range_decay_length         = 50.0f;  ///< exp(-r/L); 0 disables (caller-applied)
+
+    /// Dataset class count `C`. Sets the semantic OTHER prior `(C − K_TOP)·α₀`.
+    /// (The occupancy prior is the symmetric Beta(0.5,0.5) constant `kBetaOccPrior`,
+    /// independent of `C`.)
+    uint16_t num_classes               = 14;
+    /// Symmetric per-dim Dirichlet prior `α₀`.
+    float    alpha_0                   = kDefaultDirichletPrior;
+
+    SemanticMode semantic_mode         = SemanticMode::DIRICHLET;
+  };
+
+  explicit SemSplitMap(const Params& p);
+  ~SemSplitMap() = default;
+
+  SemSplitMap(const SemSplitMap&)            = delete;
+  SemSplitMap& operator=(const SemSplitMap&) = delete;
+  SemSplitMap(SemSplitMap&&)                 = default;
+  SemSplitMap& operator=(SemSplitMap&&)      = default;
+
+  // ----------------------------------------------------------------------
+  // Integration
+  // ----------------------------------------------------------------------
+
+  /// Real return: carve free (Beta) along [origin, endpoint), then Stream A
+  /// occupancy + gated Stream B class commit at the endpoint voxel.
+  void integrateHit(const Eigen::Vector3f&    origin,
+                    const Eigen::Vector3f&    endpoint,
+                    const std::vector<float>* sem_probs,
+                    const HitWeights*         prof = nullptr);
+
+  /// Dynamic-aware return: free-space carve stays persistent (a moving object
+  /// still proves the air in front of it is free), but the endpoint occupancy +
+  /// semantics route to the transient grids when `is_dynamic`. `is_dynamic ==
+  /// false` is identical to the 4-arg form.
+  void integrateHit(const Eigen::Vector3f&    origin,
+                    const Eigen::Vector3f&    endpoint,
+                    const std::vector<float>* sem_probs,
+                    bool                      is_dynamic,
+                    const HitWeights*         prof = nullptr);
+
+  /// Prepare one ray's observation into the map's reusable buffer and return
+  /// it. The `integrateHit` overloads do this internally; it is public for
+  /// `ScovoxMapSplit::integrateHitFused`, which drives its own walk and so must
+  /// do the once-per-ray work the split path does for itself. The result stays
+  /// valid until the next call on this map.
+  const SemObs& prepareRayObs(const std::vector<float>* sem_probs) {
+    prepareSemObs(sem_probs, params_.sem_top_k, sem_obs_);
+    return sem_obs_;
+  }
+
+  /// No-return: carve free (Beta) along [origin, endpoint] inclusive. No hit.
+  void integrateMiss(const Eigen::Vector3f& origin,
+                     const Eigen::Vector3f& endpoint,
+                     const HitWeights*      prof = nullptr);
+
+  // ----------------------------------------------------------------------
+  // Per-voxel API (used by the ScovoxMapSplit fused walker)
+  // ----------------------------------------------------------------------
+
+  /// Per-voxel carve: Beta `a_free += w_free`. Touches the Beta grid
+  /// only. Returns `false` only when the (optional, default-off) immediate-path
+  /// wall guard blocks the voxel (`carve_skip_occ_threshold > 0` and
+  /// `p_occ > threshold`); otherwise `true`.
+  ///
+  /// Behaviour depends on whether a carve frame is open (beginCarveFrame):
+  ///   - frame OPEN  (batched, the live pipeline): the update is STAGED into a
+  ///     per-scan accumulator (max `w_free` per voxel) with NO grid read
+  ///     and NO guard, then written once at flushCarveFrame. Always returns
+  ///     `true` (a scan never blocks itself — see class docs).
+  ///   - frame CLOSED (immediate): writes the Beta grid in place, applying the
+  ///     wall guard iff `carve_skip_occ_threshold > 0`.
+  bool applyCarveUpdate(const CoordT& c,
+                        const HitWeights* prof = nullptr);
+
+  // ----------------------------------------------------------------------
+  // Batched per-scan carve (universal free-space path)
+  // ----------------------------------------------------------------------
+  //
+  // Full-ray free-space carving re-traverses the dense near-origin ray fan, so
+  // the same free voxel is crossed by thousands of rays per scan. Writing it
+  // once per ray is both wasteful (thousands of Beta writes to one cell) and
+  // radially biased (near-sensor voxels saturate purely from ray density). The
+  // batched path fixes both: every carve is STAGED read-free during the walk,
+  // then written ONCE per voxel per scan at flush (max evidence), block-ordered
+  // for cache locality. This is the OctoMap computeUpdate model.
+  //
+  // Contract: wrap a whole scan's integrateHit/Miss (or the fused walker) in
+  //   beginCarveFrame(); ... integrate every ray ...; flushCarveFrame();
+  // Occupied-wins: a voxel that is a HIT (surface) anywhere in the same scan is
+  // never carved free, even if another ray grazes through it.
+
+  /// Open a carve frame: subsequent carves are staged, not written. Clears any
+  /// previously staged state. Idempotent.
+  void beginCarveFrame();
+
+  /// Write all staged carves (one Beta update per unique voxel, skipping
+  /// same-scan hit voxels), then close the frame. No-op if no frame is open.
+  /// Returns the number of voxels written.
+  std::size_t flushCarveFrame();
+
+  /// Whether a carve frame is currently open (staging mode).
+  bool carveFrameOpen() const noexcept { return carve_frame_open_; }
+  /// Voxels visited by the free-space carve DDA, cumulative. Paired with the
+  /// walker timers so per-voxel cost is comparable across walker structures.
+  std::uint64_t carveVoxels() const noexcept { return carve_voxels_; }
+
+  /// Per-voxel hit: Stream A (Beta) always, then gated Stream B (Dir). Touches
+  /// the Beta grid always; allocates + touches the Dir grid only when a class
+  /// is actually committed (the sparse-semantics memory win).
+  void applyHitUpdate(const CoordT&             c,
+                      const SemObs&             obs,
+                      const HitWeights*         prof = nullptr);
+
+  /// Dynamic-aware per-voxel hit. When `is_dynamic` is true the endpoint's
+  /// occupancy (Stream A) + semantics (Stream B) are deposited into the parallel
+  /// TRANSIENT Beta/Dir grids — decayed each frame by `decayTransient`, overlaid
+  /// on the persistent map at publish — so moving objects (e.g. people) show
+  /// live but fade fast and never pollute the persistent map. The transient
+  /// path uses the IDENTICAL Stream A/B update; only the target grids differ and
+  /// it records no touched-set (transient is local-only, never drained to the
+  /// fusion wire). `is_dynamic == false` is byte-identical to the 3-arg form.
+  void applyHitUpdate(const CoordT&             c,
+                      const SemObs&             obs,
+                      bool                      is_dynamic,
+                      const HitWeights*         prof = nullptr);
+
+  /// Per-voxel SLIM-VDB-style BAND deposit: Stream B ONLY, at a voxel the fused
+  /// walker is already standing on (`Params::semantic_band_length`). Never call
+  /// this for the endpoint voxel — `applyHitUpdate` owns that one, and running
+  /// both would double-count it.
+  ///
+  /// The three ways this differs from `applyHitUpdate`, all deliberate:
+  ///
+  ///  1. NO Stream A. Occupancy is evidence that a beam *stopped* here, which
+  ///     is true only at the endpoint. Incrementing `a_occ` along the band would
+  ///     manufacture a ~2·b-thick occupied shell around every surface and fight
+  ///     the free-space carve running over the same voxels. SLIM-VDB has no
+  ///     occupancy grid, so it has nothing to mirror here.
+  ///  2. Beta is READ, never allocated. A band voxel that LiDAR has not already
+  ///     confirmed occupied (`p_occ ≥ dirichlet_min_p_occ`, or no Beta voxel at
+  ///     all) takes no deposit. SLIM-VDB writes `alpha` unconditionally; it can
+  ///     afford to because nothing downstream distinguishes a labelled free
+  ///     voxel from a labelled surface. For SCovox the gate is what keeps the
+  ///     Dir grid from growing a label shell through the free space in front of
+  ///     every surface. THIS IS THE ONE PLACE THE MIRROR IS NOT EXACT.
+  ///  3. FLAT weight — `kappa0 · p_occ`, the same expression the
+  ///     endpoint uses, with no distance kernel. That is the point of contrast
+  ///     with `applyHitUpdateKernel`, which tapers by `k(d)`. SLIM-VDB's
+  ///     `alpha[label] += 1` is flat across its whole band, and at p_occ→1 this
+  ///     reduces to the same constant.
+  ///
+  /// Deposits into the PERSISTENT Dir grid only. Dynamic endpoints do not reach
+  /// here (see `integrateHitFused`): a moving object must not smear its class
+  /// across the static surfaces behind it.
+  void applyBandSemantic(const CoordT&             c,
+                         const SemObs&             obs,
+                         const HitWeights*         prof = nullptr);
+
+  /// Per-frame multiplicative decay of the transient grids toward their priors
+  /// (Beta `a → prior`, Dir `cnt → α₀`, `other → (C−K_TOP)·α₀`). Voxels whose
+  /// evidence decays back to within epsilon of prior are pruned (`setCellOff`)
+  /// so the transient grids stay bounded over a long run. `rate ∈ [0,1]`
+  /// (clamped): `rate == 1` is a no-op, `rate == 0` clears all transient
+  /// evidence. Call once per integrated frame.
+  void decayTransient(float rate);
+
+  // ----------------------------------------------------------------------
+  // Touched-set drains (per grid — Beta is full-ray, Dir is hit-sparse)
+  // ----------------------------------------------------------------------
+
+  /// Drains return a reference into a per-stream member scratch, valid until
+  /// the same stream's next drain; accumulator and scratch keep their
+  /// capacity across frames (see TsdfMap::drainTouched).
+  const std::vector<CoordT>& drainTouchedBeta();
+  const std::vector<CoordT>& drainTouchedDir();
+  /// O(n) per-stream clears for paths that would discard the drained coords
+  /// anyway (snapshot publishes, share toggles off) — skips the sort+unique.
+  void                clearTouchedBeta() noexcept { touched_beta_.clear(); }
+  void                clearTouchedDir()  noexcept { touched_dir_.clear(); }
+  void                clearTouched() noexcept { touched_beta_.clear(); touched_dir_.clear(); }
+  std::size_t         touchedBetaCount() const noexcept { return touched_beta_.size(); }
+  std::size_t         touchedDirCount()  const noexcept { return touched_dir_.size(); }
+
+  // ----------------------------------------------------------------------
+  // Voxel queries
+  // ----------------------------------------------------------------------
+
+  std::optional<BetaVoxel> getBetaVoxel(const Eigen::Vector3f& pos) const;
+  std::optional<DirVoxel>  getDirVoxel(const Eigen::Vector3f& pos) const;
+
+  /// Argmax class at `pos`, or kEmptySlot if no Dir voxel / no dominant class.
+  uint16_t dominantClassAt(const Eigen::Vector3f& pos) const;
+
+  template <typename Fn>
+  void forEachBeta(Fn&& fn) const {
+    const float h = 0.5f * static_cast<float>(params_.resolution);
+    beta_grid_.forEachCell([&](const BetaVoxel& v, const CoordT& c) {
+      const auto p = beta_grid_.coordToPos(c);
+      fn(v, Eigen::Vector3f(static_cast<float>(p.x) + h,
+                            static_cast<float>(p.y) + h,
+                            static_cast<float>(p.z) + h));
+    });
+  }
+
+  template <typename Fn>
+  void forEachDir(Fn&& fn) const {
+    const float h = 0.5f * static_cast<float>(params_.resolution);
+    dir_grid_.forEachCell([&](const DirVoxel& v, const CoordT& c) {
+      const auto p = dir_grid_.coordToPos(c);
+      fn(v, Eigen::Vector3f(static_cast<float>(p.x) + h,
+                            static_cast<float>(p.y) + h,
+                            static_cast<float>(p.z) + h));
+    });
+  }
+
+  // ----------------------------------------------------------------------
+  // Transient (dynamic-class) grid queries — parallel to the persistent ones.
+  // Coords are shared with the persistent grids (same resolution/hierarchy), so
+  // the publisher can overlay a transient voxel directly onto its persistent
+  // counterpart at the same position.
+  // ----------------------------------------------------------------------
+
+  std::optional<BetaVoxel> getTransientBetaVoxel(const Eigen::Vector3f& pos) const;
+  std::optional<DirVoxel>  getTransientDirVoxel(const Eigen::Vector3f& pos) const;
+
+  /// Argmax class in the transient Dir grid at `pos`, or kEmptySlot if none.
+  uint16_t transientDominantClassAt(const Eigen::Vector3f& pos) const;
+
+  template <typename Fn>
+  void forEachTransientBeta(Fn&& fn) const {
+    const float h = 0.5f * static_cast<float>(params_.resolution);
+    transient_beta_grid_.forEachCell([&](const BetaVoxel& v, const CoordT& c) {
+      const auto p = transient_beta_grid_.coordToPos(c);
+      fn(v, Eigen::Vector3f(static_cast<float>(p.x) + h,
+                            static_cast<float>(p.y) + h,
+                            static_cast<float>(p.z) + h));
+    });
+  }
+
+  template <typename Fn>
+  void forEachTransientDir(Fn&& fn) const {
+    const float h = 0.5f * static_cast<float>(params_.resolution);
+    transient_dir_grid_.forEachCell([&](const DirVoxel& v, const CoordT& c) {
+      const auto p = transient_dir_grid_.coordToPos(c);
+      fn(v, Eigen::Vector3f(static_cast<float>(p.x) + h,
+                            static_cast<float>(p.y) + h,
+                            static_cast<float>(p.z) + h));
+    });
+  }
+
+  // ----------------------------------------------------------------------
+  // Memory accounting
+  // ----------------------------------------------------------------------
+
+  std::size_t betaVoxelCount()    const;
+  std::size_t dirVoxelCount()     const;
+  std::size_t betaGridMemoryBytes() const { return beta_grid_.memUsage(); }
+  std::size_t dirGridMemoryBytes()  const { return dir_grid_.memUsage(); }
+
+  std::size_t transientBetaVoxelCount() const;
+  std::size_t transientDirVoxelCount()  const;
+
+  // ----------------------------------------------------------------------
+  // Accessors
+  // ----------------------------------------------------------------------
+
+  /// The SANITISED parameters in force — not the struct the caller passed in.
+  /// Read this, never a caller's copy, when a decision depends on a knob
+  /// `sanitise()` can override: `semantic_band_length` is silently zeroed here
+  /// when `semantic_spread_radius` is also set.
+  const Params&   params()   const noexcept { return params_; }
+  const BetaGrid& betaGrid() const noexcept { return beta_grid_; }
+  BetaGrid&       betaGrid()       noexcept { return beta_grid_; }
+  const DirGrid&  dirGrid()  const noexcept { return dir_grid_; }
+  DirGrid&        dirGrid()        noexcept { return dir_grid_; }
+
+  // Transient (dynamic-class) grids, shared-coord with the persistent ones so
+  // the publisher can overlay them at the same voxel positions.
+  const BetaGrid& transientBetaGrid() const noexcept { return transient_beta_grid_; }
+  BetaGrid&       transientBetaGrid()       noexcept { return transient_beta_grid_; }
+  const DirGrid&  transientDirGrid()  const noexcept { return transient_dir_grid_; }
+  DirGrid&        transientDirGrid()        noexcept { return transient_dir_grid_; }
+
+  // Fallback semantic accumulator (`Params::ray_spread == 4`, §16.7). Empty on
+  // every other mode. A voxel here is a CLAIM, not a measurement: readers
+  // consult it only where the primary Dir voxel holds no class evidence.
+  const DirGrid&  fallbackDirGrid()   const noexcept { return fallback_dir_grid_; }
+  DirGrid&        fallbackDirGrid()         noexcept { return fallback_dir_grid_; }
+
+  /// `Params::ray_spread` deposit at the surface's ray neighbour(s). Must run
+  /// AFTER the endpoint update, so the surface's post-Stream-A `p_occ` (which
+  /// sets `class_share`) is the one the endpoint deposit itself saw. Stream B
+  /// only. The persistent split-path `integrateHit` overloads call it
+  /// internally; `ScovoxMapSplit::integrateHitFused` calls it from outside
+  /// after its walk — which is why it is public. Callers own the
+  /// `ray_spread != 0 && !is_dynamic` gate; every other guard (DIRICHLET
+  /// only, kernel path excluded, empty observation) is internal.
+  void raySpreadDeposit(const Eigen::Vector3f&    origin,
+                        const Eigen::Vector3f&    endpoint,
+                        const CoordT&             k_hit,
+                        const SemObs&             obs,
+                        const HitWeights*         prof);
+
+  BetaVoxel defaultBeta() const noexcept {
+    return defaultBetaVoxel(beta_occ_prior_, beta_free_prior_);
+  }
+  DirVoxel defaultDir() const noexcept {
+    return defaultDirVoxel(params_.num_classes, params_.alpha_0);
+  }
+
+ private:
+  Params               params_;
+  BetaGrid             beta_grid_;
+  DirGrid              dir_grid_;
+  // Parallel transient substrate for dynamic-class endpoints. Same resolution /
+  // hierarchy as the persistent grids (coord-identical), decayed each frame and
+  // pruned back to nothing; never drained to the fusion wire.
+  BetaGrid             transient_beta_grid_;
+  DirGrid              transient_dir_grid_;
+  // Front-deposit accumulator for ray_spread mode 4 (§16.7). Same geometry as
+  // the primary Dir grid; allocated only when mode 4 actually deposits, so it
+  // costs an empty root on every other configuration. Never drained to the
+  // fusion wire — readout-local instrument state, like the transient grids.
+  DirGrid              fallback_dir_grid_;
+  BetaGrid::Accessor   beta_acc_;
+  DirGrid::Accessor    dir_acc_;
+  BetaGrid::Accessor   transient_beta_acc_;
+  DirGrid::Accessor    transient_dir_acc_;
+  DirGrid::Accessor    fallback_dir_acc_;
+  std::vector<CoordT>  touched_beta_;
+  std::vector<CoordT>  touched_dir_;
+  // Drain swap targets — hold each stream's previous drain result so the
+  // buffers are recycled instead of freed (see drainTouchedBeta/Dir).
+  std::vector<CoordT>  scratch_beta_;
+  std::vector<CoordT>  scratch_dir_;
+
+  // Per-scan carve accumulator (batched path). `carve_stage_` keys each free
+  // voxel by its Beta leaf block (`coord >> leaf_bits`) into a reused
+  // open-addressed table of dense per-block weight arrays + occupancy bitmask,
+  // keeping the MAX `w_free` seen this scan (strongest free evidence,
+  // one write); flush then walks blocks in ascending block-key order — the
+  // same block order the retired per-voxel std::sort produced — without ever
+  // sorting individual voxels (see carve_stage.hpp for the identity argument).
+  // `carve_hits_` stages the scan's surface observations the same way, so flush
+  // can honour occupied-wins and write each hit once. All three retain capacity
+  // across beginCarveFrame, so steady-state framing allocates nothing.
+  /// One scan's staged surface observation for a voxel (see `batch_hits`).
+  /// The per-source gains are carried per entry because the winning ray may
+  /// come from a different sensor than the previous one.
+  struct HitStage {
+    float    w_occ_share = 0.f;  ///< max `w_occ` of the scan's rays here
+    float    kappa0      = 0.f;  ///< that ray's class gain
+    float    min_p_occ   = 0.f;  ///< that ray's Stream B admission gate
+    uint32_t probs_off   = kNoHitProbs;  ///< start of its entries in hit_obs_
+    uint32_t probs_len   = 0;
+    uint32_t probs_cap     = 0;      ///< entries its block holds, >= probs_len
+    int      probs_argmax  = -1;     ///< index into the block, carried not recomputed
+    bool     probs_present = false;  ///< a look happened, even if it named no class
+    bool     staged      = false;  ///< false => the hit was written immediately
+  };
+  static constexpr uint32_t kNoHitProbs = 0xFFFFFFFFu;
+
+  /// This ray's observation, prepared by the public entry points and read by
+  /// every voxel the ray deposits into. Reused so the preparation does not
+  /// allocate once the first ray has sized it.
+  SemObs                              sem_obs_;
+
+  CarveStage                          carve_stage_;
+  /// The scan's staged surface hits, keyed by leaf block in a dense slot pool
+  /// rather than per voxel in a hash map — the same structure, block geometry
+  /// and flush order as `band_stage_` below. It answers the two questions the
+  /// carve frame asks of the hits: `contains` is the occupied-wins membership
+  /// test, run once per staged carve voxel, and the block-ordered walk drives
+  /// flushStagedHits. See block_record_stage.hpp.
+  BlockRecordStage<HitStage>          carve_hits_;
+  /// Flat pool of staged observations, one contiguous `probs_len` block per
+  /// staged voxel. A voxel's block is overwritten in place when a stronger ray
+  /// supersedes it, so the pool is bounded by the staged voxel count, not by
+  /// the ray count. Retains capacity across beginCarveFrame. It holds PREPARED
+  /// entries, so a staged hit costs the observation's positive classes rather
+  /// than the taxonomy's full width.
+  std::vector<SemObsEntry>            hit_obs_;
+  SemObs                              staged_obs_;         ///< flush-time view
+  /// One scan's staged band looks (see `batch_band`), staged the same way.
+  /// `BandStage::Rec` is the retired `SemSplitMap::BandStage` field for field,
+  /// and the flush order is the retired per-voxel sort's exactly —
+  /// block-ascending, then (x, y, z) within a block — so the Dir grid is
+  /// first-touched in the same sequence and the serialized bytes are
+  /// unchanged. See block_record_stage.hpp.
+  BandStage                             band_stage_;
+  std::vector<SemObsEntry>              band_obs_;
+  std::size_t flushStagedBand();
+  bool                       carve_frame_open_ = false;
+  std::uint64_t carve_voxels_ = 0;
+
+  /// The occupancy prior, cached out of the sanitised `Params` at construction
+  /// so the allocation path reads a member rather than chasing `params_`. The
+  /// default is the shipped symmetric Beta(0.5,0.5) (kBetaOccPrior/kBetaFreePrior)
+  /// → p_occ_prior = 0.5.
+  float                beta_occ_prior_;
+  float                beta_free_prior_;
+
+  void carveRay(const Eigen::Vector3f& origin,
+                const Eigen::Vector3f& endpoint,
+                bool                   inclusive_endpoint,
+                const HitWeights*      prof = nullptr);
+
+  BetaVoxel* getOrAllocateBeta(const CoordT& c);
+  DirVoxel*  getOrAllocateDir(const CoordT& c);
+
+  // Accessor-parameterised primitives so the persistent and transient targets
+  // share one implementation of the Stream A/B hit update and the prior-enforcing
+  // first-touch allocation (the persistent grids pass their touched-sets; the
+  // transient grids pass nullptr).
+  /// Write one surface observation: Stream A into `bacc`, then the gated
+  /// Stream B into `dacc`. Shared by the immediate path and the batched flush,
+  /// which differ only in WHEN they call it — the per-source gains arrive as
+  /// plain floats so a staged entry can replay a ray whose `HitWeights` is
+  /// long gone.
+  void       commitHit(const CoordT&             c,
+                       const SemObs&             obs,
+                       float                     w_occ_share,
+                       float                     kappa0,
+                       float                     min_p_occ,
+                       BetaGrid::Accessor&       bacc,
+                       DirGrid::Accessor&        dacc,
+                       std::vector<CoordT>*      touched_beta,
+                       std::vector<CoordT>*      touched_dir);
+
+  /// Apply this scan's staged hits, leaf-block-ordered. Called by
+  /// flushCarveFrame() before the carve walk.
+  std::size_t flushStagedHits();
+
+  BetaVoxel* getOrAllocateBetaOn(BetaGrid::Accessor& acc, const CoordT& c);
+  DirVoxel*  getOrAllocateDirOn(DirGrid::Accessor& acc, const CoordT& c);
+  void       applyHitUpdateOn(const CoordT&             c,
+                              const SemObs&             obs,
+                              BetaGrid::Accessor&       bacc,
+                              DirGrid::Accessor&        dacc,
+                              std::vector<CoordT>*      touched_beta,
+                              std::vector<CoordT>*      touched_dir,
+                              const HitWeights*         prof = nullptr);
+
+  /// BKI (S-BKI) semantic spread for a semantics-only source with
+  /// `prof->kernel_radius > 0` — the RGB-D→LiDAR fusion path. Deposits the
+  /// observed class onto every LiDAR-occupied voxel within the kernel radius of
+  /// endpoint `c`, weighted by the compact-support kernel and
+  /// gated on the PERSISTENT Beta occupancy (LiDAR authority), regardless of
+  /// which Dir grid (`dacc`) is the deposit target. Touches only the Dir grid —
+  /// RGB-D deposits zero occupancy, so no Beta allocation/carve here.
+  /// Also serves the single-sensor `semantic_spread_radius` path, which passes
+  /// the map-global weights instead of a source profile's; the kernel itself is
+  /// identical either way, and in both cases occupancy is read, never written.
+  void       applyHitUpdateKernel(const CoordT&             c,
+                                  const SemObs&             obs,
+                                  DirGrid::Accessor&        dacc,
+                                  std::vector<CoordT>*      touched_dir,
+                                  float                     l,
+                                  float                     kappa0,
+                                  float                     min_p_occ);
+
+  // Precomputed in-support spread offsets (audit item 10). The
+  // (dx,dy,dz) -> k(d) mapping is invariant per (resolution, l), yet the old
+  // per-hit loop redid a sqrt for every cube offset (~48% outside support)
+  // plus cos+sin for the survivors. Tables are built lazily with the exact
+  // same expressions and dz/dy/dx order as the old loop, so deposits and
+  // touch order are value-identical. Keyed by the exact float `l`; the two
+  // callers pass at most two distinct values per run (a source profile's
+  // kernel_radius and the map-global semantic_spread_radius), so a linear
+  // scan over a tiny vector beats any map.
+  struct SpreadOffset { int16_t dx, dy, dz; float wk; };
+  struct SpreadTable  { float l; std::vector<SpreadOffset> offsets; };
+  const std::vector<SpreadOffset>& spreadTable(float l);
+  std::vector<SpreadTable> spread_tables_;
+
+  void applyBetaSaturation(BetaVoxel* b) const;
+  void applyDirSaturation(DirVoxel* d) const;
+};
+
+}  // namespace scovox

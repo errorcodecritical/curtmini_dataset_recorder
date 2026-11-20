@@ -1,0 +1,956 @@
+#pragma once
+
+/// @file binary_serializer.hpp
+/// @brief Wire format for the split Beta/Dirichlet SCovox substrate.
+///
+/// Triple-stream codec carrying:
+///   - TSDF deltas      (20 B/voxel on wire, optional, flat records)
+///   - BetaVoxel deltas (block-run coords + companded evidence)
+///   - DirVoxel deltas  (block-run coords + companded evidence, packed ids)
+///
+/// This is the faithful wire counterpart of `SemSplitMap`: occupancy
+/// (`BetaVoxel`) and semantics (`DirVoxel`) cross the wire as SEPARATE streams,
+/// so the receiver reconstructs two independent grids and merges each with its
+/// own conjugate rule (see consensus_merge.hpp).
+///
+/// Revision 6 reworks the Beta/Dir record layout only — the merge rules, the
+/// priors, and the shaper are untouched:
+///
+///  1. **Block-run coordinate coding** (lossless). Records are grouped by
+///     their 8×8×8 Bonxai leaf block (`leaf_bits=3`); one block coord
+///     amortizes over up to 512 records:
+///       [bx:i32][by:i32][bz:i32][mode:u8]
+///         mode 0: [bitmask: 64 B]        // 512 bits; bit = (lx<<6)|(ly<<3)|lz,
+///                                        // stored LSB-first (byte b>>3, bit b&7)
+///         mode 1: [n:u16][idx:u16] × n   // strictly ascending, same numbering
+///       [payload] × n                    // ascending bit order
+///     Mode is chosen per block by size: the 64 B bitmask wins at n ≥ 32, the
+///     index list (2 + 2n B) below that. Blocks are emitted in ascending
+///     (bx, by, bz) order, so serialization is deterministic.
+///
+///  2. **u16 payload quantization** of evidence ABOVE the prior:
+///       q = clamp(round((a − prior) / quant_step), 0, 65535)   (sender)
+///       a = prior + q · quant_step                              (receiver)
+///     Encoding relative to the prior keeps an at-prior value at exactly q=0,
+///     reconstructing bit-exactly — the sender's at-prior emit gate and the
+///     receiver's isPrior*/refold tests (dscovox_consensus.hpp) keep working.
+///     The occupancy priors are compile-time constants (kBetaOccPrior /
+///     kBetaFreePrior); the Dir priors (α₀ per slot, (C − K_TOP)·α₀ for OTHER)
+///     are derived from existing header fields. The sender sets
+///     `quant_step = evidence_saturation / 65535` so the u16 range spans
+///     exactly the representable evidence; quant_step = 0.0 is the sentinel
+///     for "payloads are f32" (evidence_saturation=0 disables the cap, so
+///     evidence is unbounded and quantization is unsafe).
+///
+/// Quantization edge semantics (all deliberate):
+///   - Below-prior inputs clamp to the prior. These occur on normal input —
+///     the total-cap saturation rescale erodes the minority bucket below its
+///     prior on saturated lopsided voxels — and mergeBeta/mergeDir already
+///     floor them at the prior on the receiver (consensus_merge.hpp), so the
+///     clamp moves an existing floor from merge time to encode time; the
+///     fused-p error stays bounded by the prior mass, same argument.
+///   - Evidence within quant_step/2 of the prior quantizes to exactly the
+///     prior and is classified at-prior (dropped) by the receiver's refold.
+///     At the default cap (step ≈ 0.0153) that band is < 0.008 pseudo-counts,
+///     far below a single observation's increment.
+///   - Evidence above 65535·quant_step (= evidence_saturation) clamps to the
+///     cap; the live grid never exceeds it, so the clamp is unreachable on
+///     well-formed input.
+///   - Duplicate coords within one stream are deduplicated last-wins. The
+///     receiver's ingest is replace-per-(source, coord), so only the latest
+///     value is meaningful; the emit path never produces duplicates anyway.
+///
+/// The header carries the priors so the receiver reconstructs them without
+/// sharing launch params. The blob VERSION byte is the codec revision, and it
+/// is currently 8 — see `FORMAT_VERSION`, which is the single definition; the
+/// per-revision notes below are history, so read the constant, not the prose.
+/// deserialize rejects a mismatched revision, so a mixed-revision fleet fails
+/// loud (the frame is dropped with a warning) instead of silently corrupting
+/// fused mass — same drill as the 4→5 occupancy-prior bump.
+///
+/// The ROS envelope `version` is a SEPARATE number (`ENVELOPE_VERSION`, = 5):
+/// it selects which codec a `ScovoxMapBinary` message routes to, and does not
+/// move when the codec revision does.
+///
+/// Revision 7 adds the fine TSDF band on top of revision 6's layout above: a
+/// `fine_ratio_log2` header byte (0 = sender has no fine grid)
+/// and one fine-TSDF stream after the Dir stream. Fine coords are indices on
+/// the FINE lattice (`resolution / 2^fine_ratio_log2`); payload layout is
+/// identical to the coarse TSDF stream. Everything else is unchanged from 6.
+///
+/// Revision 8 shrinks the evidence payloads to ONE byte each and packs class
+/// ids, changing nothing else:
+///
+///  1. **u8 sqrt-companded evidence.** Linear u8 (step = S_max/255 ≈ 3.9 at
+///     the default cap) would open a ±step/2 dead band around the prior wide
+///     enough to swallow a voxel's first observations — the receiver's refold
+///     drops exact-prior records, so young voxels would vanish from peers'
+///     maps (~0.8% of records on real captures). Companding spends the 8 bits
+///     where evidence is scarce instead:
+///       q = clamp(round(sqrt((a − prior) / quant_step)), 0, 255)   (sender)
+///       a = prior + q² · quant_step                                (receiver)
+///     with `quant_step = evidence_saturation / 255²`. The q=0→1 step equals
+///     rev 7's u16 step (S_max/65025 vs S_max/65535), so the at-prior band is
+///     as tight as before; the local step grows as step·(2q+1) ≈ 2·√(step·e),
+///     i.e. quantization error stays below the √e sampling noise of the count
+///     itself at every evidence level. q=255 reconstructs exactly the cap.
+///     At-prior q=0 still reconstructs the prior bit-exactly.
+///  2. **u8 class ids** when the header's num_classes ≤ 255 (every real
+///     taxonomy here: SceneNet 14, NYU40, KITTI): the empty-slot sentinel
+///     kEmptySlot maps to 0xFF on the wire and back. num_classes > 255 keeps u16
+///     ids — the width is implied by the header, so the frame stays
+///     self-describing. Serialize throws on a real id ≥ 0xFF when packing
+///     (sender invariant violation: ids are < num_classes ≤ 255).
+///
+/// Revision 9 is an EXACT integer payload, selected per frame by
+/// `Frame::exact` (the VERSION byte says which layout a blob is on; a receiver
+/// decodes either). Under fixed-increment accumulation every parameter is the
+/// prior plus a whole number of lattice steps — Beta counts are `uint16`
+/// eighths (beta_voxel.hpp), Dir slots are `α₀ + deposits` — so the sender
+/// ships those integers, LEB128 varint-coded, and the receiver rebuilds the
+/// parameters from them with no companding, no cap and no dead band:
+///   Beta:  [v_occ: varint][v_free: varint]      a = prior + v·beta_unit/lattice
+///   Dir:   [v_other: varint][v_cnt: varint ×K]  cnt = α₀ + v·dir_unit,
+///          [cls: u8|u16 ×K]                      other = (C−K)·α₀ + v·dir_unit
+/// `beta_unit` / `dir_unit` are the gcd of every value in the stream (header
+/// fields, ≥ 1), so a map whose looks all weigh 12 and 8 eighths ships them as
+/// 3 and 2. The header also carries the sender's lattice (counts per unit of
+/// Beta evidence) and the receiver refuses a lattice it cannot hold exactly.
+/// Serialize throws on a value that is not on the lattice — a map with any
+/// fractional deposit cannot use this layout, and that is the invariant, not
+/// a rounding.
+///   Extra header (after fine_ratio_log2):
+///   [beta_lattice: u8] [beta_unit: u32] [dir_unit: u32]
+/// Coordinates, class ids and the TSDF streams are as in revision 8.
+///
+/// Frame layout (uncompressed, little-endian):
+///   [MAGIC: u32 = "SCVX"] [VERSION: u8 = 8]
+///   [resolution: f32]
+///   [num_classes: u16]   ← C (also selects the cls width: u8 iff C ≤ 255)
+///   [K_TOP_wire: u8]     ← K_TOP at sender; receiver asserts match
+///   [alpha_0_wire: f32]  ← symmetric Dirichlet prior at sender
+///   [quant_step: f32]    ← sqrt-companding scale (S_max/255²); 0.0 = f32
+///   [fine_ratio_log2: u8] ← fine lattice ratio k; 0 = no fine grid
+///   [tsdf_count: u32]
+///     ([x:i32][y:i32][z:i32][distance:f32][weight:f32]) × tsdf_count   // 20 B
+///   [beta_count: u32]  <block runs>   // payload: [q_occ:u8][q_free:u8] (2 B)
+///                                     //      or  [a_occ:f32][a_free:f32] (8 B)
+///   [dir_count: u32]   <block runs>   // payload: [q_other:u8][q_cnt:u8 ×K]
+///                                     //          [cls:u8|u16 ×K]
+///                                     //      or  [other:f32][cnt:f32 ×K]
+///                                     //          [cls:u8|u16 ×K]
+///   [fine_tsdf_count: u32]            // fine-lattice coords, 20 B records
+///     ([x:i32][y:i32][z:i32][distance:f32][weight:f32]) × fine_tsdf_count
+///
+/// `Options{.share_tsdf=false}` (default) writes `tsdf_count=0` and elides the
+/// TSDF payload; each robot keeps a local TSDF for mesh extraction. Beta and
+/// Dir streams are always written (they are the split substrate's payload).
+/// The fine stream ships whatever `frame.fine_tsdf_deltas` holds (the node
+/// fills it only when share_tsdf is on and the fine band is enabled); a
+/// non-empty fine stream with `fine_ratio_log2 == 0` is rejected on decode.
+///
+/// @warning K_TOP is locked at compile time. The Dir payload size scales with
+/// it, so sender and receiver MUST be compiled with the same K_TOP. A mismatch
+/// is detected during `deserialize` (the K_TOP_wire byte) and throws fatally —
+/// there is NO forward/backward compatibility across K_TOP values.
+
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
+#include <cstring>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
+#include <bonxai/bonxai.hpp>
+
+#include "scovox/beta_voxel.hpp"
+#include "scovox/dir_voxel.hpp"
+#include "scovox/tsdf_voxel.hpp"
+
+namespace scovox {
+
+class BinarySerializer {
+ public:
+  static constexpr uint32_t MAGIC          = 0x53435658;  // "SCVX"
+  // Sane upper bound on the header-supplied class count. num_classes drives the
+  // reconstructed Dirichlet OTHER prior (num_classes − K_TOP)·alpha_0 in
+  // consensus_merge; a forged u16 near 65535 with alpha_0≈0.01 injects ~650
+  // pseudo-counts of "unknown" mass per voxel, swamping real evidence (and two
+  // re-sent snapshots from the same bad sender agree, so the per-frame equality
+  // check can't catch it). No real taxonomy approaches this ceiling.
+  static constexpr uint16_t MAX_NUM_CLASSES = 4096;
+  // Blob codec revision (distinct from the ROS envelope version,
+  // ENVELOPE_VERSION below, which routes a message to this codec). Bumped
+  // 5→6 for the block-run coordinate coding + u16 payload
+  // quantization; 6→7 for the fine-TSDF band (fine_ratio_log2 header
+  // byte + trailing fine stream); 7→8 for u8 sqrt-companded evidence
+  // payloads + u8 class ids (see the revision-8 block in the file header).
+  // Any layout change means a mixed-revision fleet fails loud (deserialize
+  // rejects the VERSION byte and the frame is dropped with a warning) instead
+  // of silently misparsing.
+  static constexpr uint8_t  FORMAT_VERSION = 8;
+  // Revision 9: the exact integer payload (see the revision-9 block in the
+  // file header). Written when `Frame::exact` is set; deserialize accepts
+  // both revisions and reports which one it read in `Frame::exact`.
+  static constexpr uint8_t  FORMAT_VERSION_EXACT = 9;
+  // Largest value a payload varint may carry. Beta lattice counts are u16,
+  // Dir deposit counts are whole floats; five LEB128 bytes cover u32.
+  static constexpr int      MAX_VARINT_BYTES = 5;
+  // How far a Dir slot may sit off its integer for the exact payload to
+  // accept it: float accumulation of whole deposits drifts by ulps, never by
+  // a fraction of a deposit, so anything beyond this is a fractional deposit.
+  static constexpr float    EXACT_TOL = 1.0f / 16.0f;
+  // ROS envelope version, carried in ScovoxMapBinary::version. It answers a
+  // different question from FORMAT_VERSION: the envelope says which codec the
+  // message body belongs to, the codec revision says which layout that codec
+  // is on. They move independently — every bump above left this at 5. Lives
+  // here, next to its sibling, so the sender (scovox_node) and the receiver
+  // (dscovox_node) — which are in the same package but were agreeing on a bare
+  // literal — cannot drift.
+  static constexpr uint8_t  ENVELOPE_VERSION = 5;
+  // Sanity ceiling on the fine-lattice ratio: k=8 is res/256 — far beyond any
+  // deployable fine resolution. A forged large k would reconstruct absurd
+  // fine lattices downstream (res_fine underflow in consumers).
+  static constexpr uint8_t  MAX_FINE_RATIO_LOG2 = 8;
+
+  struct TsdfDelta { Bonxai::CoordT coord; TsdfVoxel data; };
+  struct BetaDelta { Bonxai::CoordT coord; BetaVoxel data; };
+  struct DirDelta  { Bonxai::CoordT coord; DirVoxel  data; };
+
+  struct Frame {
+    float    resolution  = 0.0f;
+    uint16_t num_classes = 14;            ///< NYU13 default
+    float    alpha_0     = kDefaultDirichletPrior;
+    /// u16 quantization step for Beta/Dir payloads. The sender sets
+    /// evidence_saturation / 65535; 0.0 (the default) keeps payloads f32.
+    float    quant_step  = 0.0f;
+    /// Fine-lattice ratio k (res_fine = resolution / 2^k); 0 = the sender
+    /// has no fine grid. Coords in `fine_tsdf_deltas` index the FINE lattice.
+    uint8_t  fine_ratio_log2 = 0;
+    /// Write (or, after deserialize, was read as) the revision-9 exact
+    /// integer payload instead of the revision-8 f32 / u8 one.
+    bool     exact = false;
+    std::vector<TsdfDelta> tsdf_deltas;
+    std::vector<BetaDelta> beta_deltas;
+    std::vector<DirDelta>  dir_deltas;
+    std::vector<TsdfDelta> fine_tsdf_deltas;
+  };
+
+  /// `share_tsdf=false` (default) elides the TSDF stream (tsdf_count=0).
+  struct Options {
+    bool share_tsdf = false;
+  };
+
+  /// Convenience: serialize with default options (Beta+Dir, no TSDF).
+  static std::string serialize(const Frame& frame) {
+    return serialize(frame, Options{});
+  }
+
+  static std::string serialize(const Frame& frame, const Options& opts) {
+    if (frame.exact) return serializeExact(frame, opts);
+    if (!std::isfinite(frame.quant_step) || frame.quant_step < 0.f)
+      throw std::runtime_error(
+          "BinarySerializer: quant_step must be finite and >= 0");
+    const float step  = frame.quant_step;
+    const bool  quant = step > 0.f;
+    // Clamp the residual at 0 to match defaultDirVoxel's num_classes ≤ K_TOP
+    // convention (see dir_voxel.hpp).
+    const int   residual_dims = static_cast<int>(frame.num_classes) - K_TOP;
+    const float other_prior = residual_dims > 0
+        ? static_cast<float>(residual_dims) * frame.alpha_0 : 0.f;
+
+    // Rev 8: class-id width is implied by the header's num_classes.
+    const bool        cls8  = frame.num_classes <= 255;
+    const std::size_t cls_w = cls8 ? 1u : 2u;
+    const std::size_t beta_payload = quant ? 2u : 8u;
+    const std::size_t dir_payload  =
+        (quant ? (1u + 1u * static_cast<std::size_t>(K_TOP))
+               : (4u + 4u * static_cast<std::size_t>(K_TOP)))
+        + cls_w * static_cast<std::size_t>(K_TOP);
+    const std::size_t tsdf_n = opts.share_tsdf ? frame.tsdf_deltas.size() : 0;
+    if (frame.fine_ratio_log2 > MAX_FINE_RATIO_LOG2)
+      throw std::runtime_error(
+          "BinarySerializer: fine_ratio_log2 > " +
+          std::to_string(MAX_FINE_RATIO_LOG2));
+    if (frame.fine_ratio_log2 == 0 && !frame.fine_tsdf_deltas.empty())
+      throw std::runtime_error(
+          "BinarySerializer: fine_tsdf_deltas without fine_ratio_log2");
+
+    std::string out;
+    // Upper bound: every Beta/Dir record in its own single-entry block
+    // (12 coord + 1 mode + 2 n + 2 idx = 17 B of overhead). Real frames
+    // amortize the block header over up to 512 records.
+    out.reserve(22                                                  // header
+                + 4 + tsdf_n * 20
+                + 4 + frame.beta_deltas.size() * (beta_payload + 17)
+                + 4 + frame.dir_deltas.size()  * (dir_payload  + 17)
+                + 4 + frame.fine_tsdf_deltas.size() * 20);
+
+    appendBytes(out, &MAGIC, sizeof(MAGIC));
+    appendBytes(out, &FORMAT_VERSION, sizeof(FORMAT_VERSION));
+    appendBytes(out, &frame.resolution, sizeof(frame.resolution));
+    appendBytes(out, &frame.num_classes, sizeof(frame.num_classes));
+    const uint8_t k_top_wire = static_cast<uint8_t>(K_TOP);
+    appendBytes(out, &k_top_wire, sizeof(k_top_wire));
+    appendBytes(out, &frame.alpha_0, sizeof(frame.alpha_0));
+    appendBytes(out, &frame.quant_step, sizeof(frame.quant_step));
+    appendBytes(out, &frame.fine_ratio_log2, sizeof(frame.fine_ratio_log2));
+
+    // TSDF stream (optional; flat records, unchanged from revision 5).
+    const uint32_t tsdf_count = static_cast<uint32_t>(tsdf_n);
+    appendBytes(out, &tsdf_count, sizeof(tsdf_count));
+    if (opts.share_tsdf) {
+      for (const auto& d : frame.tsdf_deltas) {
+        appendBytes(out, &d.coord.x,       sizeof(int32_t));
+        appendBytes(out, &d.coord.y,       sizeof(int32_t));
+        appendBytes(out, &d.coord.z,       sizeof(int32_t));
+        appendBytes(out, &d.data.distance, sizeof(float));
+        appendBytes(out, &d.data.weight,   sizeof(float));
+      }
+    }
+
+    // Rev 8 class-id emit: u8 when num_classes ≤ 255 (sentinel kEmptySlot ↔ 0xFF),
+    // u16 otherwise. A real id that doesn't fit the packed width is a sender
+    // invariant violation (ids are < num_classes) — fail loud.
+    auto writeCls = [&](uint16_t cls) {
+      if (cls8) {
+        if (cls != kEmptySlot && cls >= 0xFF)
+          throw std::runtime_error(
+              "BinarySerializer: class id " + std::to_string(cls) +
+              " does not fit u8 packing (num_classes ≤ 255)");
+        const uint8_t c = (cls == kEmptySlot) ? 0xFF : static_cast<uint8_t>(cls);
+        appendBytes(out, &c, sizeof(c));
+      } else {
+        appendBytes(out, &cls, sizeof(cls));
+      }
+    };
+
+    // Beta stream (occupancy), block-run coded.
+    writeBlockStream(out, frame.beta_deltas, [&](const BetaDelta& d) {
+      if (quant) {
+        const uint8_t q_occ  = quantize8(d.data.a_occ,  kBetaOccPrior,  step);
+        const uint8_t q_free = quantize8(d.data.a_free, kBetaFreePrior, step);
+        appendBytes(out, &q_occ,  sizeof(q_occ));
+        appendBytes(out, &q_free, sizeof(q_free));
+      } else {
+        // Widen through a float temporary: the wire is float32 regardless of
+        // how `BetaVoxel` stores its counters, so sender and receiver stay
+        // compatible across `SCOVOX_BETA_U16`.
+        const float f_occ  = d.data.a_occ;
+        const float f_free = d.data.a_free;
+        appendBytes(out, &f_occ,  sizeof(f_occ));
+        appendBytes(out, &f_free, sizeof(f_free));
+      }
+    });
+
+    // Dir stream (occupied-class semantics), block-run coded. Empty slots
+    // (cls=kEmptySlot, cnt=α₀) quantize to q=0 and reconstruct their placeholder
+    // exactly.
+    writeBlockStream(out, frame.dir_deltas, [&](const DirDelta& d) {
+      if (quant) {
+        const uint8_t q_other = quantize8(d.data.other(), other_prior, step);
+        appendBytes(out, &q_other, sizeof(q_other));
+        for (int i = 0; i < K_TOP; ++i) {
+          const uint8_t q_cnt = quantize8(d.data.cnt[i], frame.alpha_0, step);
+          appendBytes(out, &q_cnt, sizeof(q_cnt));
+        }
+      } else {
+        const float other_f = d.data.other();   // derived; needs an lvalue
+        appendBytes(out, &other_f, sizeof(float));
+        for (int i = 0; i < K_TOP; ++i)
+          appendBytes(out, &d.data.cnt[i], sizeof(float));
+      }
+      for (int i = 0; i < K_TOP; ++i)
+        writeCls(d.data.cls[i]);
+    });
+
+    // Fine TSDF stream (rev 7; flat records like the coarse TSDF stream,
+    // coords on the fine lattice). Content-gated: the sender fills
+    // fine_tsdf_deltas only when it means to share them.
+    const uint32_t fine_count =
+        static_cast<uint32_t>(frame.fine_tsdf_deltas.size());
+    appendBytes(out, &fine_count, sizeof(fine_count));
+    for (const auto& d : frame.fine_tsdf_deltas) {
+      appendBytes(out, &d.coord.x,       sizeof(int32_t));
+      appendBytes(out, &d.coord.y,       sizeof(int32_t));
+      appendBytes(out, &d.coord.z,       sizeof(int32_t));
+      appendBytes(out, &d.data.distance, sizeof(float));
+      appendBytes(out, &d.data.weight,   sizeof(float));
+    }
+
+    return out;
+  }
+
+  /// Deserialise. Throws on bad MAGIC, bad VERSION, K_TOP mismatch, malformed
+  /// block runs, or a truncated frame. K_TOP mismatch is fatal (the payload
+  /// size is length-implicit, locked by the header).
+  static Frame deserialize(const std::string& data) {
+    Frame f;
+    Reader r{data, 0};
+
+    const uint32_t magic = r.get<uint32_t>();
+    if (magic != MAGIC)
+      throw std::runtime_error("BinarySerializer: bad MAGIC");
+
+    const uint8_t version = r.get<uint8_t>();
+    if (version != FORMAT_VERSION && version != FORMAT_VERSION_EXACT)
+      throw std::runtime_error("BinarySerializer: bad VERSION");
+    f.exact = version == FORMAT_VERSION_EXACT;
+
+    f.resolution  = r.get<float>();
+    f.num_classes = r.get<uint16_t>();
+
+    const uint8_t k_top_wire = r.get<uint8_t>();
+    if (k_top_wire != static_cast<uint8_t>(K_TOP)) {
+      throw std::runtime_error(
+          "BinarySerializer: K_TOP mismatch — receiver compiled with K_TOP="
+          + std::to_string(K_TOP) + ", wire says " + std::to_string(k_top_wire));
+    }
+
+    f.alpha_0         = r.get<float>();
+    f.quant_step      = r.get<float>();
+    f.fine_ratio_log2 = r.get<uint8_t>();
+    if (f.fine_ratio_log2 > MAX_FINE_RATIO_LOG2) {
+      throw std::runtime_error(
+          "BinarySerializer: fine_ratio_log2 (" +
+          std::to_string(f.fine_ratio_log2) + ") > " +
+          std::to_string(MAX_FINE_RATIO_LOG2));
+    }
+
+    // Validate the header-supplied prior parameters before any voxel is
+    // reconstructed from them. consensus_merge rebuilds the Dirichlet
+    // (semantic) prior as (num_classes − K_TOP)·alpha_0 with per-slot alpha_0,
+    // so a corrupt header — num_classes < K_TOP, or a non-finite/non-positive
+    // alpha_0 — would silently inject negative or NaN mass into the live map
+    // (and two re-sent snapshots from the same bad sender agree with each
+    // other, so the per-frame equality check cannot catch it). The OCCUPANCY
+    // Beta prior is the symmetric constant kBetaOccPrior, independent of these
+    // fields.
+    if (f.num_classes < static_cast<uint16_t>(K_TOP)) {
+      throw std::runtime_error(
+          "BinarySerializer: num_classes (" + std::to_string(f.num_classes)
+          + ") < K_TOP (" + std::to_string(K_TOP) + ")");
+    }
+    if (f.num_classes > MAX_NUM_CLASSES) {
+      throw std::runtime_error(
+          "BinarySerializer: num_classes (" + std::to_string(f.num_classes)
+          + ") > MAX_NUM_CLASSES (" + std::to_string(MAX_NUM_CLASSES) + ")");
+    }
+    if (!std::isfinite(f.alpha_0) || f.alpha_0 <= 0.f) {
+      throw std::runtime_error("BinarySerializer: alpha_0 must be finite and > 0");
+    }
+    // resolution is reconstructed into world coords downstream (coord*res);
+    // a forged NaN/0/negative would yield NaN positions or a divide-by-zero.
+    if (!std::isfinite(f.resolution) || f.resolution <= 0.f) {
+      throw std::runtime_error("BinarySerializer: resolution must be finite and > 0");
+    }
+    // A forged NaN/negative step would reconstruct NaN/shrinking evidence in
+    // every quantized payload below.
+    if (!std::isfinite(f.quant_step) || f.quant_step < 0.f) {
+      throw std::runtime_error("BinarySerializer: quant_step must be finite and >= 0");
+    }
+
+    const float step  = f.quant_step;
+    const bool  quant = !f.exact && step > 0.f;
+    const int   residual_dims = static_cast<int>(f.num_classes) - K_TOP;
+    const float other_prior = residual_dims > 0
+        ? static_cast<float>(residual_dims) * f.alpha_0 : 0.f;
+
+    // Revision 9: the sender's Beta lattice and the two per-stream units.
+    // The receiver stores Beta counts on ITS lattice, so a sender on a
+    // different one could hand it values it cannot hold exactly; refuse
+    // rather than round. A zero unit would zero every payload.
+    uint32_t beta_unit = 1, dir_unit = 1;
+    if (f.exact) {
+      const uint8_t lattice = r.get<uint8_t>();
+      if (lattice != betaLattice())
+        throw std::runtime_error(
+            "BinarySerializer: Beta lattice mismatch — receiver stores " +
+            std::to_string(betaLattice()) + " counts per unit, wire says " +
+            std::to_string(lattice));
+      beta_unit = r.get<uint32_t>();
+      dir_unit  = r.get<uint32_t>();
+      if (beta_unit == 0 || dir_unit == 0)
+        throw std::runtime_error("BinarySerializer: zero payload unit");
+    }
+    const float beta_step = static_cast<float>(beta_unit) * kBetaLatticeStep;
+    const float dir_step  = static_cast<float>(dir_unit);
+
+    // TSDF stream (flat records, unchanged from revision 5).
+    const uint32_t tsdf_count = r.get<uint32_t>();
+    // Bound the reserve by the bytes actually present: each record is a fixed
+    // 20 B on the wire, so a count claiming more records than the remaining
+    // buffer can hold is a truncated/forged frame. Validate BEFORE reserve so
+    // an attacker-controlled count (e.g. 0xFFFFFFFF) raises the documented
+    // runtime_error rather than a multi-GB length_error/bad_alloc.
+    if (tsdf_count > r.remaining() / 20)
+      throw std::runtime_error("BinarySerializer: truncated frame");
+    f.tsdf_deltas.reserve(tsdf_count);
+    for (uint32_t i = 0; i < tsdf_count; ++i) {
+      TsdfDelta d{};
+      d.coord.x       = r.get<int32_t>();
+      d.coord.y       = r.get<int32_t>();
+      d.coord.z       = r.get<int32_t>();
+      d.data.distance = r.get<float>();
+      d.data.weight   = r.get<float>();
+      f.tsdf_deltas.push_back(d);
+    }
+
+    // Rev 8: class-id width is implied by the header's num_classes; the u8
+    // sentinel 0xFF widens back to the in-memory kEmptySlot marker.
+    const bool cls8 = f.num_classes <= 255;
+    auto readCls = [&]() -> uint16_t {
+      if (cls8) {
+        const uint8_t c = r.get<uint8_t>();
+        return (c == 0xFF) ? kEmptySlot : static_cast<uint16_t>(c);
+      }
+      return r.get<uint16_t>();
+    };
+
+    // Beta stream. Same DoS guard as TSDF: every record carries at least
+    // payload_bytes on the wire (block headers only add more), so a count
+    // exceeding the remaining byte budget is rejected before the reserve.
+    // An exact record is at least two one-byte varints.
+    const std::size_t beta_payload = f.exact ? 2u : (quant ? 2u : 8u);
+    const uint32_t beta_count = r.get<uint32_t>();
+    if (beta_count > r.remaining() / beta_payload)
+      throw std::runtime_error("BinarySerializer: truncated frame");
+    f.beta_deltas.reserve(beta_count);
+    readBlockStream(r, beta_count, [&](const Bonxai::CoordT& c) {
+      BetaDelta d{};
+      d.coord = c;
+      if (f.exact) {
+        // v·unit is a whole number of lattice steps, so this lands exactly
+        // on the receiver's storage lattice (dyadic step, whole multiple).
+        d.data.a_occ  = kBetaOccPrior  + static_cast<float>(r.getVarint()) * beta_step;
+        d.data.a_free = kBetaFreePrior + static_cast<float>(r.getVarint()) * beta_step;
+      } else if (quant) {
+        d.data.a_occ  = dequantize8(r.get<uint8_t>(), kBetaOccPrior,  step);
+        d.data.a_free = dequantize8(r.get<uint8_t>(), kBetaFreePrior, step);
+      } else {
+        d.data.a_occ  = r.get<float>();
+        d.data.a_free = r.get<float>();
+      }
+      f.beta_deltas.push_back(d);
+    });
+
+    // Dir stream.
+    const std::size_t cls_w = cls8 ? 1u : 2u;
+    const std::size_t dir_payload =
+        ((quant || f.exact) ? (1u + 1u * static_cast<std::size_t>(K_TOP))
+                            : (4u + 4u * static_cast<std::size_t>(K_TOP)))
+        + cls_w * static_cast<std::size_t>(K_TOP);
+    const uint32_t dir_count = r.get<uint32_t>();
+    if (dir_count > r.remaining() / dir_payload)
+      throw std::runtime_error("BinarySerializer: truncated frame");
+    f.dir_deltas.reserve(dir_count);
+    readBlockStream(r, dir_count, [&](const Bonxai::CoordT& c) {
+      DirDelta d{};
+      d.coord = c;
+      // The wire format is unchanged: `other` then `cnt[]`, exactly as before.
+      // Only the in-memory basis moved, so `other` is buffered until the slots
+      // are read and then installed with set_other().
+      float other_in = 0.f;
+      if (f.exact) {
+        other_in = other_prior + static_cast<float>(r.getVarint()) * dir_step;
+        for (int j = 0; j < K_TOP; ++j)
+          d.data.cnt[j] = f.alpha_0 + static_cast<float>(r.getVarint()) * dir_step;
+      } else if (quant) {
+        other_in = dequantize8(r.get<uint8_t>(), other_prior, step);
+        for (int j = 0; j < K_TOP; ++j)
+          d.data.cnt[j] = dequantize8(r.get<uint8_t>(), f.alpha_0, step);
+      } else {
+        other_in = r.get<float>();
+        for (int j = 0; j < K_TOP; ++j)
+          d.data.cnt[j] = r.get<float>();
+      }
+      d.data.set_other(other_in);
+      for (int j = 0; j < K_TOP; ++j)
+        d.data.cls[j] = readCls();
+      f.dir_deltas.push_back(d);
+    });
+
+    // Fine TSDF stream (rev 7). Same 20 B/record DoS guard as coarse.
+    const uint32_t fine_count = r.get<uint32_t>();
+    if (fine_count > r.remaining() / 20)
+      throw std::runtime_error("BinarySerializer: truncated frame");
+    if (fine_count > 0 && f.fine_ratio_log2 == 0)
+      throw std::runtime_error(
+          "BinarySerializer: fine stream without fine_ratio_log2");
+    f.fine_tsdf_deltas.reserve(fine_count);
+    for (uint32_t i = 0; i < fine_count; ++i) {
+      TsdfDelta d{};
+      d.coord.x       = r.get<int32_t>();
+      d.coord.y       = r.get<int32_t>();
+      d.coord.z       = r.get<int32_t>();
+      d.data.distance = r.get<float>();
+      d.data.weight   = r.get<float>();
+      f.fine_tsdf_deltas.push_back(d);
+    }
+
+    return f;
+  }
+
+ private:
+  // Block-run geometry: one run covers an 8×8×8 Bonxai leaf block
+  // (leaf_bits=3), 512 voxels, bit = (lx<<6)|(ly<<3)|lz.
+  static constexpr int         kBlockVoxels    = 512;
+  static constexpr std::size_t kBitmaskBytes   = 64;
+  // 64 B bitmask vs (2 + 2n) B index list: the mask wins at n ≥ 32.
+  static constexpr std::size_t kBitmaskMinCount = 32;
+
+  // Rev 8 u8 sqrt companding (see the revision-8 block in the file header):
+  // step = evidence_saturation / 255², q = round(√((a−prior)/step)) clamped
+  // to [0, 255], a = prior + q²·step. Below-prior clamps to 0 (→ prior);
+  // above-cap clamps to 255 (→ prior + 255²·step = the cap, exactly).
+  static uint8_t quantize8(float a, float prior, float step) {
+    const float e = a - prior;
+    if (!(e > 0.f)) return 0;
+    const long q = std::lround(std::sqrt(static_cast<double>(e) / step));
+    return static_cast<uint8_t>(std::clamp(q, 0L, 255L));
+  }
+  static float dequantize8(uint8_t q, float prior, float step) {
+    const float qf = static_cast<float>(q);
+    return prior + qf * qf * step;
+  }
+
+  // Counts per unit of Beta evidence at this build (the reciprocal of the
+  // weight lattice step, which is the same constant under both storage
+  // modes). Carried in the revision-9 header.
+  static uint8_t betaLattice() {
+    return static_cast<uint8_t>(std::lround(1.0f / kBetaLatticeStep));
+  }
+
+  static void putVarint(std::string& out, uint32_t v) {
+    while (v >= 0x80u) {
+      const uint8_t b = static_cast<uint8_t>((v & 0x7Fu) | 0x80u);
+      out.push_back(static_cast<char>(b));
+      v >>= 7;
+    }
+    out.push_back(static_cast<char>(static_cast<uint8_t>(v)));
+  }
+
+  // The whole number of `step`-sized increments above `prior` that `a`
+  // holds. Throws when `a` is not within EXACT_TOL·step of one — a value
+  // that is not on the lattice has no exact integer and the revision-9
+  // payload refuses to invent one — or when it sits below the prior.
+  static uint32_t exactUnits(float a, float prior, float step, const char* what) {
+    const double x = (static_cast<double>(a) - static_cast<double>(prior)) / step;
+    const double n = std::nearbyint(x);
+    if (std::fabs(x - n) > EXACT_TOL || n < 0.0 || n > 4294967295.0)
+      throw std::runtime_error(
+          std::string("BinarySerializer: ") + what + " " + std::to_string(a) +
+          " is not prior + a whole number of increments; the exact payload "
+          "needs integer counts");
+    return static_cast<uint32_t>(n);
+  }
+
+  static uint32_t gcdU32(uint32_t a, uint32_t b) {
+    while (b) { const uint32_t t = a % b; a = b; b = t; }
+    return a;
+  }
+
+  // Revision 9. Same header prefix, TSDF streams and block-run coordinate
+  // coding as revision 8; the Beta and Dir payloads are varint integers.
+  static std::string serializeExact(const Frame& frame, const Options& opts) {
+    const int   residual_dims = static_cast<int>(frame.num_classes) - K_TOP;
+    const float other_prior = residual_dims > 0
+        ? static_cast<float>(residual_dims) * frame.alpha_0 : 0.f;
+    const bool        cls8  = frame.num_classes <= 255;
+    const std::size_t cls_w = cls8 ? 1u : 2u;
+    const std::size_t tsdf_n = opts.share_tsdf ? frame.tsdf_deltas.size() : 0;
+    if (frame.fine_ratio_log2 > MAX_FINE_RATIO_LOG2)
+      throw std::runtime_error(
+          "BinarySerializer: fine_ratio_log2 > " +
+          std::to_string(MAX_FINE_RATIO_LOG2));
+    if (frame.fine_ratio_log2 == 0 && !frame.fine_tsdf_deltas.empty())
+      throw std::runtime_error(
+          "BinarySerializer: fine_tsdf_deltas without fine_ratio_log2");
+
+    // Project every record onto its integers first: the stream units are
+    // the gcd over the whole stream and go in the header, ahead of the
+    // payloads they divide.
+    struct BetaInts { uint32_t occ, free; };
+    struct DirInts  { uint32_t other; uint32_t cnt[K_TOP]; };
+    std::vector<BetaInts> bi(frame.beta_deltas.size());
+    std::vector<DirInts>  di(frame.dir_deltas.size());
+    uint32_t beta_unit = 0, dir_unit = 0;
+    for (std::size_t i = 0; i < bi.size(); ++i) {
+      const auto& v = frame.beta_deltas[i].data;
+      bi[i].occ  = exactUnits(v.a_occ,  kBetaOccPrior,  kBetaLatticeStep, "a_occ");
+      bi[i].free = exactUnits(v.a_free, kBetaFreePrior, kBetaLatticeStep, "a_free");
+      beta_unit = gcdU32(gcdU32(beta_unit, bi[i].occ), bi[i].free);
+    }
+    for (std::size_t i = 0; i < di.size(); ++i) {
+      const auto& v = frame.dir_deltas[i].data;
+      di[i].other = exactUnits(v.other(), other_prior, 1.0f, "other");
+      dir_unit = gcdU32(dir_unit, di[i].other);
+      for (int k = 0; k < K_TOP; ++k) {
+        di[i].cnt[k] = exactUnits(v.cnt[k], frame.alpha_0, 1.0f, "cnt");
+        dir_unit = gcdU32(dir_unit, di[i].cnt[k]);
+      }
+    }
+    if (beta_unit == 0) beta_unit = 1;   // every value at the prior
+    if (dir_unit  == 0) dir_unit  = 1;
+
+    std::string out;
+    // Upper bound: five varint bytes per integer, every record in its own
+    // block (17 B of overhead); real streams are far below both.
+    out.reserve(31 + 4 + tsdf_n * 20
+                + 4 + frame.beta_deltas.size() * (10u + 17u)
+                + 4 + frame.dir_deltas.size()
+                      * (5u * (1u + static_cast<std::size_t>(K_TOP))
+                         + cls_w * static_cast<std::size_t>(K_TOP) + 17u)
+                + 4 + frame.fine_tsdf_deltas.size() * 20);
+
+    appendBytes(out, &MAGIC, sizeof(MAGIC));
+    appendBytes(out, &FORMAT_VERSION_EXACT, sizeof(FORMAT_VERSION_EXACT));
+    appendBytes(out, &frame.resolution, sizeof(frame.resolution));
+    appendBytes(out, &frame.num_classes, sizeof(frame.num_classes));
+    const uint8_t k_top_wire = static_cast<uint8_t>(K_TOP);
+    appendBytes(out, &k_top_wire, sizeof(k_top_wire));
+    appendBytes(out, &frame.alpha_0, sizeof(frame.alpha_0));
+    const float no_quant = 0.f;   // rev 8 field, unused by this layout
+    appendBytes(out, &no_quant, sizeof(no_quant));
+    appendBytes(out, &frame.fine_ratio_log2, sizeof(frame.fine_ratio_log2));
+    const uint8_t lattice = betaLattice();
+    appendBytes(out, &lattice, sizeof(lattice));
+    appendBytes(out, &beta_unit, sizeof(beta_unit));
+    appendBytes(out, &dir_unit, sizeof(dir_unit));
+
+    const uint32_t tsdf_count = static_cast<uint32_t>(tsdf_n);
+    appendBytes(out, &tsdf_count, sizeof(tsdf_count));
+    if (opts.share_tsdf) {
+      for (const auto& d : frame.tsdf_deltas) {
+        appendBytes(out, &d.coord.x,       sizeof(int32_t));
+        appendBytes(out, &d.coord.y,       sizeof(int32_t));
+        appendBytes(out, &d.coord.z,       sizeof(int32_t));
+        appendBytes(out, &d.data.distance, sizeof(float));
+        appendBytes(out, &d.data.weight,   sizeof(float));
+      }
+    }
+
+    auto writeCls = [&](uint16_t cls) {
+      if (cls8) {
+        if (cls != kEmptySlot && cls >= 0xFF)
+          throw std::runtime_error(
+              "BinarySerializer: class id " + std::to_string(cls) +
+              " does not fit u8 packing (num_classes ≤ 255)");
+        const uint8_t c = (cls == kEmptySlot) ? 0xFF : static_cast<uint8_t>(cls);
+        appendBytes(out, &c, sizeof(c));
+      } else {
+        appendBytes(out, &cls, sizeof(cls));
+      }
+    };
+
+    // The payload writers take the record's index in the frame, so the
+    // projected integers are looked up rather than recomputed.
+    writeBlockStreamIndexed(out, frame.beta_deltas, [&](std::size_t i) {
+      putVarint(out, bi[i].occ  / beta_unit);
+      putVarint(out, bi[i].free / beta_unit);
+    });
+    writeBlockStreamIndexed(out, frame.dir_deltas, [&](std::size_t i) {
+      putVarint(out, di[i].other / dir_unit);
+      for (int k = 0; k < K_TOP; ++k) putVarint(out, di[i].cnt[k] / dir_unit);
+      for (int k = 0; k < K_TOP; ++k) writeCls(frame.dir_deltas[i].data.cls[k]);
+    });
+
+    const uint32_t fine_count =
+        static_cast<uint32_t>(frame.fine_tsdf_deltas.size());
+    appendBytes(out, &fine_count, sizeof(fine_count));
+    for (const auto& d : frame.fine_tsdf_deltas) {
+      appendBytes(out, &d.coord.x,       sizeof(int32_t));
+      appendBytes(out, &d.coord.y,       sizeof(int32_t));
+      appendBytes(out, &d.coord.z,       sizeof(int32_t));
+      appendBytes(out, &d.data.distance, sizeof(float));
+      appendBytes(out, &d.data.weight,   sizeof(float));
+    }
+    return out;
+  }
+
+  /// Emit one stream as [count:u32] followed by block runs. Records are
+  /// sorted by (block, bit) — deterministic output — and deduplicated
+  /// last-wins on coord (the receiver ingest is replace-per-coord). The
+  /// written count is the POST-dedup record count.
+  template <typename DeltaT, typename PayloadWriter>
+  static void writeBlockStream(std::string& out,
+                               const std::vector<DeltaT>& deltas,
+                               PayloadWriter&& write_payload) {
+    writeBlockStreamIndexed(out, deltas,
+                            [&](std::size_t i) { write_payload(deltas[i]); });
+  }
+
+  /// Same, with the payload writer handed the record's index in `deltas`.
+  template <typename DeltaT, typename PayloadWriter>
+  static void writeBlockStreamIndexed(std::string& out,
+                                      const std::vector<DeltaT>& deltas,
+                                      PayloadWriter&& write_payload) {
+    struct Entry { int32_t bx, by, bz; uint16_t bit; uint32_t src; };
+    std::vector<Entry> entries;
+    entries.reserve(deltas.size());
+    for (uint32_t i = 0; i < static_cast<uint32_t>(deltas.size()); ++i) {
+      const auto& c = deltas[i].coord;
+      // `& 7` keeps locals in [0,7] for negative coords too (two's
+      // complement); subtracting them first makes the block division exact,
+      // with no implementation-defined shift of a negative value.
+      const int32_t lx = c.x & 7, ly = c.y & 7, lz = c.z & 7;
+      entries.push_back({(c.x - lx) / 8, (c.y - ly) / 8, (c.z - lz) / 8,
+                         static_cast<uint16_t>((lx << 6) | (ly << 3) | lz), i});
+    }
+    std::sort(entries.begin(), entries.end(),
+              [](const Entry& a, const Entry& b) {
+      if (a.bx  != b.bx)  return a.bx  < b.bx;
+      if (a.by  != b.by)  return a.by  < b.by;
+      if (a.bz  != b.bz)  return a.bz  < b.bz;
+      if (a.bit != b.bit) return a.bit < b.bit;
+      return a.src < b.src;
+    });
+    // Last-wins dedup: within an equal (block, bit) run the ties are sorted
+    // by src ascending, so the final element is the latest value.
+    std::size_t w = 0;
+    for (std::size_t i = 0; i < entries.size(); ++i) {
+      if (w > 0 && entries[w - 1].bx == entries[i].bx
+                && entries[w - 1].by == entries[i].by
+                && entries[w - 1].bz == entries[i].bz
+                && entries[w - 1].bit == entries[i].bit) {
+        entries[w - 1] = entries[i];
+      } else {
+        entries[w++] = entries[i];
+      }
+    }
+    entries.resize(w);
+
+    const uint32_t count = static_cast<uint32_t>(entries.size());
+    appendBytes(out, &count, sizeof(count));
+
+    std::size_t i = 0;
+    while (i < entries.size()) {
+      std::size_t j = i;
+      while (j < entries.size() && entries[j].bx == entries[i].bx
+                                && entries[j].by == entries[i].by
+                                && entries[j].bz == entries[i].bz) ++j;
+      const std::size_t n = j - i;
+      appendBytes(out, &entries[i].bx, sizeof(int32_t));
+      appendBytes(out, &entries[i].by, sizeof(int32_t));
+      appendBytes(out, &entries[i].bz, sizeof(int32_t));
+      if (n >= kBitmaskMinCount) {
+        const uint8_t mode = 0;
+        appendBytes(out, &mode, sizeof(mode));
+        uint8_t mask[kBitmaskBytes] = {};
+        for (std::size_t k = i; k < j; ++k)
+          mask[entries[k].bit >> 3] |=
+              static_cast<uint8_t>(1u << (entries[k].bit & 7));
+        appendBytes(out, mask, sizeof(mask));
+      } else {
+        const uint8_t mode = 1;
+        appendBytes(out, &mode, sizeof(mode));
+        const uint16_t n16 = static_cast<uint16_t>(n);
+        appendBytes(out, &n16, sizeof(n16));
+        for (std::size_t k = i; k < j; ++k)
+          appendBytes(out, &entries[k].bit, sizeof(uint16_t));
+      }
+      for (std::size_t k = i; k < j; ++k)
+        write_payload(static_cast<std::size_t>(entries[k].src));
+      i = j;
+    }
+  }
+
+  struct Reader {
+    const std::string& d;
+    std::size_t off;
+    std::size_t remaining() const { return d.size() - off; }
+    void need(std::size_t n) const {
+      if (off + n > d.size())
+        throw std::runtime_error("BinarySerializer: truncated frame");
+    }
+    template <typename T>
+    T get() {
+      T v;
+      need(sizeof(T));
+      std::memcpy(&v, d.data() + off, sizeof(T));
+      off += sizeof(T);
+      return v;
+    }
+    void copy(void* dst, std::size_t n) {
+      need(n);
+      std::memcpy(dst, d.data() + off, n);
+      off += n;
+    }
+    // LEB128 unsigned, at most MAX_VARINT_BYTES; a fifth byte may only
+    // carry the top four bits of a u32, anything longer or wider is a
+    // corrupt frame.
+    uint32_t getVarint() {
+      uint32_t v = 0;
+      for (int i = 0; i < MAX_VARINT_BYTES; ++i) {
+        const uint8_t b = get<uint8_t>();
+        if (i == MAX_VARINT_BYTES - 1 && (b & 0xF0u))
+          throw std::runtime_error("BinarySerializer: varint overflow");
+        v |= static_cast<uint32_t>(b & 0x7Fu) << (7 * i);
+        if (!(b & 0x80u)) return v;
+      }
+      throw std::runtime_error("BinarySerializer: varint too long");
+    }
+  };
+
+  /// Read block runs until exactly `count` records have been consumed.
+  /// `read_payload(coord)` pulls its own payload bytes from the reader.
+  /// Structural violations — bad mode byte, empty block, out-of-range or
+  /// non-ascending indices, a block overshooting `count` — all throw, so a
+  /// corrupt frame is dropped whole rather than half-integrated.
+  template <typename PayloadReader>
+  static void readBlockStream(Reader& r, uint32_t count,
+                              PayloadReader&& read_payload) {
+    uint16_t bits[kBlockVoxels];
+    uint32_t consumed = 0;
+    while (consumed < count) {
+      const int32_t bx  = r.get<int32_t>();
+      const int32_t by  = r.get<int32_t>();
+      const int32_t bz  = r.get<int32_t>();
+      const uint8_t mode = r.get<uint8_t>();
+      std::size_t n = 0;
+      if (mode == 0) {
+        uint8_t mask[kBitmaskBytes];
+        r.copy(mask, kBitmaskBytes);
+        for (int b = 0; b < kBlockVoxels; ++b)
+          if (mask[b >> 3] & (1u << (b & 7)))
+            bits[n++] = static_cast<uint16_t>(b);
+        if (n == 0)
+          throw std::runtime_error("BinarySerializer: empty block bitmask");
+      } else if (mode == 1) {
+        const uint16_t n16 = r.get<uint16_t>();
+        if (n16 == 0 || n16 > kBlockVoxels)
+          throw std::runtime_error("BinarySerializer: bad in-block index count");
+        int last = -1;
+        for (uint16_t k = 0; k < n16; ++k) {
+          const uint16_t idx = r.get<uint16_t>();
+          if (idx >= kBlockVoxels || static_cast<int>(idx) <= last)
+            throw std::runtime_error(
+                "BinarySerializer: in-block indices must be strictly "
+                "ascending and < 512");
+          last = idx;
+          bits[n++] = idx;
+        }
+      } else {
+        throw std::runtime_error("BinarySerializer: bad block mode");
+      }
+      if (consumed + n > count)
+        throw std::runtime_error(
+            "BinarySerializer: block exceeds stream record count");
+      for (std::size_t k = 0; k < n; ++k) {
+        const int32_t lx = bits[k] >> 6;
+        const int32_t ly = (bits[k] >> 3) & 7;
+        const int32_t lz = bits[k] & 7;
+        read_payload(Bonxai::CoordT{bx * 8 + lx, by * 8 + ly, bz * 8 + lz});
+      }
+      consumed += static_cast<uint32_t>(n);
+    }
+  }
+
+  template <typename T>
+  static void appendBytes(std::string& out, const T* p, std::size_t n) {
+    out.append(reinterpret_cast<const char*>(p), n);
+  }
+};
+
+}  // namespace scovox
