@@ -40,8 +40,19 @@ services:
         ros2 launch lidar_localization_ros2 lidar_localization.launch.py \
           localization_param_dir:=/ws/config/gt_ouster_ndt_tree_curt.yaml \
           cloud_topic:=/ouster/points imu_topic:=/curt/imu/data imu_frame_id:=imu_curt \
-          base_frame_id:=base_link_curt use_sim_time:=false \
-          publish_lidar_tf:=false publish_imu_tf:=false
+          base_frame_id:=base_link_curt use_sim_time:=true \
+          publish_lidar_tf:=false publish_imu_tf:=false &
+        ros2 run pcl_ros filter_voxel_grid_node --ros-args \
+          -r __node:=voxel_grid_2 \
+          -r input:=/initial_map \
+          -r output:=/initial_map_filtered \
+          -p leaf_size:=0.60 \
+          -p filter_field_name:=z \
+          -p filter_limit_min:=-10.0 \
+          -p filter_limit_max:=10.0 \
+          -p input_frame:=map \
+          -p output_frame:=map
+
     cpuset: "0-3"   # nav2 holds 8-15; 4-7 go to scovox/explo_planner
 
   explo_planner:

@@ -21,7 +21,7 @@
     <General>
       <AllowMulticast>spdp</AllowMulticast>
       <Interfaces>
-        <NetworkInterface name="wlo1" priority="default" multicast="default"/>
+        <NetworkInterface name="enp86s0" priority="default" multicast="default"/>
       </Interfaces>
     </General>
     <Discovery>
